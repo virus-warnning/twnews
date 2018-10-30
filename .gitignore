@@ -8,5 +8,9 @@ cache/*.html
 # Testing report
 .coverage
 
+# setup.py
+dist
+twnews.egg-info
+
 # MacOS
 .DS_Store
