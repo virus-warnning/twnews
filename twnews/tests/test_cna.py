@@ -3,7 +3,7 @@
 """
 
 import unittest
-from twnews.soup import NewsSoup
+from twnews.soup import NewsSoup, pkgdir
 
 #@unittest.skip
 class TestCna(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestCna(unittest.TestCase):
         測試本地樣本解構
         * 如果測試 02 失敗，需要用 bin/getnews.sh 重新製作本地樣本
         """
-        nsoup = NewsSoup('samples/cna.html', mobile=False)
+        nsoup = NewsSoup(pkgdir + '/samples/cna.html', mobile=False)
         self.assertEqual('cna', nsoup.channel)
         self.assertIn('平鎮輪胎行惡火  疏散7人1女命喪', nsoup.title())
         self.assertEqual('2016-03-19 10:48:00', nsoup.date().strftime(self.dtf))

@@ -1,5 +1,6 @@
 import io
 import re
+import os
 import json
 import hashlib
 import logging
@@ -10,8 +11,11 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
-if os.path.isfile('conf/logging.ini'):
-    logging.config.fileConfig('conf/logging.ini')
+pkgdir = os.path.dirname(__file__)
+logini = '{}/conf/logging.ini'.format(pkgdir)
+
+if os.path.isfile(logini):
+    logging.config.fileConfig(logini)
 logger = logging.getLogger()
 
 __allconf = None
@@ -98,6 +102,10 @@ def soup_from_website(url, channel, refresh, mobile):
             for (k,v) in resp.headers.items():
                 logger.debug('{}: {}'.format(k, v))
             soup = BeautifulSoup(resp.text, 'lxml')
+
+            if not os.path.isdir('cache'):
+                os.mkdir('cache')
+
             with open(path, 'w') as cache_file:
                 logger.debug('寫入快取: {}'.format(path))
                 cache_file.write(resp.text)
@@ -148,7 +156,8 @@ def load_soup_conf(path):
     global __allconf
 
     if __allconf is None:
-        with open('conf/news-soup.json', 'r') as conf_file:
+        soup_cfg = '{}/conf/news-soup.json'.format(pkgdir)
+        with open(soup_cfg, 'r') as conf_file:
             __allconf = json.load(conf_file)
 
     for (channel, conf) in __allconf.items():
@@ -180,8 +189,8 @@ class NewsSoup:
                 else:
                     logger.debug('從檔案載入新聞')
                     self.soup = soup_from_file(path)
-            except:
-                logger.error('無法載入新聞')
+            except Exception as ex:
+                logger.error('無法載入新聞, {}'.format(ex))
 
             if self.soup is None:
                 logger.error('無法轉換 BeautifulSoup，可能是網址或檔案路徑錯誤')

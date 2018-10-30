@@ -10,6 +10,7 @@ cache/*.html
 
 # setup.py
 dist
+build
 twnews.egg-info
 
 # MacOS
