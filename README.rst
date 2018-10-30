@@ -15,47 +15,32 @@
 參考手冊
 =========
 
-class NewsSoup
+class twnews.soup.NewsSoup
 ----------------------
 
-WorkerDispatcher.__init__(worker_count=0, use_core=0, time_limit=0)
+NewsSoup.__init__(path, refresh=False, mobile=True)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+建立新聞分解器
 
-Create a dispatcher instace.
+path
+  本機檔案路徑或是網址
+refresh
+  使用網址時，是否要重新整理而不使用既有快取
+mobile
+  是否使用行動版網頁
 
-worker_count
-  How many threads would be created, 0 means to create (use_core * 2) threads.
-use_core
-  How many cores would be use, 0 means all cores.
-time_limit
-  Stop workers after given seconds. Running functions still run at that moment.
-  Queued functions would be cancled.
-
-WorkerDispatcher.dispatch(func, args)
+NewsSoup.title()
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+取得新聞標題
 
-Dispatch a function to one of workers randomly.
-
-func
-  Function to call.
-args
-  Argument list of this function.
-
-WorkerDispatcher.sleep(seconds)
+NewsSoup.date()
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+取得發佈日期
 
-Sleep dispatcher for given seconds.
-
-seconds
-  Seconds to sleep. Dispatcher would not sleep given seconds actually.
-  It sleep many times during given seconds, so that system signal (e.g. Ctrl+C) can be handled.
-
-WorkerDispatcher.join()
+NewsSoup.author()
 ^^^^^^^^^^^^^^^^^^^^^^^
+取得記者姓名
 
-Wait until all workers stopped.
-
-WorkerDispatcher.is_alive()
+NewsSoup.contents()
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Check if the dispatcher is alive.
+取得新聞內文
