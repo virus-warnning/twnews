@@ -849,13 +849,13 @@ $('.text > p:lt(2)').each(function(i){ if ($(this).html().length>70 || i>0){ $(t
                                 <li><a href="http://news.ltn.com.tw/news/life/breakingnews/1981174" target="_blank" class="JQellipsis" data-desc="T:0:租屋族小心！台北最陰大樓 網友都推這棟">租屋族小心！台北最陰大樓 網友都推這棟</a></li>
                                     <li><a href="http://news.ltn.com.tw/news/society/breakingnews/1307420" target="_blank" class="JQellipsis" data-desc="T:1:房客指控租到凶宅 房東才知前房客上吊自殺">房客指控租到凶宅 房東才知前房客上吊自殺</a></li>
                                     <li>
-                        <a href="http://cache.ltn.com.tw/app/program/click.php?ano=2018102685212715" class="ltn_ad" target="_blank" data-no="2018102685212715" data-desc="T:2:面對財富傳承，您的準備夠充分嗎？">面對財富傳承，您的準備夠充分嗎？</a>
+                        <a href="http://cache.ltn.com.tw/app/program/click.php?ano=2018103076482176" class="ltn_ad" target="_blank" data-no="2018103076482176" data-desc="T:2:歲末年終來這裡  讓你的尾牙不一樣">歲末年終來這裡  讓你的尾牙不一樣</a>
                     </li>
 
                                     <li><a href="http://news.ltn.com.tw/news/society/breakingnews/2487594" target="_blank" class="JQellipsis" data-desc="T:3:情侶吵架女上吊亡成凶宅 屋主向男友求償311萬">情侶吵架女上吊亡成凶宅 屋主向男友求償311萬</a></li>
                                     <li><a href="http://news.ltn.com.tw/news/society/breakingnews/2496447" target="_blank" class="JQellipsis" data-desc="T:4:隱瞞凶宅轉手賺進130萬 買家怒告、賣方詐欺起訴">隱瞞凶宅轉手賺進130萬 買家怒告、賣方詐欺起訴</a></li>
                                     <li>
-                        <a href="http://cache.ltn.com.tw/app/program/click.php?ano=2018103080211573" class="ltn_ad" target="_blank" data-no="2018103080211573" data-desc="T:5:聖誕將近！穿上這雙秒變party焦點">聖誕將近！穿上這雙秒變party焦點</a>
+                        <a href="http://cache.ltn.com.tw/app/program/click.php?ano=2018102691618283" class="ltn_ad" target="_blank" data-no="2018102691618283" data-desc="T:5:謎樣球后朴城炫 旅美2年大豐收">謎樣球后朴城炫 旅美2年大豐收</a>
                     </li>
 
                                     <li><a href="http://news.ltn.com.tw/news/society/breakingnews/2483332" target="_blank" class="JQellipsis" data-desc="T:6:大學生租兇宅夜夜聞蛋糕味... 事主前妻說話了">大學生租兇宅夜夜聞蛋糕味... 事主前妻說話了</a></li>
@@ -1067,110 +1067,14 @@ googletag.cmd.push(function() {
     <p class="date"> 2018年10月31日‧星期三‧戊戌年九月廿三日</p>
 
     
-    <div class="boxTitle" data-desc="右側事件倒數">
-    <a href="http://election.ltn.com.tw/2018" data-desc="2018九合一選舉">
-        <div class="ad_w300 countdown">
-            <!-- 在元素中顯示倒數計時器 -->
-            <div id="timer">
-                <span style="display:none;" class="days" id="days"></span>
-                <span style="display:none;" class="days">天</span>
-                <span style="display:none;" class="hours" id="hours"></span>
-                <span style="display:none;" class="hours">時</span>
-                <span style="display:none;" class="minutes" id="minutes"></span>
-                <span style="display:none;" class="minutes">分</span>
-                <span style="display:none;" class="seconds" id="seconds"></span>
-                <span style="display:none;" class="seconds">秒</span>
-            </div>
-        </div>
+    <div class="countdown boxTitle" data-desc="右側事件倒數">
+    <a href="http://news.ltn.com.tw/news/business/breakingnews/2462183" data-desc="金融正妹型男徵稿">
+        <img src="http://img.ltn.com.tw/Upload/Module/2/662/1661962.jpg">
     </a>
 </div>
-<script>
-    $(function () {
-        // 倒數計時日期
-        var countDownDate = '1542988800000';
-        // 每秒更新一次倒數計時
-        var interval = setInterval(function () {
-            countdown(countDownDate, interval);
-        }, 1000);
-    });
 
-    /**
-     * 倒數計時
-     *
-     * @param countDownDate Date 物件
-     * @param interval 倒數計時物件本身
-     */
-    function countdown(countDownDate, interval) {
-        // 倒數計時器
-        var timer = $('.countdown');
-        // 取得今天的日期和時間
-        var now = new Date().getTime();
-        // 找出現在和倒數日期之間的差
-        var distance = countDownDate - now;
-        // 計算時間，天數，小時數，分鐘數和秒數
-        // 目前僅顯示到天所以天暫用無條件進入
-//        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-//        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-//        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-//        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        var days = Math.ceil(distance / (1000 * 60 * 60 * 24));
-        var hours = Math.ceil((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        // 倒數結束
-        if (distance < 0) {
-            clearInterval(interval);
-            days = hours = minutes = seconds = 0;
-            timer.slideUp(200);
-        }
-
-        // 在元素中顯示結果
-        $('#days').html(days.toString());
-        $('#hours').html(hours.toString());
-        $('#minutes').html(minutes.toString());
-        $('#seconds').html(seconds.toString());
-
-        // 顯示最大的有值的欄位
-        showMaxNonzeroColumn([
-            {title: 'days', count: days}
-//            {title: 'hours', count: hours}
-//            {title: 'minutes', count: minutes},
-//            {title: 'seconds', count: seconds}
-        ], timer);
-
-        // 倒數還沒結束時顯示
-        if (!timer.is(":visible") && distance > 5) {
-            timer.show(200);
-        }
-    }
-
-    function showMaxNonzeroColumn(counts, timer) {
-        for(i in counts) {
-            // 跳過已經倒數為0的單位
-            if (!(counts[i]['count'] > 0)) {
-                continue;
-            }
-
-            // 已顯示則不處理
-            var target = '#' + counts[i]['title'];
-            if ($(target).css('display') == 'block') {
-                return;
-            }
-            // 切換下一個顯示的單位
-            target = '.' + counts[i]['title'];
-            timer.find('span').hide();
-            timer.find(target).show();
-            break;
-        }
-    }
-</script>
-
-<link href="https://fonts.googleapis.com/css?family=Amaranth" rel="stylesheet">
 <style>
-.countdown{margin-bottom:15px; width:100%;height:120px; position:relative;  background:url(http://img.ltn.com.tw/Upload/Module/2/647/1646753.jpg) no-repeat; display:none;}
-.countdown #timer span{color:#ffffff; font-family:"微軟正黑體"; font-size:1.2rem; font-weight:700; position:absolute; top:92px; right:5px;}
-.countdown #timer span#days, .countdown #timer span#hours, .countdown #timer span#minutes, .countdown #timer span#seconds{color:#0ea4b3; font-family:'Amaranth',sans-serif; font-size:3.8rem; font-weight:100; letter-spacing:-3px; text-align:center; display:block; width:80px; top:45px; right:27px;}
+    .countdown{ margin-bottom:15px; }
 </style>
 
     <!-- BEGIN 1202999 - Liberty Times - TW - Adblocking - 300x250 - collapse -->
