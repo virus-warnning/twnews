@@ -12,6 +12,31 @@
 
   pip3 install twnews
 
+範例
+==========
+.. code:: python
+
+  from twnews.soup import NewsSoup
+
+  nsoup = NewsSoup('https://tw.news.appledaily.com/local/realtime/20181025/1453825')
+  print('頻道: {}'.format(nsoup.channel))
+  print('標題: {}'.format(nsoup.title()))
+  print('日期: {}'.format(nsoup.date().isoformat()))
+  print('記者: {}'.format(nsoup.author()))
+  print('內文:')
+  print(nsoup.contents())
+
+卡關了
+=========
+如果新聞無法正確分解可能是網站改版了，利用 green 跑一下單元測試看看
+假如單元測試失敗了，表示需要更新套件囉
+
+.. code:: bash
+
+  pip3 install green      # 安裝 green 套件
+  green -vvv twnews.tests # 使用 green 套件跑單元測試
+  pip3 install -U twnews  # 更新 twnews
+
 參考手冊
 =========
 
