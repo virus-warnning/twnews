@@ -1,0 +1,12 @@
+# Python 3
+*.pyc
+__pycache__
+
+# Web cache
+cache/*.html
+
+# Testing report
+.coverage
+
+# MacOS
+.DS_Store

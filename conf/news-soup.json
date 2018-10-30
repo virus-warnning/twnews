@@ -1,0 +1,140 @@
+{
+  "what's that": {
+    "desktop": {
+      "prefix": "非 RWD 網站的桌面版網址開頭",
+      "title_node": "標題所在的 CSS selector",
+      "title_attr": "標題所在的屬性，空字串表示標題在內文中",
+      "date_node": "日期時間所在的 CSS Selector",
+      "date_format": "日期時間的格式，會用 datetime.strptime 處理",
+      "author_node": "記者所在的 CSS selector，空字串表示記者姓名在內文中，程式會自動偵測",
+      "article_node": "內文所在的 CSS selector"
+    },
+    "mobile": {
+      "prefix": "非 RWD 網站的行動版網址開頭",
+      "title_node": "標題所在的 CSS selector",
+      "title_attr": "標題所在的屬性，空字串表示標題在內文中",
+      "date_node": "日期時間所在的 CSS Selector",
+      "date_format": "日期時間的格式，會用 datetime.strptime 處理",
+      "author_node": "記者所在的 CSS selector，空字串表示記者姓名在內文中，程式會自動偵測",
+      "article_node": "內文所在的 CSS selector"
+    }
+  },
+  "appledaily": {
+    "rwd": true,
+    "desktop": {
+      "title_node": "head > meta[property=og:title]",
+      "title_attr": "content",
+      "date_node": "article.ndArticle_leftColumn > hgroup > div.ndArticle_creat",
+      "date_format": "出版時間：%Y/%m/%d %H:%M",
+      "author_node": "",
+      "article_node": "div.ndArticle_margin > p"
+    },
+    "mobile": {
+      "title_node": "head > meta[property=og:title]",
+      "title_attr": "content",
+      "date_node": "article.nm-content > div.nm-article > header > div.time-and-share > time",
+      "date_format": "建立時間：%Y/%m/%d %H:%M",
+      "author_node": "",
+      "article_node": "article.nm-content > div.nm-article > div.nm-article-body > div.text"
+    }
+  },
+  "cna": {
+    "rwd": true,
+    "desktop": {
+      "title_node": "div.centralContent > h1",
+      "title_attr": "",
+      "date_node": "div.centralContent > div.timeBox > div.updatetime > span",
+      "date_format": "%Y/%m/%d %H:%M",
+      "author_node": "",
+      "article_node": "div.centralContent > div.paragraph > p"
+    },
+    "mobile": {
+      "title_node": "div.centralContent > h1",
+      "title_attr": "",
+      "date_node": "div.centralContent > div.timeBox > div.updatetime > span",
+      "date_format": "%Y/%m/%d %H:%M",
+      "author_node": "",
+      "article_node": "div.centralContent > div.paragraph > p"
+    }
+  },
+  "ettoday": {
+    "rwd": true,
+    "desktop": {
+      "title_node": "div.subject_article > header > h1",
+      "title_attr": "",
+      "date_node": "time.date",
+      "date_format": "%Y年%m月%d日 %H:%M",
+      "author_node": "",
+      "article_node": "div.subject_article > div.story > p"
+    },
+    "mobile": {
+      "title_node": "div.subject_news > header > h1",
+      "title_attr": "",
+      "date_node": "span.date > time",
+      "date_format": "%Y年%m月%d日 %H:%M",
+      "author_node": "",
+      "article_node": "div.subject_news > div.story > p"
+    }
+  },
+  "ltn": {
+    "rwd": false,
+    "desktop": {
+      "prefix": "https://news.ltn.com.tw",
+      "title_node": "div.articlebody > h1",
+      "title_attr": "",
+      "date_node": "div.articlebody > div.text > span.viewtime",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "",
+      "article_node": "div.articlebody > div.text > p"
+    },
+    "mobile": {
+      "prefix": "https://m.ltn.com.tw",
+      "title_node": "div.com > h2",
+      "title_attr": "",
+      "date_node": "div.com > div.h2_else > div.time",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "",
+      "article_node": "div.com > div.boxTitle > p"
+    }
+  },
+  "setn": {
+    "rwd": false,
+    "desktop": {
+      "prefix": "https://www.setn.com",
+      "title_node": "#contFix > div.row > div.contLeft > h1",
+      "title_attr": "",
+      "date_node": "#contFix > div.row > div.contLeft > div.content > div.page-title-text > time.page-date",
+      "date_format": "%Y/%m/%d %H:%M:%S",
+      "author_node": "#contFix > div.row > div.contLeft > div.content > div.page-title-text > span.reporter",
+      "article_node": "#Content1 > p"
+    },
+    "mobile": {
+      "prefix": "https://www.setn.com/m",
+      "title_node": "section.news-all-area > h1",
+      "title_attr": "",
+      "date_node": "section.news-all-area > div.page-date > time",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "",
+      "article_node": "#ckuse > article > p"
+    }
+  },
+  "udn": {
+    "rwd": true,
+    "desktop": {
+      "title_node": "#story_body_content > h1",
+      "title_attr": "",
+      "date_node": "#story_bady_info > div.story_bady_info_author > span",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "#story_bady_info > div.story_bady_info_author > a",
+      "article_node": "#story_body_content > p"
+    },
+    "mobile": {
+      "title_node": "#story_body_content > h1",
+      "title_attr": "",
+      "date_node": "#story_bady_info > div.story_bady_info_author > span",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "#story_bady_info > div.story_bady_info_author > a",
+      "article_node": "#story_body_content > p"
+    }
+  }
+}
