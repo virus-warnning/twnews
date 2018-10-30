@@ -1,44 +1,21 @@
-Module burncpu is a worker dispatcher with multiprocessing and multithreading.
+用來分解台灣各大新聞網站，取出重要的純文字內容
 
-Features
+功能特色
 ========
-- All CPU cores can be used.
-- Workers can be stopped gracefully by system signals.
-- Pure python code.
+- 預設使用行動版網頁降低流量
+- 首次載入後會存入快取，避免同一網頁重複下載
+- 利用 BeautifulSoup 的 select() 方式搭配設定檔分解，利於跟進網站改版
 
-Quickstart
+安裝
 ==========
-Use the following command to run the sample module.
-
 .. code:: bash
 
-  python3 -m burncpu.sample
+  pip3 install twnews
 
-Then monitor CPU status, some changes take place at these time.
-
-====  =================================================
-Time                        Events
-====  =================================================
-  0s   All CPU cores are IDLE.
- 10s   Workers begin to call one_second_task many times.
- 60s   Workers begin to terminate.
-====  =================================================
-
-Pressing Ctrl+C or sending system signal can also terminate the sample.
-
-Finally copy and modify the `source code <https://github.com/virus-warnning/burncpu/blob/master/burncpu/sample.py>`_ to make your own.
-
-Reference
+參考手冊
 =========
 
-To import
----------
-
-.. code:: python
-
-  from burncpu.dispatcher import WorkerDispatcher
-
-class WorkerDispatcher
+class NewsSoup
 ----------------------
 
 WorkerDispatcher.__init__(worker_count=0, use_core=0, time_limit=0)
