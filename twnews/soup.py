@@ -207,14 +207,10 @@ class NewsSoup:
         """
         if self.cache['title'] is None:
             nsel = self.conf[self.device]['title_node']
-            attr = self.conf[self.device]['title_attr']
             found = self.soup.select(nsel)
             if len(found) > 0:
                 node = found[0]
-                if attr != '':
-                    self.cache['title'] = node[attr]
-                else:
-                    self.cache['title'] = node.text.strip()
+                self.cache['title'] = node.text.strip()
                 if len(found) > 1:
                     logger.warning('找到多組標題節點 (新聞台: {})'.format(self.channel))
             else:
