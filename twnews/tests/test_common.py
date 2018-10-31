@@ -20,10 +20,11 @@ class TestCommon(unittest.TestCase):
         """
 
         # 清除快取
-        for cache_file in os.listdir('cache'):
-            if re.match(r'appledaily-mobile-.*\.html', cache_file):
-                cache_path = 'cache/{}'.format(cache_file)
-                os.unlink(cache_path)
+        if os.isdir('cache'):
+            for cache_file in os.listdir('cache'):
+                if re.match(r'appledaily-mobile-.*\.html', cache_file):
+                    cache_path = 'cache/{}'.format(cache_file)
+                    os.unlink(cache_path)
 
         # 讀取新聞，計算快取檔案數
         count = 0
