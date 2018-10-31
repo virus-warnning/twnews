@@ -295,7 +295,7 @@ class NewsSoup:
 
         return self.cache['contents']
 
-    def rate(self):
+    def effective_text_rate(self):
         """
         計算有效內容率 (有效內容位元組數/全部位元組數)
         """
