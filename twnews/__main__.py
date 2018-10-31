@@ -19,6 +19,7 @@ def main():
         logging.info('記者: {}'.format(ns.author()))
         logging.info('內文:')
         logging.info(ns.contents())
+        logging.info('有效內容率: {:.2f}%'.format(ns.rate() * 100))
         logging.info('-' * 80)
 
 if __name__ == '__main__':

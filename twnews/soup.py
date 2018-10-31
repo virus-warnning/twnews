@@ -90,7 +90,7 @@ def soup_from_website(url, channel, refresh, mobile):
     if os.path.isfile(path) and not refresh:
         logger.debug('發現 URL 快取: {}'.format(url))
         logger.debug('載入快取檔案: {}'.format(path))
-        soup = soup_from_file(path)
+        (soup, rawlen) = soup_from_file(path)
 
     # 下載網頁
     if soup is None:
@@ -102,6 +102,7 @@ def soup_from_website(url, channel, refresh, mobile):
             for (k,v) in resp.headers.items():
                 logger.debug('{}: {}'.format(k, v))
             soup = BeautifulSoup(resp.text, 'lxml')
+            rawlen = resp.text.encode('utf-8')
 
             if not os.path.isdir('cache'):
                 os.mkdir('cache')
@@ -112,7 +113,7 @@ def soup_from_website(url, channel, refresh, mobile):
         else:
             logger.warning('回應碼: {}'.format(resp.status_code))
 
-    return soup
+    return (soup, rawlen)
 
 def soup_from_file(file_path):
     """
@@ -122,7 +123,7 @@ def soup_from_file(file_path):
     with open(file_path, 'r') as cache_file:
         html = cache_file.read()
         soup = BeautifulSoup(html, 'lxml')
-    return soup
+    return (soup, len(html.encode('utf-8')))
 
 def scan_author(article):
     """
@@ -160,10 +161,15 @@ def load_soup_conf(path):
 class NewsSoup:
 
     def __init__(self, path, refresh=False, mobile=True):
+        """
+        建立新聞分解器
+        """
         self.soup = None
         self.device = 'mobile' if mobile else 'desktop'
+        self.rawlen = 0
         self.cache = {
             'title': None,
+            'date_raw': None,
             'date': None,
             'author': None,
             'contents': None,
@@ -175,10 +181,10 @@ class NewsSoup:
         if self.channel is not None:
             try:
                 if path.startswith('http'):
-                    self.soup = soup_from_website(path, self.channel, refresh, mobile)
+                    (self.soup, self.rawlen) = soup_from_website(path, self.channel, refresh, mobile)
                 else:
                     logger.debug('從檔案載入新聞')
-                    self.soup = soup_from_file(path)
+                    (self.soup, self.rawlen) = soup_from_file(path)
             except Exception as ex:
                 logger.error('無法載入新聞, {}'.format(ex))
 
@@ -188,6 +194,9 @@ class NewsSoup:
             logger.error('不支援的新聞台，請檢查設定檔')
 
     def title(self):
+        """
+        取得新聞標題
+        """
         if self.cache['title'] is None:
             nsel = self.conf[self.device]['title_node']
             attr = self.conf[self.device]['title_attr']
@@ -205,24 +214,39 @@ class NewsSoup:
 
         return self.cache['title']
 
-    def date(self):
-        if self.cache['date'] is None:
+    def date_raw(self):
+        """
+        取得原始時間字串
+        """
+        if self.cache['date_raw'] is None:
             nsel = self.conf[self.device]['date_node']
-            dfmt = self.conf[self.device]['date_format']
             found = self.soup.select(nsel)
             if len(found) > 0:
                 node = found[0]
-                # ettoday 的日期有換行字元，要先過濾再跑 strptime
-                # TODO: 處理 parsing 例外
-                self.cache['date'] = datetime.strptime(node.text.strip(), dfmt)
+                self.cache['date_raw'] = node.text.strip()
                 if len(found) > 1:
                     logger.warning('發現多組日期節點 (新聞台: {})'.format(self.channel))
             else:
                 logger.error('找不到日期時間節點 (新聞台: {})'.format(self.channel))
 
+        return self.cache['date_raw']
+
+    def date(self):
+        """
+        取得 datetime.datetime 格式的時間
+        """
+        if self.cache['date'] is None:
+            dfmt = self.conf[self.device]['date_format']
+            try:
+                self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
+            except Exception as ex:
+                logger.error('日期格式分析失敗')
         return self.cache['date']
 
     def author(self):
+        """
+        取得新聞記者/社論作者
+        """
         if self.cache['author'] is None:
             nsel = self.conf[self.device]['author_node']
             if nsel != '':
@@ -246,6 +270,9 @@ class NewsSoup:
         return self.cache['author']
 
     def contents(self):
+        """
+        取得新聞內文
+        """
         if self.cache['contents'] is None:
             nsel = self.conf[self.device]['article_node']
             found = self.soup.select(nsel)
@@ -259,3 +286,21 @@ class NewsSoup:
                 logger.error('找不到內文節點 (新聞台: {})'.format(self.channel))
 
         return self.cache['contents']
+
+    def rate(self):
+        """
+        計算有效內容率 (有效內容位元組數/全部位元組數)
+        """
+        data = [
+            self.title(),
+            self.author(),
+            self.date_raw(),
+            self.contents()
+        ]
+
+        useful_len = 0
+        for d in data:
+            if d is not None:
+                useful_len += len(d.encode('utf-8'))
+
+        return useful_len / self.rawlen
