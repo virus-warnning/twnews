@@ -12,8 +12,8 @@ readme.close()
 # https://python-packaging.readthedocs.io/en/latest/non-code-files.html
 setup(
   name='twnews',
-  version='0.1.6',
-  description='To tear down news webpages in Taiwan.',
+  version='0.1.7',
+  description='To tear down news web pages in Taiwan.',
   long_description=longdesc,
   packages=find_packages(),
   url='https://github.com/virus-warnning/twnews',
