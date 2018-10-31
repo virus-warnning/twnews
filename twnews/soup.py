@@ -124,16 +124,6 @@ def soup_from_file(file_path):
         soup = BeautifulSoup(html, 'lxml')
     return soup
 
-def unicode_escape(s):
-    e = ''
-    for c in s:
-        code = ord(c)
-        if ord(c) < 128:
-            e += c
-        else:
-            e += '\\u{:4x}'.format(code)
-    return e
-
 def scan_author(article):
     """
     從新聞內文找出記者姓名
