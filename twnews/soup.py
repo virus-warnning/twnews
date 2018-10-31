@@ -4,6 +4,7 @@ import os
 import json
 import hashlib
 import logging
+import tempfile
 import logging.config
 import os.path
 from datetime import datetime
@@ -55,6 +56,17 @@ def get_session(mobile=True):
 
     return __session[device]
 
+def get_cache_dir():
+    """
+    取得快取目錄
+    """
+    cache_dir = '{}/{}'.format(tempfile.gettempdir(), 'twnews-cache')
+    if not os.path.isdir(cache_dir):
+        logger.debug('建立快取目錄: {}'.format(cache_dir))
+        os.mkdir(cache_dir)
+    logger.debug('使用快取目錄: {}'.format(cache_dir))
+    return cache_dir
+
 def soup_from_website(url, channel, refresh, mobile):
     """
     網址轉換成 BeautifulSoup 4 物件
@@ -86,7 +98,7 @@ def soup_from_website(url, channel, refresh, mobile):
     soup = None
     device = 'mobile' if mobile else 'desktop'
     hash = hashlib.md5(suffix.encode('ascii')).hexdigest()
-    path = 'cache/{}-{}-{}.html'.format(channel, device, hash)
+    path = '{}/{}-{}-{}.html'.format(get_cache_dir(), channel, device, hash)
     if os.path.isfile(path) and not refresh:
         logger.debug('發現 URL 快取: {}'.format(url))
         logger.debug('載入快取檔案: {}'.format(path))
@@ -103,10 +115,6 @@ def soup_from_website(url, channel, refresh, mobile):
                 logger.debug('{}: {}'.format(k, v))
             soup = BeautifulSoup(resp.text, 'lxml')
             rawlen = resp.text.encode('utf-8')
-
-            if not os.path.isdir('cache'):
-                os.mkdir('cache')
-
             with open(path, 'w') as cache_file:
                 logger.debug('寫入快取: {}'.format(path))
                 cache_file.write(resp.text)
