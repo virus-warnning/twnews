@@ -4,8 +4,9 @@
 
 import os
 import re
+import tempfile
 import unittest
-from twnews.soup import NewsSoup
+from twnews.soup import NewsSoup, get_cache_dir
 
 #@unittest.skip
 class TestCommon(unittest.TestCase):
@@ -20,16 +21,16 @@ class TestCommon(unittest.TestCase):
         """
 
         # 清除快取
-        if os.isdir('cache'):
-            for cache_file in os.listdir('cache'):
-                if re.match(r'appledaily-mobile-.*\.html', cache_file):
-                    cache_path = 'cache/{}'.format(cache_file)
-                    os.unlink(cache_path)
+        cache_dir = get_cache_dir()
+        for cache_file in os.listdir(cache_dir):
+            if re.match(r'appledaily-mobile-.*\.html', cache_file):
+                cache_path = 'cache/{}'.format(cache_file)
+                os.unlink(cache_path)
 
         # 讀取新聞，計算快取檔案數
         count = 0
         nsoup = NewsSoup(self.url)
-        for cache_file in os.listdir('cache'):
+        for cache_file in os.listdir(cache_dir):
             if re.match(r'appledaily-mobile-.*\.html', cache_file):
                 count += 1
 
