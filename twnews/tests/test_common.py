@@ -24,7 +24,7 @@ class TestCommon(unittest.TestCase):
         cache_dir = get_cache_dir()
         for cache_file in os.listdir(cache_dir):
             if re.match(r'appledaily-mobile-.*\.html', cache_file):
-                cache_path = 'cache/{}'.format(cache_file)
+                cache_path = '{}/{}'.format(cache_dir, cache_file)
                 os.unlink(cache_path)
 
         # 讀取新聞，計算快取檔案數
