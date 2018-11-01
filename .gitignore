@@ -2,9 +2,6 @@
 *.pyc
 __pycache__
 
-# Web cache
-cache/*.html
-
 # Testing report
 .coverage
 
@@ -12,6 +9,9 @@ cache/*.html
 dist
 build
 twnews.egg-info
+
+# virtualenv
+sandbox
 
 # MacOS
 .DS_Store
