@@ -24,6 +24,7 @@ setup(
     },
     install_requires=[
         'beautifulsoup4',
+        'lxml',
         'requests'
     ],
     python_requires='>=3.7'
