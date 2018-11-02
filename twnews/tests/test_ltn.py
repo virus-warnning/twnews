@@ -17,7 +17,7 @@ class TestLtn(unittest.TestCase):
         測試本地樣本解構
         * 如果測試 02 失敗，需要用 bin/getnews.sh 重新製作本地樣本
         """
-        nsoup = NewsSoup(pkgdir + '/samples/ltn.html', mobile=False)
+        nsoup = NewsSoup(pkgdir + '/samples/ltn.html.gz', mobile=False)
         self.assertEqual('ltn', nsoup.channel)
         self.assertIn('10年前父親掐死兒後自縊... 凶宅下月拍開價425萬', nsoup.title())
         self.assertEqual('2018-07-31 08:19:00', nsoup.date().strftime(self.dtf))

@@ -17,7 +17,7 @@ class TestUdn(unittest.TestCase):
         測試本地樣本解構
         * 如果測試 02 失敗，需要用 bin/getnews.sh 重新製作本地樣本
         """
-        nsoup = NewsSoup(pkgdir + '/samples/udn.html', mobile=False)
+        nsoup = NewsSoup(pkgdir + '/samples/udn.html.gz', mobile=False)
         self.assertEqual('udn', nsoup.channel)
         self.assertIn('澎湖重度殘障男子 陳屍馬公水仙宮旁空屋', nsoup.title())
         self.assertEqual('2018-02-28 14:31:00', nsoup.date().strftime(self.dtf))

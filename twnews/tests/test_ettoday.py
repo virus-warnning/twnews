@@ -17,7 +17,7 @@ class TestEttoday(unittest.TestCase):
         測試本地樣本解構
         * 如果測試 02 失敗，需要用 bin/getnews.sh 重新製作本地樣本
         """
-        nsoup = NewsSoup(pkgdir + '/samples/ettoday.html', mobile=False)
+        nsoup = NewsSoup(pkgdir + '/samples/ettoday.html.gz', mobile=False)
         self.assertEqual('ettoday', nsoup.channel)
         self.assertIn('客運司機車禍致人於死　心情鬱悶陽台以狗鍊上吊', nsoup.title())
         self.assertEqual('2017-12-09 00:26:00', nsoup.date().strftime(self.dtf))

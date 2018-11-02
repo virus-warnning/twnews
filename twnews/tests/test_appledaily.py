@@ -17,7 +17,7 @@ class TestAppleDaily(unittest.TestCase):
         測試本地樣本解構
         * 如果測試 02 失敗，需要用 bin/getnews.sh 重新製作本地樣本
         """
-        nsoup = NewsSoup(pkgdir + '/samples/appledaily.html', mobile=False)
+        nsoup = NewsSoup(pkgdir + '/samples/appledaily.html.gz', mobile=False)
         self.assertEqual('appledaily', nsoup.channel)
         self.assertIn('和男友口角鎖門吞藥　女墜樓不治', nsoup.title())
         self.assertEqual('2016-05-21 11:44:00', nsoup.date().strftime(self.dtf))

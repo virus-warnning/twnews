@@ -18,7 +18,7 @@ class TestSetn(unittest.TestCase):
         測試本地樣本解構
         * 如果測試 02 失敗，需要用 bin/getnews.sh 重新製作本地樣本
         """
-        nsoup = NewsSoup(pkgdir + '/samples/setn.html', mobile=False)
+        nsoup = NewsSoup(pkgdir + '/samples/setn.html.gz', mobile=False)
         self.assertEqual('setn', nsoup.channel)
         self.assertIn('與母爭吵疑失足墜樓　男子送醫搶救不治', nsoup.title())
         self.assertEqual('2018-02-21 18:03:00', nsoup.date().strftime(self.dtf))

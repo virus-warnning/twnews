@@ -17,7 +17,7 @@ class TestChinatimes(unittest.TestCase):
         測試本地樣本解構
         * 如果測試 02 失敗，需要用 bin/getnews.sh 重新製作本地樣本
         """
-        nsoup = NewsSoup(pkgdir + '/samples/chinatimes.html', mobile=False)
+        nsoup = NewsSoup(pkgdir + '/samples/chinatimes.html.gz', mobile=False)
         self.assertEqual('chinatimes', nsoup.channel)
         self.assertIn('悲慟！北市士林年邁母子 住處上吊自殺身亡', nsoup.title())
         self.assertEqual('2018-09-16 15:31:00', nsoup.date().strftime(self.dtf))

@@ -1,6 +1,7 @@
 import io
 import re
 import os
+import gzip
 import json
 import hashlib
 import logging
@@ -98,7 +99,7 @@ def soup_from_website(url, channel, refresh, mobile):
     soup = None
     device = 'mobile' if mobile else 'desktop'
     hash = hashlib.md5(suffix.encode('ascii')).hexdigest()
-    path = '{}/{}-{}-{}.html'.format(get_cache_dir(), channel, device, hash)
+    path = '{}/{}-{}-{}.html.gz'.format(get_cache_dir(), channel, device, hash)
     if os.path.isfile(path) and not refresh:
         logger.debug('發現 URL 快取: {}'.format(url))
         logger.debug('載入快取檔案: {}'.format(path))
@@ -115,7 +116,7 @@ def soup_from_website(url, channel, refresh, mobile):
                 logger.debug('{}: {}'.format(k, v))
             soup = BeautifulSoup(resp.text, 'lxml')
             rawlen = resp.text.encode('utf-8')
-            with open(path, 'w') as cache_file:
+            with gzip.open(path, 'wt') as cache_file:
                 logger.debug('寫入快取: {}'.format(path))
                 cache_file.write(resp.text)
         else:
@@ -127,11 +128,28 @@ def soup_from_file(file_path):
     """
     本地檔案轉換成 BeautifulSoup 4 物件
     """
+    html = None
     soup = None
-    with open(file_path, 'r') as cache_file:
-        html = cache_file.read()
+
+    '''
+    if not os.path.isfile(file_path):
+        if os.path.isfile(file_path + '.gz'):
+            file_path += '.gz'
+    '''
+
+    if file_path.endswith('.gz'):
+        # 注意 gzip 預設 mode 是 rb
+        with gzip.open(file_path, 'rt') as cache_file:
+            html = cache_file.read()
+    else:
+        with open(file_path, 'r') as cache_file:
+            html = cache_file.read()
+
+    if html is not None:
         soup = BeautifulSoup(html, 'lxml')
-    return (soup, len(html.encode('utf-8')))
+        return (soup, len(html.encode('utf-8')))
+
+    return (None, 0)
 
 def scan_author(article):
     """

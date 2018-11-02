@@ -23,7 +23,7 @@ class TestCommon(unittest.TestCase):
         # 清除快取
         cache_dir = get_cache_dir()
         for cache_file in os.listdir(cache_dir):
-            if re.match(r'appledaily-mobile-.*\.html', cache_file):
+            if re.search(r'\.html\.gz$', cache_file):
                 cache_path = '{}/{}'.format(cache_dir, cache_file)
                 os.unlink(cache_path)
 
@@ -31,7 +31,14 @@ class TestCommon(unittest.TestCase):
         count = 0
         nsoup = NewsSoup(self.url)
         for cache_file in os.listdir(cache_dir):
-            if re.match(r'appledaily-mobile-.*\.html', cache_file):
+            if re.search(r'\.html\.gz$', cache_file):
                 count += 1
-
+                news_cache = '{}/{}'.format(cache_dir, cache_file)
+                news_mtime = os.path.getmtime(news_cache)
         self.assertEqual(1, count)
+
+        # 再次讀取新聞，確認快取檔的 mtime 沒變
+        if count == 1:
+            nsoup = NewsSoup(self.url)
+            news_mtime_new = os.path.getmtime(news_cache)
+            self.assertEqual(news_mtime, news_mtime_new)
