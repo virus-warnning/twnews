@@ -130,12 +130,7 @@ def soup_from_file(file_path):
     """
     html = None
     soup = None
-
-    '''
-    if not os.path.isfile(file_path):
-        if os.path.isfile(file_path + '.gz'):
-            file_path += '.gz'
-    '''
+    clen = 0
 
     if file_path.endswith('.gz'):
         # 注意 gzip 預設 mode 是 rb
@@ -147,9 +142,9 @@ def soup_from_file(file_path):
 
     if html is not None:
         soup = BeautifulSoup(html, 'lxml')
-        return (soup, len(html.encode('utf-8')))
+        clen = len(html.encode('utf-8'))
 
-    return (None, 0)
+    return (soup, clen)
 
 def scan_author(article):
     """
