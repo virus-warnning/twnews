@@ -143,3 +143,47 @@ class TestCommon(unittest.TestCase):
             os.unlink('appledaily-empty.html.gz')
         except Exception:
             self.fail('空白檔案時，__init__() 不應該發生例外')
+
+    def test_04_author(self):
+        """
+        測試無記者欄的記者姓名分析
+        """
+
+        good_samples = [
+            # 蘋果
+            '(王覺一／台北報導)',
+            '（林文彬／綜合外電報導）',
+            # 中央社
+            '（中央社記者吳睿騏桃園5日電）',
+            '（中央社東京5日綜合外電報導）日本軟銀（譯者：何宏儒/核稿：劉學源）',
+            # 東森
+            '記者吳奕靖／高雄報導',
+            # 自由
+            '〔記者梁偉銘／台北報導〕',
+            '［記者江志雄／宜蘭報導］',
+            # 三立
+            '記者於慶璇／台中報導'
+        ]
+
+        bad_samples = [
+            # 蘋果
+            '（國際中心／綜合外電報導）',
+            # 中央社
+            '（中央社伊斯坦堡/日內瓦5日綜合外電報導）',
+            # 東森
+            '地方中心／嘉義報導',
+            # 自由
+            '〔即時新聞／綜合報導〕',
+            # 三立
+            '社會中心／綜合報導'
+        ]
+
+        for text in good_samples:
+            author = scan_author(text)
+            msg = '"{}" 應該分析出記者姓名'.format(text)
+            self.assertIsNotNone(author, msg)
+
+        for text in bad_samples:
+            author = scan_author(text)
+            msg = '"{}" 不應分析出記者姓名'.format(text)
+            self.assertIsNone(author, msg)

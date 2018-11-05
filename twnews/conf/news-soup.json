@@ -113,7 +113,7 @@
       "title_node": "#contFix > div.row > div.contLeft > h1",
       "date_node": "#contFix > div.row > div.contLeft > div.content > div.page-title-text > time.page-date",
       "date_format": "%Y/%m/%d %H:%M:%S",
-      "author_node": "#contFix > div.row > div.contLeft > div.content > div.page-title-text > span.reporter",
+      "author_node": "",
       "article_node": "#Content1 > p"
     },
     "mobile": {
