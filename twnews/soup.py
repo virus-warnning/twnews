@@ -119,7 +119,7 @@ def soup_from_website(url, channel, refresh, mobile):
             for (k,v) in resp.headers.items():
                 logger.debug('{}: {}'.format(k, v))
             soup = BeautifulSoup(resp.text, 'lxml')
-            rawlen = resp.text.encode('utf-8')
+            rawlen = len(resp.text.encode('utf-8'))
             with gzip.open(path, 'wt') as cache_file:
                 logger.debug('寫入快取: {}'.format(path))
                 cache_file.write(resp.text)
@@ -222,6 +222,10 @@ class NewsSoup:
         """
         取得新聞標題
         """
+
+        if self.soup is None:
+            return None
+
         if self.cache['title'] is None:
             nsel = self.conf[self.device]['title_node']
             found = self.soup.select(nsel)
@@ -239,6 +243,10 @@ class NewsSoup:
         """
         取得原始時間字串
         """
+
+        if self.soup is None:
+            return None
+
         if self.cache['date_raw'] is None:
             nsel = self.conf[self.device]['date_node']
             found = self.soup.select(nsel)
@@ -256,6 +264,10 @@ class NewsSoup:
         """
         取得 datetime.datetime 格式的時間
         """
+
+        if self.soup is None:
+            return None
+
         if self.cache['date'] is None:
             dfmt = self.conf[self.device]['date_format']
             try:
@@ -268,6 +280,10 @@ class NewsSoup:
         """
         取得新聞記者/社論作者
         """
+
+        if self.soup is None:
+            return None
+
         if self.cache['author'] is None:
             nsel = self.conf[self.device]['author_node']
             if nsel != '':
@@ -294,6 +310,10 @@ class NewsSoup:
         """
         取得新聞內文
         """
+
+        if self.soup is None:
+            return None
+
         if self.cache['contents'] is None:
             nsel = self.conf[self.device]['article_node']
             found = self.soup.select(nsel)
@@ -312,6 +332,10 @@ class NewsSoup:
         """
         計算有效內容率 (有效內容位元組數/全部位元組數)
         """
+
+        if self.soup is None or self.rawlen == 0:
+            return 0
+
         data = [
             self.title(),
             self.author(),

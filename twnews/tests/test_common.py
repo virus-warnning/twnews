@@ -1,12 +1,14 @@
 """
 分解程式共用單元測試
+
+為了節省爬蟲開發時間，原則上 NewsSoup 盡量不丟例外，有問題以 logging 機制為主
 """
 
 import os
 import re
 import tempfile
 import unittest
-from twnews.soup import NewsSoup, get_cache_dir
+from twnews.soup import *
 
 #@unittest.skip
 class TestCommon(unittest.TestCase):
@@ -42,3 +44,102 @@ class TestCommon(unittest.TestCase):
             nsoup = NewsSoup(self.url)
             news_mtime_new = os.path.getmtime(news_cache)
             self.assertEqual(news_mtime, news_mtime_new)
+
+    def test_02_soup_from_website(self):
+        '''
+        測試 NewSoup(URL) 輸入不理想網址
+        '''
+
+        # channel 不存在
+        try:
+            nsoup = NewsSoup('https://localhost.xxx')
+            self.assertIsNone(nsoup.soup)
+            self.assertIsNone(nsoup.title(), 'channel 錯誤時，title() 應該回傳 None')
+            self.assertIsNone(nsoup.date(), 'channel 錯誤時，date() 應該回傳 None')
+            self.assertIsNone(nsoup.author(), 'channel 錯誤時，author() 應該回傳 None')
+            self.assertIsNone(nsoup.contents(), 'channel 錯誤時，contents() 應該回傳 None')
+            self.assertEqual(0, nsoup.effective_text_rate(), 'channel 錯誤時，effective_text_rate() 應該回傳 0')
+        except Exception:
+            self.fail('channel 錯誤時，__init__() 不應該發生例外')
+
+        # channel 正確但 host 漏字
+        try:
+            nsoup = NewsSoup('https://appledaily.co')
+            self.assertIsNone(nsoup.soup)
+            self.assertIsNone(nsoup.title(), 'host 錯誤時，title() 應該回傳 None')
+            self.assertIsNone(nsoup.date(), 'host 錯誤時，date() 應該回傳 None')
+            self.assertIsNone(nsoup.author(), 'host 錯誤時，author() 應該回傳 None')
+            self.assertIsNone(nsoup.contents(), 'host 錯誤時，contents() 應該回傳 None')
+            self.assertEqual(0, nsoup.effective_text_rate(), 'host 錯誤時，effective_text_rate() 應該回傳 0')
+        except Exception:
+            self.fail('host 錯誤時，__init__() 不應該發生例外')
+
+        # host 正確但 url 漏字
+        try:
+            url = 'https://tw.news.appledaily.com/local/realtime/WRONG/NEWS_ID'
+            nsoup = NewsSoup(url)
+            self.assertIsNotNone(nsoup.soup)
+            self.assertIsNone(nsoup.title(), 'url 錯誤時，title() 應該回傳 None')
+            self.assertIsNone(nsoup.date(), 'url 錯誤時，date() 應該回傳 None')
+            self.assertIsNone(nsoup.author(), 'url 錯誤時，author() 應該回傳 None')
+            self.assertIsNone(nsoup.contents(), 'url 錯誤時，contents() 應該回傳 None')
+            self.assertEqual(0, nsoup.effective_text_rate(), '頻道錯誤時，effective_text_rate() 應該回傳 0')
+        except Exception:
+            self.fail('url 錯誤時，__init__() 不應該發生例外')
+
+    def test_03_soup_from_file(self):
+        '''
+        測試 NewsSoup(FILE) 輸入不理想檔案
+        '''
+
+        # channel 不存在
+        try:
+            nsoup = NewsSoup('/tmp/badchannel.html')
+            self.assertIsNone(nsoup.soup)
+            self.assertIsNone(nsoup.title(), 'channel 錯誤時，title() 應該回傳 None')
+            self.assertIsNone(nsoup.date(), 'channel 錯誤時，date() 應該回傳 None')
+            self.assertIsNone(nsoup.author(), 'channel 錯誤時，author() 應該回傳 None')
+            self.assertIsNone(nsoup.contents(), 'channel 錯誤時，contents() 應該回傳 None')
+            self.assertEqual(0, nsoup.effective_text_rate(), 'channel 錯誤時，effective_text_rate() 應該回傳 0')
+        except Exception:
+            self.fail('channel 錯誤時，__init__() 不應該發生例外')
+
+        # 檔案不存在
+        try:
+            nsoup = NewsSoup('/tmp/appledaily-notexisted.html')
+            self.assertIsNone(nsoup.soup)
+            self.assertIsNone(nsoup.title(), '檔案不存在時，title() 應該回傳 None')
+            self.assertIsNone(nsoup.date(), '檔案不存在時，date() 應該回傳 None')
+            self.assertIsNone(nsoup.author(), '檔案不存在時，author() 應該回傳 None')
+            self.assertIsNone(nsoup.contents(), '檔案不存在時，contents() 應該回傳 None')
+            self.assertEqual(0, nsoup.effective_text_rate(), '檔案不存在時，effective_text_rate() 應該回傳 0')
+        except Exception:
+            self.fail('檔案不存在時，__init__() 不應該發生例外')
+
+        # 空白檔案
+        try:
+            os.system('touch appledaily-empty.html')
+            nsoup = NewsSoup('appledaily-empty.html')
+            self.assertIsNotNone(nsoup.soup)
+            self.assertIsNone(nsoup.title(), '空白檔案時，title() 應該回傳 None')
+            self.assertIsNone(nsoup.date(), '空白檔案時，date() 應該回傳 None')
+            self.assertIsNone(nsoup.author(), '空白檔案時，author() 應該回傳 None')
+            self.assertIsNone(nsoup.contents(), '空白檔案時，contents() 應該回傳 None')
+            self.assertEqual(0, nsoup.effective_text_rate(), '檔案不存在時，effective_text_rate() 應該回傳 0')
+            os.unlink('appledaily-empty.html')
+        except Exception:
+            self.fail('空白檔案時，__init__() 不應該發生例外')
+
+        # 空白 gz 檔案
+        try:
+            os.system('touch appledaily-empty.html.gz')
+            nsoup = NewsSoup('appledaily-empty.html')
+            self.assertIsNone(nsoup.soup)
+            self.assertIsNone(nsoup.title(), '空白檔案時，title() 應該回傳 None')
+            self.assertIsNone(nsoup.date(), '空白檔案時，date() 應該回傳 None')
+            self.assertIsNone(nsoup.author(), '空白檔案時，author() 應該回傳 None')
+            self.assertIsNone(nsoup.contents(), '空白檔案時，contents() 應該回傳 None')
+            self.assertEqual(0, nsoup.effective_text_rate(), '檔案不存在時，effective_text_rate() 應該回傳 0')
+            os.unlink('appledaily-empty.html.gz')
+        except Exception:
+            self.fail('空白檔案時，__init__() 不應該發生例外')
