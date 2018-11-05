@@ -13,6 +13,10 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
+logdir = os.path.expanduser('~/.twnews/log')
+if not os.path.isdir(logdir):
+    os.makedirs(logdir)
+
 pkgdir = os.path.dirname(__file__)
 logini = '{}/conf/logging.ini'.format(pkgdir)
 
