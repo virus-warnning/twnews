@@ -308,7 +308,7 @@ class NewsSoup:
                     if len(found) > 1:
                         logger.warning('找到多組記者姓名 (新聞台: {})'.format(self.channel))
                 else:
-                    logger.error('找不到記者節點 (新聞台: {})'.format(self.channel))
+                    logger.warning('找不到記者節點 (新聞台: {})'.format(self.channel))
             else:
                 contents = self.contents()
                 if contents is not None:

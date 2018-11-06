@@ -144,9 +144,9 @@ class TestCommon(unittest.TestCase):
         except Exception:
             self.fail('空白檔案時，__init__() 不應該發生例外')
 
-    def test_04_author(self):
+    def test_04_author_in_contents(self):
         """
-        測試無記者欄的記者姓名分析
+        測試無記者欄的記者姓名分析 (蘋果、中央社、東森、自由、三立)
         """
 
         good_samples = [
@@ -163,9 +163,7 @@ class TestCommon(unittest.TestCase):
             '〔記者梁偉銘／台北報導〕',
             '［記者江志雄／宜蘭報導］',
             # 三立
-            '記者於慶璇／台中報導',
-            # 故意錯誤，測試通知信用 (平常不要打開)
-            # '（國際中心／綜合外電報導）',
+            '記者於慶璇／台中報導'
         ]
 
         bad_samples = [
@@ -194,4 +192,23 @@ class TestCommon(unittest.TestCase):
         for text in bad_samples:
             author = scan_author(text)
             msg = '"{}" 不應分析出記者姓名'.format(text)
+            self.assertIsNone(author, msg)
+
+    def test_05_author_in_node(self):
+        """
+        測試有記者欄的記者姓名分析 (中時、聯合)
+        """
+
+        # 中時找不到異常案例，暫不測試
+        bad_samples = [
+          # 中央社 高雄6日電 (無連結)
+          'https://udn.com/news/story/10958/3465283',
+          # 聯合新聞網 綜合報導 (無連結)
+          'https://udn.com/news/story/10958/3465161'
+        ]
+
+        for url in bad_samples:
+            nsoup = NewsSoup(url)
+            author = nsoup.author()
+            msg = '"{}" 不應分析出記者姓名'.format(url)
             self.assertIsNone(author, msg)
