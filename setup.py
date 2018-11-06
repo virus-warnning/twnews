@@ -12,7 +12,7 @@ readme.close()
 # https://python-packaging.readthedocs.io/en/latest/non-code-files.html
 setup(
     name='twnews',
-    version='0.1.8',
+    version='0.1.9',
     description='To tear down news web pages in Taiwan.',
     long_description=longdesc,
     packages=find_packages(),
@@ -27,5 +27,5 @@ setup(
         'lxml',
         'requests'
     ],
-    python_requires='>=3.7'
+    python_requires='>=3.5'
 )
