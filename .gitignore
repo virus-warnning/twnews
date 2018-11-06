@@ -13,5 +13,8 @@ twnews.egg-info
 # virtualenv
 sandbox
 
+# vim
+*.swp
+
 # MacOS
 .DS_Store
