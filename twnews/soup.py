@@ -174,8 +174,8 @@ def scan_author(article):
         po = re.compile(p)
         m = po.search(article)
         if m is not None:
-            if m[1] not in exclude_list:
-                return m[1]
+            if m.group(1) not in exclude_list:
+                return m.group(1)
 
     return None
 
