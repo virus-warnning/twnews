@@ -154,17 +154,30 @@ def scan_author(article):
     """
     從新聞內文找出記者姓名
     """
+
     patterns = [
-        '\((.{2,5})／.+報導\)',
-        '（(.{2,5})／.+報導）',
-        '記者(.{2,5})／.+報導',
-        '中心(.{2,5})／.+報導'
+        r'\((.{2,5})／.+報導\)',
+        r'（(.{2,5})／.+報導）',
+        r'記者(.{2,5})／.+報導',
+        r'中心(.{2,5})／.+報導',
+        r'記者(.{2,3}).{2}[縣市]?\d{1,2}日電',
+        r'（譯者：(.{2,5})/.+）'
     ]
+
+    exclude_list = [
+        '國際中心',
+        '地方中心',
+        '社會中心'
+    ]
+
     for p in patterns:
         po = re.compile(p)
         m = po.search(article)
         if m is not None:
-            return m[1]
+            if m[1] not in exclude_list:
+                return m[1]
+
+    return None
 
 def load_soup_conf(path):
     """
