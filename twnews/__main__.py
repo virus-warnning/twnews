@@ -3,11 +3,12 @@ import os.path
 from twnews.soup import NewsSoup, pkgdir
 
 def main():
-    if sys.argv[1].startswith('https'):
+    if len(sys.argv) > 1 and sys.argv[1].startswith('https'):
         samples = [sys.argv[1]]
     else:
+        pkgdir = os.path.dirname(__file__)
         samples = [
-            '{}/samples/appledaily.html'.format(pkgdir),
+            '{}/samples/appledaily.html.gz'.format(pkgdir),
             'https://tw.news.appledaily.com/local/realtime/20181025/1453825',
         ]
 
