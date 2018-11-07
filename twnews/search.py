@@ -11,12 +11,10 @@ from bs4 import BeautifulSoup
 
 class NewsSearch:
 
-    def __init__(self, channel, days_limit=30, records_limit=25):
+    def __init__(self, channel, beg_date, end_date, records_limit=25):
         self.conf = common.get_channel_conf(channel, 'search')
-        now_dti = datetime.now()
-        beg_dti = datetime.fromtimestamp(now_dti.timestamp() - days_limit * 86400)
-        self.now = now_dti.strftime(self.conf['date_query_format'])
-        self.beg = beg_dti.strftime(self.conf['date_query_format'])
+        self.beg_date = datetime.strptime(beg_date, '%Y-%m-%d')
+        self.end_date = datetime.strptime(end_date, '%Y-%m-%d')
         self.records_limit = records_limit
         self.pages = 0
         self.elapsed = 0
@@ -33,8 +31,8 @@ class NewsSearch:
             url = Template(self.conf['url']).substitute({
                 'PAGE': page,
                 'KEYWORD': urllib.parse.quote_plus(keyword),
-                'DATE_BEG': urllib.parse.quote_plus(self.beg),
-                'DATE_END': urllib.parse.quote_plus(self.now)
+                'DATE_BEG': urllib.parse.quote_plus(self.beg_date.strftime(self.conf['date_query_format'])),
+                'DATE_END': urllib.parse.quote_plus(self.end_date.strftime(self.conf['date_query_format']))
             })
 
             # 查詢
@@ -77,19 +75,13 @@ class NewsSearch:
         return results
 
 def main():
-    if len(sys.argv) > 1:
-        keyword = sys.argv[1]
-    else:
-        keyword = '上吊'
+    keyword = sys.argv[1] if len(sys.argv) > 1 else '上吊'
+    nsearch = NewsSearch('appledaily', '2018-01-01', '2018-11-07', 100)
+    results = nsearch.by_keyword(keyword)
 
-    nsearch = NewsSearch('appledaily', 30, 10)
-    results = nsearch.by_keyword(keyword, True)
-    i = 0
-    for r in results:
-        i += 1
-        print('{:03d}: {} ({})'.format(i, r['title'], r['date'].strftime('%Y-%m-%d')))
+    for (i, r) in enumerate(results):
+        print('{:03d}: {} ({})'.format(i+1, r['title'], r['date'].strftime('%Y-%m-%d')))
         print('     {}'.format(r['link']))
-
     print('-' * 75)
     print('耗時 {:.2f} 秒，分析 {} 頁查詢結果'.format(nsearch.elapsed, nsearch.pages))
 

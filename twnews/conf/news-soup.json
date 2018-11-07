@@ -35,6 +35,8 @@
     },
     "search": {
       "url": "https://tw.appledaily.com/search/result/page/${PAGE}?querystrS=${KEYWORD}&dateStart=${DATE_BEG}&dateEnd=${DATE_END}",
+      "pager": true,
+      "date_range": true,
       "date_query_format": "%Y/%m/%d",
       "result_node": "#result > li.item > div.content",
       "title_node": "h2 > a",
@@ -76,6 +78,9 @@
       "date_format": "%Y/%m/%d %H:%M",
       "author_node": "",
       "article_node": "div.centralContent > div.paragraph > p"
+    },
+    "search": {
+      "url": "https://www.cna.com.tw/cna2018api/api/simplelist/searchkeyword/${KEYWORD}/pageidx/${PAGE}/"
     }
   },
   "ettoday": {
@@ -93,6 +98,9 @@
       "date_format": "%Y年%m月%d日 %H:%M",
       "author_node": "",
       "article_node": "div.subject_news > div.story > p"
+    },
+    "search": {
+      "url": "https://www.ettoday.net/news_search/doSearch.php?keywords=${KEYWORD}&page=${PAGE}&daydiff=3&idx=1"
     }
   },
   "ltn": {
@@ -112,6 +120,10 @@
       "date_format": "%Y-%m-%d %H:%M",
       "author_node": "",
       "article_node": "div.com > div.boxTitle > p"
+    },
+    "search": {
+      "url": "http://m.ltn.com.tw/search/${PAGE}?q=${KEYWORD}&start=${DATE_BEG}&end=${DATE_END}",
+      "date_range": true
     }
   },
   "setn": {
@@ -131,6 +143,10 @@
       "date_format": "%Y-%m-%d %H:%M",
       "author_node": "",
       "article_node": "#ckuse > article > p"
+    },
+    "search": {
+      "url": "https://www.setn.com/m/search.aspx?q=${KEYWORD}&p=${PAGE}",
+      "date_range": false
     }
   },
   "udn": {
@@ -148,6 +164,10 @@
       "date_format": "%Y-%m-%d %H:%M",
       "author_node": "#story_bady_info > div.story_bady_info_author > a",
       "article_node": "#story_body_content > p"
+    },
+    "search": {
+      "url": "https://udn.com/search/result/2/${KEYWORD}/${PAGE}",
+      "date_range": false
     }
   }
 }
