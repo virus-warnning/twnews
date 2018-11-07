@@ -32,6 +32,14 @@
       "date_format": "建立時間：%Y/%m/%d %H:%M",
       "author_node": "",
       "article_node": "article.nm-content > div.nm-article > div.nm-article-body > div.text"
+    },
+    "search": {
+      "url": "https://tw.appledaily.com/search/result/page/${PAGE}?querystrS=${KEYWORD}&dateStart=${DATE_BEG}&dateEnd=${DATE_END}",
+      "date_query_format": "%Y/%m/%d",
+      "result_node": "#result > li.item > div.content",
+      "title_node": "h2 > a",
+      "date_node": "time",
+      "date_format": "%Y%m%d"
     }
   },
   "chinatimes": {
