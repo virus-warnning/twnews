@@ -51,11 +51,16 @@ class NewsSearch:
             # 拆查詢結果
             result_nodes = soup.select(self.conf['result_node'])
             if len(result_nodes) > 0:
+                spos = self.conf['url'].find('/', 10) + 1
+                website = self.conf['url'][:spos]
                 for n in result_nodes:
                     title_node = n.select(self.conf['title_node'])[0]
+                    link_node = n.select(self.conf['link_node'])[0]
                     date_node = n.select(self.conf['date_node'])[0]
                     title = title_node.text.strip()
-                    link  = title_node['href']
+                    link  = link_node['href']
+                    if not link.startswith('https://'):
+                        link = website + link
                     date_inst = datetime.strptime(date_node.text.strip(), self.conf['date_format'])
                     if (not title_only) or (keyword in title):
                         results.append({
@@ -76,7 +81,7 @@ class NewsSearch:
 
 def main():
     keyword = sys.argv[1] if len(sys.argv) > 1 else '上吊'
-    nsearch = NewsSearch('appledaily', '2018-01-01', '2018-11-07', 100)
+    nsearch = NewsSearch('ltn', '2018-10-01', '2018-11-07', 100)
     results = nsearch.by_keyword(keyword)
 
     for (i, r) in enumerate(results):

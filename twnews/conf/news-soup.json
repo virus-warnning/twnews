@@ -40,6 +40,7 @@
       "date_query_format": "%Y/%m/%d",
       "result_node": "#result > li.item > div.content",
       "title_node": "h2 > a",
+      "link_node": "h2 > a",
       "date_node": "time",
       "date_format": "%Y%m%d"
     }
@@ -123,7 +124,14 @@
     },
     "search": {
       "url": "http://m.ltn.com.tw/search/${PAGE}?q=${KEYWORD}&start=${DATE_BEG}&end=${DATE_END}",
-      "date_range": true
+      "pager": true,
+      "date_range": true,
+      "date_query_format": "%Y-%m-%d",
+      "result_node": "ul.news > li",
+      "link_node": "a",
+      "title_node": "a > p",
+      "date_node": "a > span",
+      "date_format": "%Y-%m-%d"
     }
   },
   "setn": {
