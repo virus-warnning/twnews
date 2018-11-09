@@ -118,7 +118,7 @@ class TestCommon(unittest.TestCase):
 
         # 空白檔案
         try:
-            os.system('touch appledaily-empty.html')
+            open('appledaily-empty.html', 'a').close()
             nsoup = NewsSoup('appledaily-empty.html')
             self.assertIsNotNone(nsoup.soup)
             self.assertIsNone(nsoup.title(), '空白檔案時，title() 應該回傳 None')
@@ -132,7 +132,7 @@ class TestCommon(unittest.TestCase):
 
         # 空白 gz 檔案
         try:
-            os.system('touch appledaily-empty.html.gz')
+            open('appledaily-empty.html.gz', 'a').close()
             nsoup = NewsSoup('appledaily-empty.html')
             self.assertIsNone(nsoup.soup)
             self.assertIsNone(nsoup.title(), '空白檔案時，title() 應該回傳 None')
