@@ -34,10 +34,9 @@
       "article_node": "article.nm-content > div.nm-article > div.nm-article-body > div.text"
     },
     "search": {
-      "url": "https://tw.appledaily.com/search/result/page/${PAGE}?querystrS=${KEYWORD}&dateStart=${DATE_BEG}&dateEnd=${DATE_END}",
-      "pager": true,
-      "date_range": true,
-      "date_query_format": "%Y/%m/%d",
+      "url": "https://tw.appledaily.com/search/result/page/${PAGE}?querystrS=${KEYWORD}",
+      "begin_date_format": "&dateStart=%Y/%m/%d",
+      "end_date_format": "&dateEnd=%Y/%m/%d",
       "result_node": "#result > li.item > div.content",
       "title_node": "h2 > a",
       "link_node": "h2 > a",
@@ -81,7 +80,12 @@
       "article_node": "div.centralContent > div.paragraph > p"
     },
     "search": {
-      "url": "https://www.cna.com.tw/cna2018api/api/simplelist/searchkeyword/${KEYWORD}/pageidx/${PAGE}/"
+      "url": "https://www.cna.com.tw/cna2018api/api/simplelist/searchkeyword/${KEYWORD}/pageidx/${PAGE}/",
+      "result_node": ["result", "SimpleItems"],
+      "link_node": "PageUrl",
+      "title_node": "HeadLine",
+      "date_node": "CreateTime",
+      "date_format": "%Y/%m/%d %H:%M"
     }
   },
   "ettoday": {
@@ -101,7 +105,13 @@
       "article_node": "div.subject_news > div.story > p"
     },
     "search": {
-      "url": "https://www.ettoday.net/news_search/doSearch.php?keywords=${KEYWORD}&page=${PAGE}&daydiff=3&idx=1"
+      "url": "https://www.ettoday.net/news_search/doSearch.php?keywords=${KEYWORD}&page=${PAGE}&daydiff=3&idx=1",
+      "result_node": "#result-list > div.archive",
+      "link_node": "div.box_2 > h2 > a",
+      "title_node": "div.box_2 > h2 > a",
+      "date_node": "div.box_2 > p.detail > span.date",
+      "date_pattern": "\\d{4}-\\d{2}-\\d{2}",
+      "date_format": "%Y-%m-%d"
     }
   },
   "ltn": {
@@ -123,10 +133,9 @@
       "article_node": "div.com > div.boxTitle > p"
     },
     "search": {
-      "url": "http://m.ltn.com.tw/search/${PAGE}?q=${KEYWORD}&start=${DATE_BEG}&end=${DATE_END}",
-      "pager": true,
-      "date_range": true,
-      "date_query_format": "%Y-%m-%d",
+      "url": "https://m.ltn.com.tw/search/${PAGE}?q=${KEYWORD}",
+      "begin_date_format": "&start=%Y-%m-%d",
+      "end_date_format": "&end=%Y-%m-%d",
       "result_node": "ul.news > li",
       "link_node": "a",
       "title_node": "a > p",
@@ -154,7 +163,11 @@
     },
     "search": {
       "url": "https://www.setn.com/m/search.aspx?q=${KEYWORD}&p=${PAGE}",
-      "date_range": false
+      "result_node": "div.news-area",
+      "link_node": "div.news-info > div.news-word > a",
+      "title_node": "div.news-info > div.news-word > a",
+      "date_node": "div.news-info > div.lable-date",
+      "date_format": "%Y/%m/%d %H:%M"
     }
   },
   "udn": {
@@ -175,7 +188,12 @@
     },
     "search": {
       "url": "https://udn.com/search/result/2/${KEYWORD}/${PAGE}",
-      "date_range": false
+      "result_node": "#search_content > dt",
+      "link_node": "a",
+      "title_node": "a > h2",
+      "date_node": "a > span.cat",
+      "date_pattern": "\\d{4}/\\d{2}/\\d{2}",
+      "date_format": "%Y/%m/%d"
     }
   }
 }

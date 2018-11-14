@@ -1,6 +1,8 @@
 import re
 import sys
 import time
+import json
+import os.path
 import urllib.parse
 from string import Template
 from datetime import datetime
@@ -15,7 +17,7 @@ class NewsSearchException(Exception):
 
 class NewsSearch:
 
-    def __init__(self, channel, beg_date=None, end_date=None, records_limit=25):
+    def __init__(self, channel, limit=25, beg_date=None, end_date=None):
         """
         配置新聞搜尋器
         """
@@ -63,25 +65,36 @@ class NewsSearch:
                 raise NewsSearchException(msg)
 
         self.conf = common.get_channel_conf(channel, 'search')
-        self.records_limit = records_limit
+        self.limit = limit
         self.pages = 0
         self.elapsed = 0
+        self.host = None
+        self.url_base = None
+        self.soup = None
+        self.json = None
 
     def by_keyword(self, keyword, title_only=False):
+        """
+        關鍵字搜尋
+        """
         logger = common.get_logger()
-        page = 1
+        page = 7
         results = []
         no_more = False
         begin_time = time.time()
 
-        while not no_more and len(results) < self.records_limit:
+        while not no_more and len(results) < self.limit:
             # 組查詢條件
-            url = Template(self.conf['url']).substitute({
+            replacement = {
                 'PAGE': page,
-                'KEYWORD': urllib.parse.quote_plus(keyword),
-                'DATE_BEG': urllib.parse.quote_plus(self.beg_date.strftime(self.conf['date_query_format'])),
-                'DATE_END': urllib.parse.quote_plus(self.end_date.strftime(self.conf['date_query_format']))
-            })
+                'KEYWORD': urllib.parse.quote_plus(keyword)
+            }
+            url = Template(self.conf['url']).substitute(replacement)
+
+            # 再加上日期範圍
+            if self.beg_date is not None:
+                url += self.beg_date.strftime(self.conf['begin_date_format'])
+                url += self.end_date.strftime(self.conf['end_date_format'])
 
             # 查詢
             session = common.get_session()
@@ -91,34 +104,53 @@ class NewsSearch:
                 logger.debug('回應 200 OK')
                 for (k, v) in resp.headers.items():
                     logger.debug('{}: {}'.format(k, v))
-                soup = BeautifulSoup(resp.text, 'lxml')
+                ctype = resp.headers['Content-Type']
+                if 'text/html' in ctype:
+                    self.soup = BeautifulSoup(resp.text, 'lxml')
+                if 'application/json' in ctype:
+                    self.json = resp.json()
+            elif resp.status_code == 404:
+                logger.debug('回應 404 Not Found，視為沒有更多查詢結果')
+                self.json = None
+                no_more = True
             else:
                 logger.warning('回應碼: {}'.format(resp.status_code))
                 break
 
-            # 拆查詢結果
-            result_nodes = soup.select(self.conf['result_node'])
-            if len(result_nodes) > 0:
-                spos = self.conf['url'].find('/', 10) + 1
-                website = self.conf['url'][:spos]
-                for n in result_nodes:
-                    title_node = n.select(self.conf['title_node'])[0]
-                    link_node = n.select(self.conf['link_node'])[0]
-                    date_node = n.select(self.conf['date_node'])[0]
-                    title = title_node.text.strip()
-                    link  = link_node['href']
-                    if not link.startswith('https://'):
-                        link = website + link
-                    date_inst = datetime.strptime(date_node.text.strip(), self.conf['date_format'])
+            # 拆查詢結果 Soup
+            if self.soup is not None:
+                result_nodes = self.soup.select(self.conf['result_node'])
+                if len(result_nodes) > 0:
+                    for n in result_nodes:
+                        title = self.__parse_title_node(n)
+                        if (not title_only) or (keyword in title):
+                            link = self.__parse_link_node(n)
+                            date_inst = self.__parse_date_node(n)
+                            results.append({
+                                "title": title,
+                                "link": link,
+                                'date': date_inst
+                            })
+                            if len(results) == self.limit: break
+                else:
+                    no_more = True
+
+            # 拆查詢結果 JSON
+            if self.json is not None:
+                result_nodes = self.json
+                for k in self.conf['result_node']:
+                    result_nodes = result_nodes[k]
+                for r in result_nodes:
+                    title = self.__parse_title_field(r)
                     if (not title_only) or (keyword in title):
+                        link = self.__parse_link_field(r)
+                        date_inst = self.__parse_date_field(r)
                         results.append({
                             "title": title,
                             "link": link,
                             'date': date_inst
                         })
-                        if len(results) == self.records_limit: break
-            else:
-                no_more = True
+                        if len(results) == self.limit: break
 
             page += 1
 
@@ -127,12 +159,109 @@ class NewsSearch:
 
         return results
 
+    def __parse_title_node(self, result_node):
+        """
+        單筆查詢結果範圍內取標題文字 (soup)
+        """
+        title_node = result_node.select(self.conf['title_node'])[0]
+        return title_node.text.strip()
+
+    def __parse_link_node(self, result_node):
+        """
+        單筆查詢結果範圍內取新聞連結 (soup)
+        """
+        link_node = result_node.select(self.conf['link_node'])[0]
+        href = link_node['href']
+
+        # 完整網址
+        if href.startswith('https://'):
+            return href
+
+        # 絕對路徑
+        if href.startswith('/'):
+            if not self.host:
+                m = re.match(r'^https://([^/]+)/', self.conf['url'])
+                self.host = m.group(1)
+            return 'https://{}{}'.format(self.host, href)
+
+        # 相對路徑
+        # 自由的 <head> 有設定 base_url
+        if not self.url_base:
+            nodes = self.soup.select('head > base')
+            if len(nodes) == 1:
+                self.url_base = nodes[0]['href']
+            else:
+                base_end = self.conf['url'].rfind('/')
+                self.url_base = self.conf['url'][0:base_end+1]
+
+        # 消除三立的 ../
+        full_url = self.url_base + href
+        spos = full_url.find('/', 10)
+        reduced_url = full_url[0:spos] + os.path.realpath(full_url[spos:])
+        return reduced_url
+
+    def __parse_date_node(self, result_node):
+        """
+        單筆查詢結果範圍內取報導日期 (soup)
+        """
+        date_node = result_node.select(self.conf['date_node'])[0]
+
+        if 'date_pattern' in self.conf:
+            # DOM node 除了日期還有其他文字
+            m = re.search(self.conf['date_pattern'], date_node.text)
+            date_text = m.group(0)
+        else:
+            # DOM 只有日期
+            date_text = date_node.text.strip()
+        date_inst = datetime.strptime(date_text, self.conf['date_format'])
+        return date_inst
+
+    def __parse_title_field(self, result):
+        """
+        單筆查詢結果範圍內取標題文字 (dict)
+        """
+        field = self.conf['title_node']
+        return result[field]
+
+    def __parse_link_field(self, result):
+        """
+        單筆查詢結果範圍內取新聞連結 (dict)
+        """
+        field = self.conf['link_node']
+        href = result[field]
+
+        # 完整網址
+        if href.startswith('https://'):
+            return href
+
+        # 絕對路徑
+        if not self.host:
+            m = re.match(r'^https://([^/]+)/', self.conf['url'])
+            self.host = m.group(1)
+        return 'https://{}{}'.format(self.host, href)
+
+    def __parse_date_field(self, result):
+        """
+        單筆查詢結果範圍內取報導日期 (dict)
+        """
+        field = self.conf['date_node']
+        date_inst = datetime.strptime(result[field], self.conf['date_format'])
+        return date_inst
+
+def get_cmd_param(n, default):
+    if len(sys.argv) > n:
+        return sys.argv[n]
+    else:
+        return default
+
 def main():
-    keyword = sys.argv[1] if len(sys.argv) > 1 else '上吊'
+    keyword = get_cmd_param(1, '上吊')
+    channel = get_cmd_param(2, 'appledaily')
     nsearch = NewsSearch(
-        'ltn',
-        beg_date='2018-08-03',
-        end_date='2018-11-01'
+        channel,
+        limit = 100,
+        # beg_date = '2018-11-01',
+        # end_date = '2018-11-30',
     )
     results = nsearch.by_keyword(keyword)
 
@@ -141,6 +270,8 @@ def main():
         print('     {}'.format(r['link']))
     print('-' * 75)
     print('耗時 {:.2f} 秒，分析 {} 頁查詢結果'.format(nsearch.elapsed, nsearch.pages))
+    print('平均每頁 {:.2f} 秒'.format(nsearch.elapsed / nsearch.pages))
+    print('平均每筆 {:.2f} 秒'.format(nsearch.elapsed / len(results)))
 
 if __name__ == '__main__':
     main()
