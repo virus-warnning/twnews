@@ -1,3 +1,4 @@
+import re
 import sys
 import time
 import urllib.parse
@@ -9,12 +10,59 @@ import twnews.common as common
 import requests
 from bs4 import BeautifulSoup
 
+class NewsSearchException(Exception):
+    pass
+
 class NewsSearch:
 
-    def __init__(self, channel, beg_date, end_date, records_limit=25):
+    def __init__(self, channel, beg_date=None, end_date=None, records_limit=25):
+        """
+        配置新聞搜尋器
+        """
+
+        # 防止用中時搜尋
+        if channel == 'chinatimes':
+            msg = '頻道 {} 不支援搜尋功能'.format(channel)
+            raise NewsSearchException(msg)
+
+        # 防止中央社、東森、三立、聯合使用日期範圍
+        if channel in ['cna', 'ettoday', 'setn', 'udn']:
+            if not (beg_date is None and end_date is None):
+                msg = '頻道 {} 不支援日期範圍條件'.format(channel)
+                raise NewsSearchException(msg)
+
+        # 防止開始日期和結束日期只設定了一個
+        if beg_date is None or end_date is None:
+            if end_date is not None:
+                msg = '遺漏了開始日期'
+                raise NewsSearchException(msg)
+            if beg_date is not None:
+                msg = '遺漏了結束日期'
+                raise NewsSearchException(msg)
+
+        # 防止開始日期和結束日期格式錯誤
+        self.beg_date = None
+        self.end_date = None
+        try:
+            if beg_date is not None:
+                self.beg_date = datetime.strptime(beg_date, '%Y-%m-%d')
+            if end_date is not None:
+                self.end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        except ValueError:
+            msg = '日期必須是 ISO 格式 (yyyy-mm-dd)'
+            raise NewsSearchException(msg)
+
+        # 防止開始日期大於結束日期
+        if self.beg_date is not None:
+            delta = self.end_date - self.beg_date
+            if delta.days < 0:
+                msg = '開始日期必須小於或等於結束日期'
+                raise NewsSearchException(msg)
+            if delta.days > 90 and channel == 'ltn':
+                msg = '頻道 {} 的日期條件必須在 90 天內'.format(channel)
+                raise NewsSearchException(msg)
+
         self.conf = common.get_channel_conf(channel, 'search')
-        self.beg_date = datetime.strptime(beg_date, '%Y-%m-%d')
-        self.end_date = datetime.strptime(end_date, '%Y-%m-%d')
         self.records_limit = records_limit
         self.pages = 0
         self.elapsed = 0
@@ -81,7 +129,11 @@ class NewsSearch:
 
 def main():
     keyword = sys.argv[1] if len(sys.argv) > 1 else '上吊'
-    nsearch = NewsSearch('ltn', '2018-10-01', '2018-11-07', 100)
+    nsearch = NewsSearch(
+        'ltn',
+        beg_date='2018-08-03',
+        end_date='2018-11-01'
+    )
     results = nsearch.by_keyword(keyword)
 
     for (i, r) in enumerate(results):
