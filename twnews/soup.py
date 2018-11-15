@@ -203,6 +203,7 @@ class NewsSoup:
         """
         建立新聞分解器
         """
+        self.path = path
         self.soup = None
         self.device = 'mobile' if mobile else 'desktop'
         self.rawlen = 0

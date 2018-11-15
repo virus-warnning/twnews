@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import twnews.common as common
 
 # Load reStructedText description.
 # Online Editor   - http://rst.ninjs.org/
@@ -12,7 +13,7 @@ readme.close()
 # https://python-packaging.readthedocs.io/en/latest/non-code-files.html
 setup(
     name='twnews',
-    version='0.1.10',
+    version=common.VERSION,
     description='To tear down news web pages in Taiwan.',
     long_description=longdesc,
     packages=find_packages(),
