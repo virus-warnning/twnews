@@ -8,6 +8,7 @@ from string import Template
 from datetime import datetime
 
 import twnews.common as common
+from twnews.soup import NewsSoup
 
 import requests
 from bs4 import BeautifulSoup
@@ -21,7 +22,6 @@ class NewsSearch:
         """
         配置新聞搜尋器
         """
-
         # 防止用中時搜尋
         if channel == 'chinatimes':
             msg = '頻道 {} 不支援搜尋功能'.format(channel)
@@ -154,10 +154,41 @@ class NewsSearch:
 
             page += 1
 
+        # 以連結網址為基準去重複化
+        filtered = []
+        for (i, r) in enumerate(results):
+            duplicated = False
+            for j in range(i):
+                p = results[j]
+                if r['link'] == p['link']:
+                    duplicated = True
+
+            if not duplicated:
+                filtered.append(r)
+            else:
+                logger.warning('查詢結果的 {}, {} 筆重複，新聞網址 {}'.format(i, j, r['link']))
+
+        self.result_list = filtered
         self.pages = page - 1
         self.elapsed = time.time() - begin_time
 
-        return results
+        return self
+
+    def to_dict_list(self):
+        """
+        回傳新聞查詢結果
+        """
+        return self.result_list
+
+    def to_soup_list(self):
+        """
+        回傳新聞查詢結果的分解器
+        """
+        soup_list = []
+        for r in self.result_list:
+            nsoup = NewsSoup(r['link'])
+            soup_list.append(nsoup)
+        return soup_list
 
     def __parse_title_node(self, result_node):
         """
@@ -247,31 +278,3 @@ class NewsSearch:
         field = self.conf['date_node']
         date_inst = datetime.strptime(result[field], self.conf['date_format'])
         return date_inst
-
-def get_cmd_param(n, default):
-    if len(sys.argv) > n:
-        return sys.argv[n]
-    else:
-        return default
-
-def main():
-    keyword = get_cmd_param(1, '上吊')
-    channel = get_cmd_param(2, 'appledaily')
-    nsearch = NewsSearch(
-        channel,
-        limit = 100,
-        # beg_date = '2018-11-01',
-        # end_date = '2018-11-30',
-    )
-    results = nsearch.by_keyword(keyword)
-
-    for (i, r) in enumerate(results):
-        print('{:03d}: {} ({})'.format(i+1, r['title'], r['date'].strftime('%Y-%m-%d')))
-        print('     {}'.format(r['link']))
-    print('-' * 75)
-    print('耗時 {:.2f} 秒，分析 {} 頁查詢結果'.format(nsearch.elapsed, nsearch.pages))
-    print('平均每頁 {:.2f} 秒'.format(nsearch.elapsed / nsearch.pages))
-    print('平均每筆 {:.2f} 秒'.format(nsearch.elapsed / len(results)))
-
-if __name__ == '__main__':
-    main()
