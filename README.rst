@@ -10,19 +10,38 @@
 - 徹底解決 Python for Windows CP950 編碼問題，節省處理鳥事的時間
 - 每週執行自動化測試檢查分解程式的時效性
 
+0.2.0 新功能
+
+- 支援蘋果日報、中央社、東森新聞雲、自由時報、三立新聞網、聯合新聞網的新聞搜尋
+- 新聞搜尋完成後，可接續拆解新聞內容
+- 工具程式提供多元的體驗方式
+
 安裝
 ==========
 
 .. code:: bash
 
-  pip3 install twnews # 安裝
-  python3 -m twnews   # 試一下
+  pip3 install twnews
 
-  # 用網址也可以
-  python3 -m twnews https://tw.news.appledaily.com/local/realtime/20181025/1453825
-
-範例
+工具程式
 ==========
+
+.. code:: bash
+
+  # 拆新聞
+  python3 -m twnews soup https://tw.news.appledaily.com/local/realtime/20181025/1453825
+
+  # 搜尋
+  python3 -m twnews search 韓國瑜 udn
+
+  # 搜尋 + 拆
+  python3 -m twnews snsp 酒駕
+
+  # 查看用法
+  python3 -m twnews help
+
+範例 - 分解新聞
+==============
 
 .. code:: python
 
@@ -52,60 +71,63 @@
   >>加入蘋果日報粉絲團94即時94狂！
   有效內容率: 1.37%
 
-卡關
-=========
+範例 - 關鍵字搜尋 + 分解新聞
+=========================
 
-如果新聞無法正確分解可能是網站改版了，利用 green 跑一下單元測試看看，假如單元測試失敗了，表示需要更新套件囉
+.. code:: python
 
-.. code:: bash
+  from twnews.search import NewsSearch
 
-  pip3 install green      # 安裝 green 套件
-  green -vvv twnews.tests # 使用 green 套件跑單元測試
-  pip3 install -U twnews  # 更新 twnews
+  nsearch = NewsSearch(
+    'ltn',
+    limit=10,
+    beg_date='2018-08-03', # 自由時報的日期範圍只能在 90 天以內
+    end_date='2018-11-01'
+  )
+  nsoups = nsearch.by_keyword('上吊', title_only=True).to_soup_list()
 
-參考手冊
-=========
+  for (i, nsoup) in enumerate(nsoups):
+      print('{:03d}: {}'.format(i, nsoup.path))
+      if nsoup.title() is not None:
+          print('     記者: {} / 日期: {}'.format(nsoup.author(), nsoup.date()))
+          print('     標題: {}'.format(nsoup.title()))
+          print('     {} ...'.format(nsoup.contents()[0:30]))
+      else:
+          print('     新聞分解失敗，無法識別 DOM 結構')
 
-class twnews.soup.NewsSoup
---------------------------
+.. code:: text
 
-NewsSoup.__init__(path, refresh=False, mobile=True)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-建立新聞分解器
-
-path
-  本機檔案路徑或是網址
-refresh
-  是否忽略快取重新整理，只有 path 是 URL 時有作用
-mobile
-  是否使用行動版網頁，若 path 是本機檔案避免用預設值，否則對 RWD 設計不完全的頻道可能會分解失敗
-
-NewsSoup.channel
-^^^^^^^^^^^^^^^^
-
-頻道名稱 (appledaily|chinatimes|cna|ettoday|ltn|setn|udn)
-
-NewsSoup.title()
-^^^^^^^^^^^^^^^^
-
-取得新聞標題
-
-NewsSoup.date()
-^^^^^^^^^^^^^^^
-
-取得發佈日期
-
-NewsSoup.author()
-^^^^^^^^^^^^^^^^^
-
-取得記者姓名
-
-NewsSoup.contents()
-^^^^^^^^^^^^^^^^^^^
-
-取得新聞內文
-
-NewsSoup.effective_text_rate()
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-取得有效內容率
+000: http://m.ltn.com.tw/news/society/breakingnews/2581807
+     記者: None / 日期: 2018-10-15 23:51:00
+     標題: 疑因病厭世 男子國小圖書館上吊身亡
+     〔即時新聞／綜合報導〕台北市萬華區的老松國小今（15）日早上 ...
+001: http://m.ltn.com.tw/news/society/breakingnews/2579780
+     記者: None / 日期: 2018-10-13 16:52:00
+     標題: 汐止五指山驚傳男子上吊 水管繞頸陳屍樹林
+     〔記者林嘉東、吳昇儒／新北報導〕台北市郭姓男子今天午後被發現 ...
+002: http://m.ltn.com.tw/news/entertainment/breakingnews/2579590
+     新聞分解失敗，無法識別 DOM 結構
+003: http://m.ltn.com.tw/news/society/breakingnews/2577987
+     記者: 謝武雄 / 日期: 2018-10-11 18:10:00
+     標題: 議員尿急樹林解放赫見白骨 男子上吊這天正好滿七...
+     ［記者謝武雄／桃園報導］桃園市大園選區市議員游吾和昨天在臉書 ...
+004: http://m.ltn.com.tw/news/entertainment/breakingnews/2577596
+     新聞分解失敗，無法識別 DOM 結構
+005: http://m.ltn.com.tw/news/society/breakingnews/2570595
+     記者: 吳仁捷 / 日期: 2018-10-04 13:40:00
+     標題: 疑借貸千萬翻身失敗 公墓上吊嚇壞爬山男
+     〔記者吳仁捷／新北報導〕章姓男子今天上午到新北市樹林大同山區 ...
+006: http://m.ltn.com.tw/news/entertainment/breakingnews/2567740
+     新聞分解失敗，無法識別 DOM 結構
+007: http://m.ltn.com.tw/news/life/breakingnews/2567637
+     記者: None / 日期: 2018-10-01 23:35:00
+     標題: 「肉粽」難送！ 員林三合院連5人在「同條樑」上吊
+     〔即時新聞／綜合報導〕在彰化沿海一帶，為上吊身亡者「送肉棕」 ...
+008: http://m.ltn.com.tw/news/society/breakingnews/2561962
+     記者: None / 日期: 2018-09-26 11:08:00
+     標題: 男子北美館樹林上吊亡 警到場調查
+     〔即時新聞／綜合報導〕今天上午10時許，台北市立美術館停車場 ...
+009: http://m.ltn.com.tw/news/society/breakingnews/2561566
+     記者: 黃良傑 / 日期: 2018-09-25 18:05:00
+     標題: 美籍女師上吊租屋處身亡 美籍男友：房內發現遺書
+     〔記者黃良傑／高雄報導〕一名美籍女老師今午被男友發現陳屍租屋 ...
