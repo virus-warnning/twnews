@@ -41,7 +41,7 @@
   python3 -m twnews help
 
 範例 - 分解新聞
-==============
+================
 
 .. code:: python
 
@@ -72,7 +72,7 @@
   有效內容率: 1.37%
 
 範例 - 關鍵字搜尋 + 分解新聞
-=========================
+============================
 
 .. code:: python
 
@@ -97,37 +97,37 @@
 
 .. code:: text
 
-000: http://m.ltn.com.tw/news/society/breakingnews/2581807
-     記者: None / 日期: 2018-10-15 23:51:00
-     標題: 疑因病厭世 男子國小圖書館上吊身亡
-     〔即時新聞／綜合報導〕台北市萬華區的老松國小今（15）日早上 ...
-001: http://m.ltn.com.tw/news/society/breakingnews/2579780
-     記者: None / 日期: 2018-10-13 16:52:00
-     標題: 汐止五指山驚傳男子上吊 水管繞頸陳屍樹林
-     〔記者林嘉東、吳昇儒／新北報導〕台北市郭姓男子今天午後被發現 ...
-002: http://m.ltn.com.tw/news/entertainment/breakingnews/2579590
-     新聞分解失敗，無法識別 DOM 結構
-003: http://m.ltn.com.tw/news/society/breakingnews/2577987
-     記者: 謝武雄 / 日期: 2018-10-11 18:10:00
-     標題: 議員尿急樹林解放赫見白骨 男子上吊這天正好滿七...
-     ［記者謝武雄／桃園報導］桃園市大園選區市議員游吾和昨天在臉書 ...
-004: http://m.ltn.com.tw/news/entertainment/breakingnews/2577596
-     新聞分解失敗，無法識別 DOM 結構
-005: http://m.ltn.com.tw/news/society/breakingnews/2570595
-     記者: 吳仁捷 / 日期: 2018-10-04 13:40:00
-     標題: 疑借貸千萬翻身失敗 公墓上吊嚇壞爬山男
-     〔記者吳仁捷／新北報導〕章姓男子今天上午到新北市樹林大同山區 ...
-006: http://m.ltn.com.tw/news/entertainment/breakingnews/2567740
-     新聞分解失敗，無法識別 DOM 結構
-007: http://m.ltn.com.tw/news/life/breakingnews/2567637
-     記者: None / 日期: 2018-10-01 23:35:00
-     標題: 「肉粽」難送！ 員林三合院連5人在「同條樑」上吊
-     〔即時新聞／綜合報導〕在彰化沿海一帶，為上吊身亡者「送肉棕」 ...
-008: http://m.ltn.com.tw/news/society/breakingnews/2561962
-     記者: None / 日期: 2018-09-26 11:08:00
-     標題: 男子北美館樹林上吊亡 警到場調查
-     〔即時新聞／綜合報導〕今天上午10時許，台北市立美術館停車場 ...
-009: http://m.ltn.com.tw/news/society/breakingnews/2561566
-     記者: 黃良傑 / 日期: 2018-09-25 18:05:00
-     標題: 美籍女師上吊租屋處身亡 美籍男友：房內發現遺書
-     〔記者黃良傑／高雄報導〕一名美籍女老師今午被男友發現陳屍租屋 ...
+  000: http://m.ltn.com.tw/news/society/breakingnews/2581807
+       記者: None / 日期: 2018-10-15 23:51:00
+       標題: 疑因病厭世 男子國小圖書館上吊身亡
+       〔即時新聞／綜合報導〕台北市萬華區的老松國小今（15）日早上 ...
+  001: http://m.ltn.com.tw/news/society/breakingnews/2579780
+       記者: None / 日期: 2018-10-13 16:52:00
+       標題: 汐止五指山驚傳男子上吊 水管繞頸陳屍樹林
+       〔記者林嘉東、吳昇儒／新北報導〕台北市郭姓男子今天午後被發現 ...
+  002: http://m.ltn.com.tw/news/entertainment/breakingnews/2579590
+       新聞分解失敗，無法識別 DOM 結構
+  003: http://m.ltn.com.tw/news/society/breakingnews/2577987
+       記者: 謝武雄 / 日期: 2018-10-11 18:10:00
+       標題: 議員尿急樹林解放赫見白骨 男子上吊這天正好滿七...
+       ［記者謝武雄／桃園報導］桃園市大園選區市議員游吾和昨天在臉書 ...
+  004: http://m.ltn.com.tw/news/entertainment/breakingnews/2577596
+       新聞分解失敗，無法識別 DOM 結構
+  005: http://m.ltn.com.tw/news/society/breakingnews/2570595
+       記者: 吳仁捷 / 日期: 2018-10-04 13:40:00
+       標題: 疑借貸千萬翻身失敗 公墓上吊嚇壞爬山男
+       〔記者吳仁捷／新北報導〕章姓男子今天上午到新北市樹林大同山區 ...
+  006: http://m.ltn.com.tw/news/entertainment/breakingnews/2567740
+       新聞分解失敗，無法識別 DOM 結構
+  007: http://m.ltn.com.tw/news/life/breakingnews/2567637
+       記者: None / 日期: 2018-10-01 23:35:00
+       標題: 「肉粽」難送！ 員林三合院連5人在「同條樑」上吊
+       〔即時新聞／綜合報導〕在彰化沿海一帶，為上吊身亡者「送肉棕」 ...
+  008: http://m.ltn.com.tw/news/society/breakingnews/2561962
+       記者: None / 日期: 2018-09-26 11:08:00
+       標題: 男子北美館樹林上吊亡 警到場調查
+       〔即時新聞／綜合報導〕今天上午10時許，台北市立美術館停車場 ...
+  009: http://m.ltn.com.tw/news/society/breakingnews/2561566
+       記者: 黃良傑 / 日期: 2018-09-25 18:05:00
+       標題: 美籍女師上吊租屋處身亡 美籍男友：房內發現遺書
+       〔記者黃良傑／高雄報導〕一名美籍女老師今午被男友發現陳屍租屋 ...
