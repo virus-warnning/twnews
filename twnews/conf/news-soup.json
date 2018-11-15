@@ -1,5 +1,7 @@
 {
   "what's that": {
+    "name": "頻道名稱",
+    "rwd": "(bool) 是否有響應式設計",
     "desktop": {
       "prefix": "非 RWD 網站的桌面版網址開頭",
       "title_node": "標題所在的 CSS selector",
@@ -15,9 +17,20 @@
       "date_format": "日期時間的格式，會用 datetime.strptime 處理",
       "author_node": "記者所在的 CSS selector，空字串表示記者姓名在內文中，程式會自動偵測",
       "article_node": "內文所在的 CSS selector"
+    },
+    "search": {
+      "url": "搜尋網址形式",
+      "begin_date_format": "開始日期參數形式",
+      "end_date_format": "結束日期參數形式",
+      "result_node": "搜尋結果位置",
+      "title_node": "標題位置，相對於搜尋結果",
+      "link_node": "連結位置，相對於搜尋結果",
+      "date_node": "日期位置，相對於搜尋結果",
+      "date_format": "日期格式"
     }
   },
   "appledaily": {
+    "name": "蘋果日報",
     "rwd": true,
     "desktop": {
       "title_node": "article.ndArticle_leftColumn > hgroup > h1",
@@ -45,6 +58,7 @@
     }
   },
   "chinatimes": {
+    "name": "中時電子報",
     "rwd": true,
     "desktop": {
       "title_node": "#h1",
@@ -62,6 +76,7 @@
     }
   },
   "cna": {
+    "name": "中央社",
     "rwd": true,
     "desktop": {
       "title_node": "div.centralContent > h1",
@@ -89,6 +104,7 @@
     }
   },
   "ettoday": {
+    "name": "東森新聞雲",
     "rwd": true,
     "desktop": {
       "title_node": "div.subject_article > header > h1",
@@ -115,6 +131,7 @@
     }
   },
   "ltn": {
+    "name": "自由時報",
     "rwd": false,
     "desktop": {
       "prefix": "https://news.ltn.com.tw",
@@ -144,6 +161,7 @@
     }
   },
   "setn": {
+    "name": "三立新聞網",
     "rwd": false,
     "desktop": {
       "prefix": "https://www.setn.com",
@@ -171,6 +189,7 @@
     }
   },
   "udn": {
+    "name": "聯合新聞網",
     "rwd": true,
     "desktop": {
       "title_node": "#story_body_content > h1",
