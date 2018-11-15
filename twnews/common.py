@@ -13,6 +13,8 @@ __session = {
     'mobile': None
 }
 
+VERSION = '0.2.0'
+
 def get_logger():
     """
     取得 logger 如果已經存在就使用現有的
