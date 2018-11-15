@@ -10,10 +10,10 @@ fi
 echo 'OK'
 
 # 封裝前跑一次單元測試，確認程式邏輯正確
-echo -n '發佈前單元測試 ... '
+echo -n '發佈前測試 ... '
 python3 -m unittest discover -f twnews.tests 2> /dev/null
 if [ $? -ne 0 ]; then
-  echo '發佈前單元測試失敗，停止封裝'
+  echo '發佈前測試失敗，停止封裝'
   exit 2
 fi
 echo 'OK'
@@ -50,7 +50,7 @@ else
   echo 'OK'
 
   # 在 sandbox 跑一次單元測試
-  echo -n '發佈後單元測試 ... '
+  echo -n '發佈後測試 ... '
   cd sandbox
   bin/python -m unittest discover -f twnews.tests 2> /dev/null
   if [ $? -ne 0 ]; then
