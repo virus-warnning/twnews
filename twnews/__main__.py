@@ -75,7 +75,7 @@ def search_and_compare_performance(keyword):
     search_and_compare_performance(keyword):
     """
 
-    print('測試各家新聞台的搜尋性能')
+    print('測試各家新聞台的搜尋效能')
     summary = {}
 
     for channel in ['appledaily', 'cna', 'ettoday', 'ltn', 'setn', 'udn']:

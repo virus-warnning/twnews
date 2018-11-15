@@ -78,7 +78,7 @@ class NewsSearch:
         關鍵字搜尋
         """
         logger = common.get_logger()
-        page = 7
+        page = 1
         results = []
         no_more = False
         begin_time = time.time()
