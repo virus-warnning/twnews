@@ -10,11 +10,21 @@ fi
 echo 'OK'
 
 # 封裝前跑一次單元測試，確認程式邏輯正確
+echo -n '檢查 README.rst 語法 ... '
+MSG=`rstcheck README.rst 2>&1`
+if [ $? -ne 0 ]; then
+  echo 'README.rst 語法錯誤，停止封裝'
+  echo $MSG
+  exit 2
+fi
+echo 'OK'
+
+# 封裝前跑一次單元測試，確認程式邏輯正確
 echo -n '發佈前測試 ... '
 python3 -m unittest discover -f twnews.tests 2> /dev/null
 if [ $? -ne 0 ]; then
   echo '發佈前測試失敗，停止封裝'
-  exit 2
+  exit 3
 fi
 echo 'OK'
 
