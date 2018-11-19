@@ -207,6 +207,8 @@
     },
     "search": {
       "url": "https://udn.com/search/result/2/${KEYWORD}/${PAGE}",
+      "last_page": "#result_list > div.pagelink > span.total",
+      "page_pattern": "共 (\\d+) 頁",
       "result_node": "#search_content > dt",
       "link_node": "a",
       "title_node": "a > h2",

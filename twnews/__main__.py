@@ -107,6 +107,33 @@ def search_and_compare_performance(keyword):
         print()
     print()
 
+def compare_keyword(keyword):
+    """
+    比較關鍵字在各媒體的出現次數
+    """
+    print('比較 "{}" 在各媒體標題出現次數'.format(keyword))
+
+    name = {
+        'appledaily': '  蘋果',
+        'cna': '中央社',
+        'ettoday': '  東森',
+        'ltn': '  自由',
+        'setn': '  三立',
+        'udn': '  聯合'
+    }
+
+    #for channel in ['appledaily', 'cna', 'ettoday', 'ltn', 'setn', 'udn']:
+    for channel in ['cna', 'ettoday', 'ltn', 'setn']:
+    #for channel in ['udn']:
+        nsearch = NewsSearch(
+            channel,
+            beg_date='2018-10-01',
+            end_date='2018-10-30',
+            limit=10
+        )
+        results = nsearch.by_keyword(keyword, title_only=True).to_dict_list()
+        msg = '{}: {}'.format(name[channel], len(results))
+        print(msg, flush=True)
 
 def usage():
     """
@@ -148,6 +175,9 @@ def main():
     elif action == 'sncp':
         keyword = get_cmd_param(2, '酒駕')
         search_and_compare_performance(keyword)
+    elif action == 'cpkw':
+        keyword = get_cmd_param(2, '酒駕')
+        compare_keyword(keyword)
     else:
         if action != 'help':
             print('動作名稱錯誤')
