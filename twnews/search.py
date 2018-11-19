@@ -1,22 +1,41 @@
+"""
+新聞搜尋模組
+"""
+
 import re
-import sys
 import time
-import json
 import os.path
 import urllib.parse
 from string import Template
 from datetime import datetime
 
-import twnews.common as common
-from twnews.soup import NewsSoup
-
-import requests
 from bs4 import BeautifulSoup
 
+import twnews.common
+from twnews.soup import NewsSoup
+
+def visit_dict(dict_node, path):
+    """
+    用 CSS Selector 的形式拜訪 dict
+    """
+    keys = []
+    if path != '':
+        keys = path.split(' > ')
+    visited = dict_node
+    for key in keys:
+        visited = visited[key]
+    return visited
+
 class NewsSearchException(Exception):
+    """
+    新聞搜尋例外
+    """
     pass
 
 class NewsSearch:
+    """
+    新聞搜尋器
+    """
 
     def __init__(self, channel, limit=25, beg_date=None, end_date=None):
         """
@@ -64,7 +83,8 @@ class NewsSearch:
                 msg = '頻道 {} 的日期條件必須在 90 天內'.format(channel)
                 raise NewsSearchException(msg)
 
-        self.conf = common.get_channel_conf(channel, 'search')
+        self.result_list = []
+        self.conf = twnews.common.get_channel_conf(channel, 'search')
         self.limit = limit
         self.pages = 0
         self.elapsed = 0
@@ -77,7 +97,7 @@ class NewsSearch:
         """
         關鍵字搜尋
         """
-        logger = common.get_logger()
+        logger = twnews.common.get_logger()
         page = 1
         results = []
         no_more = False
@@ -97,13 +117,13 @@ class NewsSearch:
                 url += self.end_date.strftime(self.conf['end_date_format'])
 
             # 查詢
-            session = common.get_session()
-            logger.debug('新聞搜尋 ' + url)
+            session = twnews.common.get_session()
+            logger.debug('新聞搜尋 %s', url)
             resp = session.get(url, allow_redirects=False)
             if resp.status_code == 200:
                 logger.debug('回應 200 OK')
-                for (k, v) in resp.headers.items():
-                    logger.debug('{}: {}'.format(k, v))
+                for (key, val) in resp.headers.items():
+                    logger.debug('%s: %s', key, val)
                 ctype = resp.headers['Content-Type']
                 if 'text/html' in ctype:
                     self.soup = BeautifulSoup(resp.text, 'lxml')
@@ -114,59 +134,60 @@ class NewsSearch:
                 self.json = None
                 no_more = True
             else:
-                logger.warning('回應碼: {}'.format(resp.status_code))
+                logger.warning('回應碼: %s', resp.status_code)
                 break
 
             # 拆查詢結果 Soup
             if self.soup is not None:
                 result_nodes = self.soup.select(self.conf['result_node'])
-                if len(result_nodes) > 0:
-                    for n in result_nodes:
-                        title = self.__parse_title_node(n)
+                result_count = len(result_nodes)
+                if result_count > 0:
+                    for node in result_nodes:
+                        title = self.__parse_title_node(node)
                         if (not title_only) or (keyword in title):
-                            link = self.__parse_link_node(n)
-                            date_inst = self.__parse_date_node(n)
+                            link = self.__parse_link_node(node)
+                            date_inst = self.__parse_date_node(node)
                             results.append({
                                 "title": title,
                                 "link": link,
                                 'date': date_inst
                             })
-                            if len(results) == self.limit: break
+                            if len(results) == self.limit:
+                                break
                 else:
                     no_more = True
 
             # 拆查詢結果 JSON
             if self.json is not None:
-                result_nodes = self.json
-                for k in self.conf['result_node']:
-                    result_nodes = result_nodes[k]
-                for r in result_nodes:
-                    title = self.__parse_title_field(r)
+                result_nodes = visit_dict(self.json, self.conf['result_node'])
+                for node in result_nodes:
+                    title = self.__parse_title_field(node)
                     if (not title_only) or (keyword in title):
-                        link = self.__parse_link_field(r)
-                        date_inst = self.__parse_date_field(r)
+                        link = self.__parse_link_field(node)
+                        date_inst = self.__parse_date_field(node)
                         results.append({
                             "title": title,
                             "link": link,
                             'date': date_inst
                         })
-                        if len(results) == self.limit: break
+                        if len(results) == self.limit:
+                            break
 
             page += 1
 
         # 以連結網址為基準去重複化
         filtered = []
-        for (i, r) in enumerate(results):
+        for (cidx, result) in enumerate(results):
             duplicated = False
-            for j in range(i):
-                p = results[j]
-                if r['link'] == p['link']:
+            for pidx in range(cidx):
+                previous = results[pidx]
+                if result['link'] == previous['link']:
                     duplicated = True
 
             if not duplicated:
-                filtered.append(r)
+                filtered.append(result)
             else:
-                logger.warning('查詢結果的 {}, {} 筆重複，新聞網址 {}'.format(i, j, r['link']))
+                logger.warning('查詢結果的 %d, %d 筆重複，新聞網址 %s', cidx, pidx, result['link'])
 
         self.result_list = filtered
         self.pages = page - 1
@@ -185,8 +206,8 @@ class NewsSearch:
         回傳新聞查詢結果的分解器
         """
         soup_list = []
-        for r in self.result_list:
-            nsoup = NewsSoup(r['link'])
+        for result in self.result_list:
+            nsoup = NewsSoup(result['link'])
             soup_list.append(nsoup)
         return soup_list
 
@@ -211,8 +232,8 @@ class NewsSearch:
         # 絕對路徑
         if href.startswith('/'):
             if not self.host:
-                m = re.match(r'^https://([^/]+)/', self.conf['url'])
-                self.host = m.group(1)
+                match = re.match(r'^https://([^/]+)/', self.conf['url'])
+                self.host = match.group(1)
             return 'https://{}{}'.format(self.host, href)
 
         # 相對路徑
@@ -239,8 +260,8 @@ class NewsSearch:
 
         if 'date_pattern' in self.conf:
             # DOM node 除了日期還有其他文字
-            m = re.search(self.conf['date_pattern'], date_node.text)
-            date_text = m.group(0)
+            match = re.search(self.conf['date_pattern'], date_node.text)
+            date_text = match.group(0)
         else:
             # DOM 只有日期
             date_text = date_node.text.strip()
@@ -251,15 +272,13 @@ class NewsSearch:
         """
         單筆查詢結果範圍內取標題文字 (dict)
         """
-        field = self.conf['title_node']
-        return result[field]
+        return visit_dict(result, self.conf['title_node'])
 
     def __parse_link_field(self, result):
         """
         單筆查詢結果範圍內取新聞連結 (dict)
         """
-        field = self.conf['link_node']
-        href = result[field]
+        href = visit_dict(result, self.conf['link_node'])
 
         # 完整網址
         if href.startswith('https://'):
@@ -267,14 +286,14 @@ class NewsSearch:
 
         # 絕對路徑
         if not self.host:
-            m = re.match(r'^https://([^/]+)/', self.conf['url'])
-            self.host = m.group(1)
+            match = re.match(r'^https://([^/]+)/', self.conf['url'])
+            self.host = match.group(1)
         return 'https://{}{}'.format(self.host, href)
 
     def __parse_date_field(self, result):
         """
         單筆查詢結果範圍內取報導日期 (dict)
         """
-        field = self.conf['date_node']
-        date_inst = datetime.strptime(result[field], self.conf['date_format'])
+        date_str = visit_dict(result, self.conf['date_node'])
+        date_inst = datetime.strptime(date_str, self.conf['date_format'])
         return date_inst
