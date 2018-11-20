@@ -120,10 +120,12 @@ class NewsSearch:
         no_more = False
         begin_time = time.time()
 
-        # 如果蘋果和自由以外的媒體有設定日期範圍，先掃描合適的頁數
-        # - 東森、三立、聯合支援這個選項
-        # - 中央社不支援
-        if self.beg_date is not None and self.channel not in ['appledaily', 'ltn', 'cna']:
+        # 如果蘋果和自由以外的媒體有設定日期範圍，先跳到合適的頁數
+        # -   支援: 東森、聯合
+        # - 不支援: 三立、中央社
+        # TODO: 三立、中央社研擬假設 500 頁的二分翻頁法
+        if self.beg_date is not None and self.channel not in ['appledaily', 'ltn', 'setn', 'cna']:
+            # 東森、聯合採取二分翻頁法
             page = self.__flip_to_end_date(keyword)
 
         while not no_more and len(results) < self.limit:
@@ -135,8 +137,17 @@ class NewsSearch:
             logger.info('第 %d 頁: 有 %d 筆搜尋結果', page, result_count)
             if result_count > 0:
                 for node in result_nodes:
-                    title = self.__parse_title_node(node)
                     date_inst = self.__parse_date_node(node)
+                    if self.beg_date is not None and self.channel not in ['appledaily', 'ltn']:
+                        # 過濾開頭超過日期範圍的項目
+                        if date_inst > self.end_date:
+                            continue
+                        # 過濾結尾超過日期範圍的項目
+                        if date_inst < self.beg_date:
+                            no_more = True
+                            break
+
+                    title = self.__parse_title_node(node)
                     link = self.__parse_link_node(node)
                     if (not title_only) or (keyword in title):
                         results.append({
@@ -182,7 +193,7 @@ class NewsSearch:
         self.__load_page(keyword, 1)
         node = self.soup.select(self.conf['last_page'])[0]
         if 'page_pattern' in self.conf:
-            match = re.match(self.conf['page_pattern'], node.text)
+            match = re.search(self.conf['page_pattern'], node.text)
             if match:
                 last_page = int(match.group(1))
             else:

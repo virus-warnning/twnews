@@ -5,6 +5,7 @@ __main__.py
 import sys
 import locale
 import os.path
+from datetime import datetime
 from twnews.common import get_logger, VERSION
 from twnews.soup import NewsSoup
 from twnews.search import NewsSearch
@@ -111,7 +112,13 @@ def compare_keyword(keyword):
     """
     比較關鍵字在各媒體的出現次數
     """
-    print('比較 "{}" 在各媒體標題出現次數'.format(keyword))
+    print('比較上個月 "{}" 在各媒體標題出現次數'.format(keyword))
+    now = datetime.now()
+    nts = now.timestamp()
+    nts = nts - nts % 86400
+    day_lmon = datetime.fromtimestamp(nts - 86400 * now.day).day
+    beg_date = datetime(now.year, now.month - 1, 1)
+    end_date = datetime(now.year, now.month - 1, day_lmon, 23, 59, 59, 999999)
 
     name = {
         'appledaily': '  蘋果',
@@ -122,14 +129,12 @@ def compare_keyword(keyword):
         'udn': '  聯合'
     }
 
-    #for channel in ['appledaily', 'cna', 'ettoday', 'ltn', 'setn', 'udn']:
-    for channel in ['cna', 'ettoday', 'ltn', 'setn']:
-    #for channel in ['udn']:
+    for channel in ['appledaily', 'cna', 'ettoday', 'ltn', 'setn', 'udn']:
         nsearch = NewsSearch(
             channel,
-            beg_date='2018-10-01',
-            end_date='2018-10-30',
-            limit=10
+            beg_date=beg_date,
+            end_date=end_date,
+            limit=999
         )
         results = nsearch.by_keyword(keyword, title_only=True).to_dict_list()
         msg = '{}: {}'.format(name[channel], len(results))
