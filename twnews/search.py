@@ -124,7 +124,7 @@ class NewsSearch:
         # - 東森、三立、聯合支援這個選項
         # - 中央社不支援
         if self.beg_date is not None and self.channel not in ['appledaily', 'ltn', 'cna']:
-            page = self.__flip_to_end_date()
+            page = self.__flip_to_end_date(keyword)
 
         while not no_more and len(results) < self.limit:
             self.__load_page(keyword, page)
@@ -173,11 +173,71 @@ class NewsSearch:
             soup_list.append(nsoup)
         return soup_list
 
-    def __flip_to_end_date(self):
-        # TODO: 取得在 end_date 之內的頁數，採用二分搜尋法尋找
-        exit()
+    def __flip_to_end_date(self, keyword):
+        """
+        回傳篩選時間範圍的開始頁數
+        """
 
-    def __load_page(self, keyword, page=1):
+        # 取得最大頁數
+        self.__load_page(keyword, 1)
+        node = self.soup.select(self.conf['last_page'])[0]
+        if 'page_pattern' in self.conf:
+            match = re.match(self.conf['page_pattern'], node.text)
+            if match:
+                last_page = int(match.group(1))
+            else:
+                last_page = -1
+        else:
+            try:
+                last_page = int(node.text)
+            except ValueError:
+                last_page = -1
+
+        if last_page == -1:
+            return 1
+
+        # 取第一則搜尋結果的日期
+        upper_date = self.__parse_date_node(self.__result_nodes()[0])
+        if upper_date < self.end_date:
+            return 1
+
+        # 取最後一頁最後一則搜尋結果的日期
+        self.__load_page(keyword, last_page)
+        lower_date = self.__parse_date_node(self.__result_nodes()[-1])
+        if lower_date > self.end_date:
+            return -1
+
+        # 起始狀態
+        lower_page = 1
+        upper_page = last_page
+        page_range = upper_page - lower_page
+        prev_range = upper_page - lower_page + 1
+        msg = 'page: %d ~ %d, date: %s ~ %s'
+        logger = twnews.common.get_logger()
+        logger.info(msg, lower_page, upper_page, upper_date, lower_date)
+
+        while page_range < prev_range:
+            mid_page = (lower_page + upper_page) // 2
+            self.__load_page(keyword, mid_page)
+            middle_udt = self.__parse_date_node(self.__result_nodes()[0])
+            middle_ldt = self.__parse_date_node(self.__result_nodes()[-1])
+
+            if middle_udt > self.end_date:
+                lower_page = mid_page
+                upper_date = middle_udt
+
+            if middle_ldt < self.end_date:
+                upper_page = mid_page
+                lower_date = middle_ldt
+
+            prev_range = page_range
+            page_range = upper_page - lower_page
+            msg = 'page: %d ~ %d, date: %s ~ %s, mid=%d'
+            logger.info(msg, lower_page, upper_page, upper_date, lower_date, mid_page)
+
+        return lower_page
+
+    def __load_page(self, keyword, page):
         # 組查詢條件
         replacement = {
             'PAGE': page,
