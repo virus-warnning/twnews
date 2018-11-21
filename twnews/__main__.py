@@ -117,10 +117,11 @@ def compare_keyword(keyword):
     nts = now.timestamp()
     nts = nts - nts % 86400
     day_lmon = datetime.fromtimestamp(nts - 86400 * now.day).day
-    beg_date = datetime(now.year, now.month - 1, 1)
-    end_date = datetime(now.year, now.month - 1, day_lmon, 23, 59, 59, 999999)
+    beg_date = datetime(now.year, now.month - 1, 1).strftime('%Y-%m-%d')
+    end_date = datetime(now.year, now.month - 1, day_lmon).strftime('%Y-%m-%d')
+    print('時間區間: {} ~ {}'.format(beg_date, end_date))
 
-    name = {
+    media = {
         'appledaily': '  蘋果',
         'cna': '中央社',
         'ettoday': '  東森',
@@ -129,7 +130,7 @@ def compare_keyword(keyword):
         'udn': '  聯合'
     }
 
-    for channel in ['appledaily', 'cna', 'ettoday', 'ltn', 'setn', 'udn']:
+    for (channel, name) in media.items():
         nsearch = NewsSearch(
             channel,
             beg_date=beg_date,
@@ -137,7 +138,7 @@ def compare_keyword(keyword):
             limit=999
         )
         results = nsearch.by_keyword(keyword, title_only=True).to_dict_list()
-        msg = '{}: {}'.format(name[channel], len(results))
+        msg = '{}: {}'.format(name, len(results))
         print(msg, flush=True)
 
 def usage():
