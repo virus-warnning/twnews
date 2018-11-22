@@ -10,6 +10,7 @@ from string import Template
 from datetime import datetime
 
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 import twnews.common
 from twnews.soup import NewsSoup
@@ -302,7 +303,6 @@ class NewsSearch:
             ctype = resp.headers['Content-Type']
             if 'text/html' in ctype:
                 self.context = BeautifulSoup(resp.text, 'lxml')
-                print('fuck')
             if 'application/json' in ctype:
                 # TODO: 這裡有時會發生 decode error
                 self.context = resp.json()
@@ -327,7 +327,8 @@ class NewsSearch:
         """
         單筆查詢結果範圍內取標題文字
         """
-        if isinstance(result_node, BeautifulSoup):
+
+        if isinstance(result_node, Tag):
             title_node = result_node.select(self.conf['title_node'])[0]
             title = title_node.text.strip()
         else:
@@ -338,7 +339,8 @@ class NewsSearch:
         """
         單筆查詢結果範圍內取報導日期
         """
-        if isinstance(result_node, BeautifulSoup):
+
+        if isinstance(result_node, Tag):
             date_node = result_node.select(self.conf['date_node'])[0]
             if 'date_pattern' in self.conf:
                 # DOM node 除了日期還有其他文字
@@ -358,7 +360,7 @@ class NewsSearch:
         """
         單筆查詢結果範圍內取新聞連結
         """
-        if isinstance(result_node, BeautifulSoup):
+        if isinstance(result_node, Tag):
             link_node = result_node.select(self.conf['link_node'])[0]
             href = link_node['href']
         else:
