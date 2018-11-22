@@ -5,6 +5,7 @@ __main__.py
 import sys
 import locale
 import os.path
+from datetime import datetime
 from twnews.common import get_logger, VERSION
 from twnews.soup import NewsSoup
 from twnews.search import NewsSearch
@@ -107,6 +108,38 @@ def search_and_compare_performance(keyword):
         print()
     print()
 
+def compare_keyword(keyword):
+    """
+    比較關鍵字在各媒體的出現次數
+    """
+    print('比較上個月 "{}" 在各媒體標題出現次數'.format(keyword))
+    now = datetime.now()
+    nts = now.timestamp()
+    nts = nts - nts % 86400
+    day_lmon = datetime.fromtimestamp(nts - 86400 * now.day).day
+    beg_date = datetime(now.year, now.month - 1, 1).strftime('%Y-%m-%d')
+    end_date = datetime(now.year, now.month - 1, day_lmon).strftime('%Y-%m-%d')
+    print('時間區間: {} ~ {}'.format(beg_date, end_date))
+
+    media = {
+        'appledaily': '  蘋果',
+        'cna': '中央社',
+        'ettoday': '  東森',
+        'ltn': '  自由',
+        'setn': '  三立',
+        'udn': '  聯合'
+    }
+
+    for (channel, name) in media.items():
+        nsearch = NewsSearch(
+            channel,
+            beg_date=beg_date,
+            end_date=end_date,
+            limit=999
+        )
+        results = nsearch.by_keyword(keyword, title_only=True).to_dict_list()
+        msg = '{}: {}'.format(name, len(results))
+        print(msg, flush=True)
 
 def usage():
     """
@@ -148,6 +181,9 @@ def main():
     elif action == 'sncp':
         keyword = get_cmd_param(2, '酒駕')
         search_and_compare_performance(keyword)
+    elif action == 'cpkw':
+        keyword = get_cmd_param(2, '酒駕')
+        compare_keyword(keyword)
     else:
         if action != 'help':
             print('動作名稱錯誤')
