@@ -47,13 +47,13 @@
       "article_node": "article.nm-content > div.nm-article > div.nm-article-body > div.text"
     },
     "search": {
-      "url": "https://tw.appledaily.com/search/result/page/${PAGE}?querystrS=${KEYWORD}",
+      "url": "https://tw.appledaily.com/search/ajaxresult?querystrS=${KEYWORD}&page=${PAGE}",
       "begin_date_format": "&dateStart=%Y/%m/%d",
       "end_date_format": "&dateEnd=%Y/%m/%d",
-      "result_node": "#result > li.item > div.content",
-      "title_node": "h2 > a",
-      "link_node": "h2 > a",
-      "date_node": "time",
+      "result_node": "",
+      "title_node": "title",
+      "link_node": "sharing > url",
+      "date_node": "pubDate",
       "date_format": "%Y%m%d"
     }
   },
@@ -96,7 +96,7 @@
     },
     "search": {
       "url": "https://www.cna.com.tw/cna2018api/api/simplelist/searchkeyword/${KEYWORD}/pageidx/${PAGE}/",
-      "result_node": ["result", "SimpleItems"],
+      "result_node": "result > SimpleItems",
       "link_node": "PageUrl",
       "title_node": "HeadLine",
       "date_node": "CreateTime",
@@ -122,6 +122,8 @@
     },
     "search": {
       "url": "https://www.ettoday.net/news_search/doSearch.php?keywords=${KEYWORD}&page=${PAGE}&daydiff=3&idx=1",
+      "last_page": "div.page_nav > div.menu_page > p.info",
+      "page_pattern": "共(\\d+)頁",
       "result_node": "#result-list > div.archive",
       "link_node": "div.box_2 > h2 > a",
       "title_node": "div.box_2 > h2 > a",
@@ -207,6 +209,8 @@
     },
     "search": {
       "url": "https://udn.com/search/result/2/${KEYWORD}/${PAGE}",
+      "last_page": "#result_list > div.pagelink > span.total",
+      "page_pattern": "共 (\\d+) 頁",
       "result_node": "#search_content > dt",
       "link_node": "a",
       "title_node": "a > h2",
