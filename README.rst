@@ -7,8 +7,13 @@
 - 使用行動版網頁與快取機制節省流量
 - 盡可能找出記者姓名
 - 利用 BeautifulSoup 的 CSS selector 功能搭配設定檔分解，容易同步網站改版
-- 徹底解決 Python for Windows CP950 編碼問題，節省處理鳥事的時間
+- 解決 Python for Windows CP950 編碼問題，節省處理鳥事的時間
 - 每週執行自動化測試檢查分解程式的時效性
+
+0.2.1 新功能
+
+- 統計關鍵字在各媒體新聞標題的出現次數
+- 改良蘋果日報的搜尋方式
 
 0.2.0 新功能
 
@@ -36,6 +41,9 @@
 
   # 搜尋 + 拆
   python3 -m twnews snsp 酒駕
+
+  # 統計關鍵字出現在標題的次數
+  python3 -m twnews cpkw 柯文哲
 
   # 查看用法
   python3 -m twnews help

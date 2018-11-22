@@ -302,6 +302,7 @@ class NewsSearch:
             ctype = resp.headers['Content-Type']
             if 'text/html' in ctype:
                 self.context = BeautifulSoup(resp.text, 'lxml')
+                print('fuck')
             if 'application/json' in ctype:
                 # TODO: 這裡有時會發生 decode error
                 self.context = resp.json()
@@ -317,30 +318,27 @@ class NewsSearch:
         取查詢結果的 soup 或 dict
         """
         if self.context is not None:
-            if isinstance(self.context, dict):
-                return visit_dict(self.context, self.conf['result_node'])
-            return self.context.select(self.conf['result_node'])
+            if isinstance(self.context, BeautifulSoup):
+                return self.context.select(self.conf['result_node'])
+            return visit_dict(self.context, self.conf['result_node'])
         return []
 
     def __parse_title_node(self, result_node):
         """
         單筆查詢結果範圍內取標題文字
         """
-        if isinstance(result_node, dict):
-            title = visit_dict(result_node, self.conf['title_node'])
-        else:
+        if isinstance(result_node, BeautifulSoup):
             title_node = result_node.select(self.conf['title_node'])[0]
             title = title_node.text.strip()
+        else:
+            title = visit_dict(result_node, self.conf['title_node'])
         return title
 
     def __parse_date_node(self, result_node):
         """
         單筆查詢結果範圍內取報導日期
         """
-        if isinstance(result_node, dict):
-            # API 的日期都很乾淨
-            date_text = visit_dict(result_node, self.conf['date_node'])
-        else:
+        if isinstance(result_node, BeautifulSoup):
             date_node = result_node.select(self.conf['date_node'])[0]
             if 'date_pattern' in self.conf:
                 # DOM node 除了日期還有其他文字
@@ -349,6 +347,9 @@ class NewsSearch:
             else:
                 # DOM node 只有日期
                 date_text = date_node.text.strip()
+        else:
+            # API 的日期都很乾淨
+            date_text = visit_dict(result_node, self.conf['date_node'])
 
         date_inst = datetime.strptime(date_text, self.conf['date_format'])
         return date_inst
@@ -357,11 +358,11 @@ class NewsSearch:
         """
         單筆查詢結果範圍內取新聞連結
         """
-        if isinstance(result_node, dict):
-            href = visit_dict(result_node, self.conf['link_node'])
-        else:
+        if isinstance(result_node, BeautifulSoup):
             link_node = result_node.select(self.conf['link_node'])[0]
             href = link_node['href']
+        else:
+            href = visit_dict(result_node, self.conf['link_node'])
 
         # 完整網址
         if href.startswith('https://'):
