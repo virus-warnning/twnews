@@ -9,13 +9,23 @@ if [ $? -ne 0 ]; then
 fi
 echo 'OK'
 
-# 封裝前跑一次單元測試，確認程式邏輯正確
+# 封裝前檢查 reStructedText 語法
 echo -n '檢查 README.rst 語法 ... '
 MSG=`rstcheck README.rst 2>&1`
 if [ $? -ne 0 ]; then
   echo 'README.rst 語法錯誤，停止封裝'
-  echo $MSG
+  echo "$MSG"
   exit 2
+fi
+echo 'OK'
+
+# 封裝前檢查 pylint 錯誤
+echo -n '檢查程式碼語法錯誤 ... '
+MSG=`pylint -f colorized -E twnews/*.py`
+if [ $? -ne 0 ]; then
+  echo 'Python 程式碼語法錯誤，停止封裝'
+  echo "$MSG"
+  exit 3
 fi
 echo 'OK'
 
@@ -24,7 +34,7 @@ echo -n '發佈前測試 ... '
 python3 -m unittest discover -f twnews.tests 2> /dev/null
 if [ $? -ne 0 ]; then
   echo '發佈前測試失敗，停止封裝'
-  exit 3
+  exit 4
 fi
 echo 'OK'
 
@@ -35,7 +45,7 @@ RET=$?
 rm -rf build twnews.egg-info
 if [ $RET -ne 0 ]; then
   echo '封裝失敗'
-  exit 3
+  exit 5
 fi
 echo 'OK'
 
