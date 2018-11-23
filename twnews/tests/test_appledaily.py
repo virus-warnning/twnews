@@ -3,7 +3,8 @@
 """
 
 import unittest
-from twnews.soup import NewsSoup, pkgdir
+import twnews.common
+from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestAppleDaily(unittest.TestCase):
@@ -16,6 +17,7 @@ class TestAppleDaily(unittest.TestCase):
         """
         測試蘋果日報樣本
         """
+        pkgdir = twnews.common.get_package_dir()
         nsoup = NewsSoup(pkgdir + '/samples/appledaily.html.gz', mobile=False)
         self.assertEqual('appledaily', nsoup.channel)
         self.assertIn('和男友口角鎖門吞藥　女墜樓不治', nsoup.title())

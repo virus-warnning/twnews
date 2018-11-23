@@ -3,7 +3,8 @@
 """
 
 import unittest
-from twnews.soup import NewsSoup, pkgdir
+import twnews.common
+from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestChinatimes(unittest.TestCase):
@@ -16,6 +17,7 @@ class TestChinatimes(unittest.TestCase):
         """
         測試中時電子報樣本
         """
+        pkgdir = twnews.common.get_package_dir()
         nsoup = NewsSoup(pkgdir + '/samples/chinatimes.html.gz', mobile=False)
         self.assertEqual('chinatimes', nsoup.channel)
         self.assertIn('悲慟！北市士林年邁母子 住處上吊自殺身亡', nsoup.title())
