@@ -29,7 +29,6 @@ def soup(path):
     print('有效內容率: {:.2f}%'.format(nsoup.effective_text_rate() * 100))
     print('-' * 75)
 
-
 def search_and_list(keyword, channel):
     """
     search_and_list(keyword, channel)
@@ -45,10 +44,9 @@ def search_and_list(keyword, channel):
             print('{:03d}: {}'.format(i, result['title']))
             print('     日期: {}'.format(result['date']))
             print('     連結: {}'.format(result['link']))
-        except Exception as ex:
+        except ValueError as ex:
             logger.error('例外類型: %s', type(ex).__name__)
             logger.error(ex)
-
 
 def search_and_soup(keyword, channel):
     """
@@ -65,11 +63,10 @@ def search_and_soup(keyword, channel):
             print('{:03d}: {}'.format(i, nsoup.path))
             print('     記者: {} / 日期: {}'.format(nsoup.author(), nsoup.date()))
             print('     標題: {}'.format(nsoup.title()))
-            print('     {} ...'.format(nsoup.contents()[0:30]))
-        except Exception as ex:
+            print('     {} ...'.format(nsoup.contents(30)))
+        except ValueError as ex:
             logger.error('例外類型: %s', type(ex).__name__)
             logger.error(ex)
-
 
 def search_and_compare_performance(keyword):
     """
@@ -89,11 +86,11 @@ def search_and_compare_performance(keyword):
             nsearch.by_keyword(keyword)
             results = nsearch.to_dict_list()
             total = len(results)
-            tpp = nsearch.elapsed / nsearch.pages
-            tpr = nsearch.elapsed / total
+            tpp = nsearch.elapsed() / nsearch.pages()
+            tpr = nsearch.elapsed() / total
             summary[channel].append(tpp)
             msg = '{:03d}: {:.3f} 秒/頁, {:.3f} 秒/筆, 共 {} 頁, 總耗時: {:.3f} 秒'
-            print(msg.format(repeat, tpp, tpr, nsearch.pages, nsearch.elapsed))
+            print(msg.format(repeat, tpp, tpr, nsearch.pages(), nsearch.elapsed()))
         print('-' * 60)
 
     print()
@@ -152,7 +149,6 @@ def usage():
     with open(usage_path, 'r') as usage_file:
         print(usage_file.read())
 
-
 def get_cmd_param(index, default=None):
     """
     get_cmd_param(index, default=None)
@@ -189,7 +185,6 @@ def main():
             print('動作名稱錯誤')
             print()
         usage()
-
 
 if __name__ == '__main__':
     main()
