@@ -3,7 +3,8 @@
 """
 
 import unittest
-from twnews.soup import NewsSoup, pkgdir
+import twnews.common
+from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestUdn(unittest.TestCase):
@@ -16,6 +17,7 @@ class TestUdn(unittest.TestCase):
         """
         測試聯合新聞網樣本
         """
+        pkgdir = twnews.common.get_package_dir()
         nsoup = NewsSoup(pkgdir + '/samples/udn.html.gz', mobile=False)
         self.assertEqual('udn', nsoup.channel)
         self.assertIn('澎湖重度殘障男子 陳屍馬公水仙宮旁空屋', nsoup.title())

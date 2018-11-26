@@ -3,7 +3,8 @@
 """
 
 import unittest
-from twnews.soup import NewsSoup, pkgdir
+import twnews.common
+from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestLtn(unittest.TestCase):
@@ -16,6 +17,7 @@ class TestLtn(unittest.TestCase):
         """
         測試自由時報樣本
         """
+        pkgdir = twnews.common.get_package_dir()
         nsoup = NewsSoup(pkgdir + '/samples/ltn.html.gz', mobile=False)
         self.assertEqual('ltn', nsoup.channel)
         self.assertIn('10年前父親掐死兒後自縊... 凶宅下月拍開價425萬', nsoup.title())

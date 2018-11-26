@@ -3,7 +3,8 @@
 """
 
 import unittest
-from twnews.soup import NewsSoup, pkgdir
+import twnews.common
+from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestCna(unittest.TestCase):
@@ -16,6 +17,7 @@ class TestCna(unittest.TestCase):
         """
         測試中央社樣本
         """
+        pkgdir = twnews.common.get_package_dir()
         nsoup = NewsSoup(pkgdir + '/samples/cna.html.gz', mobile=False)
         self.assertEqual('cna', nsoup.channel)
         self.assertIn('平鎮輪胎行惡火  疏散7人1女命喪', nsoup.title())
