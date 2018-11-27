@@ -28,27 +28,68 @@ def get_cache_dir():
     logger.debug('使用快取目錄: %s', cache_dir)
     return cache_dir
 
-def get_cache_filepath(channel, mobile, suffix):
+def get_cache_filepath(channel, uri):
     """
     取得快取檔案路徑
     """
-    device = 'mobile' if mobile else 'desktop'
-    cache_hash = hashlib.md5(suffix.encode('ascii')).hexdigest()
-    path = '{}/{}-{}-{}.html.gz'.format(get_cache_dir(), channel, device, cache_hash)
+    cache_id = hashlib.md5(uri.encode('ascii')).hexdigest()
+    path = '{}/{}-{}.html.gz'.format(get_cache_dir(), channel, cache_id)
     return path
+
+def url_follow_redirection(url):
+    """
+    取得轉址後的 URL
+    """
+    logger = twnews.common.get_logger()
+    session = twnews.common.get_session()
+    old_url = url
+    new_url = ''
+    done = False
+
+    while not done:
+        resp = session.head(old_url)
+        status = resp.status_code
+        if status // 100 == 3:
+            dest = resp.headers['Location']
+            if dest.startswith('/'):
+                new_url = old_url[0:old_url.find('/',10)] + dest
+            else:
+                new_url = dest
+            logger.debug('變更 URL 為: %s', new_url)
+            old_url = new_url
+        elif status == 200:
+            done = True
+        else:
+            logger.error('檢查轉址過程發生錯誤，回應碼: %d', status)
+            done = True
+
+    return old_url
+
+def url_force_https(url):
+    """
+    強制使用 https
+    """
+    logger = twnews.common.get_logger()
+    if url.startswith('http://'):
+        new_url = 'https://' + url[7:]
+        logger.debug('變更 URL 為: %s', new_url)
+    else:
+        new_url = url
+    return new_url
 
 def soup_from_website(url, channel, refresh, mobile):
     """
     網址轉換成 BeautifulSoup 4 物件
     """
     logger = twnews.common.get_logger()
+    session = twnews.common.get_session()
 
-    # 強制使用 https
-    if url.startswith('http://'):
-        url = 'https://' + url[7:]
-        logger.debug('變更 URL 為: %s', url)
+    # URL 正規化
+    url = url_follow_redirection(url)
+    url = url_force_https(url)
 
     # 處理非 RWD 設計的網址轉換 (自由、三立)
+    '''
     suffix = url[url.find('/', 10):]
     conf = twnews.common.get_channel_conf(channel)
     if not conf['rwd']:
@@ -64,11 +105,13 @@ def soup_from_website(url, channel, refresh, mobile):
             logger.debug('prefix: %s', prefix_exp)
             logger.debug('suffix: %s', suffix)
             logger.debug('變更 URL 為: %s', url)
+    '''
 
     # 嘗試使用快取
     soup = None
     rawlen = 0
-    path = get_cache_filepath(channel, mobile, suffix)
+    uri = url[url.find('/', 10):]
+    path = get_cache_filepath(channel, uri)
     if os.path.isfile(path) and not refresh:
         logger.debug('發現 URL 快取: %s', url)
         logger.debug('載入快取檔案: %s', path)
@@ -77,7 +120,7 @@ def soup_from_website(url, channel, refresh, mobile):
     # 下載網頁
     if soup is None:
         logger.debug('從網路讀取 URL: %s', url)
-        session = twnews.common.get_session(mobile)
+        session = twnews.common.get_session()
         resp = session.get(url, allow_redirects=False)
         if resp.status_code == 200:
             logger.debug('回應 200 OK')
@@ -89,7 +132,7 @@ def soup_from_website(url, channel, refresh, mobile):
         else:
             logger.warning('回應碼: %d', resp.status_code)
 
-    return (soup, rawlen)
+    return (soup, rawlen, url)
 
 def soup_from_file(file_path):
     """
@@ -151,14 +194,21 @@ class NewsSoup:
         """
         建立新聞分解器
         """
-        device = 'mobile' if mobile else 'desktop'
+        self.channel = twnews.common.detect_channel(path)
+        if mobile:
+            layout = 'mobile'
+            layout_list = twnews.common.get_channel_conf(self.channel, 'layout_list')
+            for item in layout_list:
+                if path.startswith(item['prefix']):
+                    layout = item['name']
+        else:
+            layout = 'desktop'
 
         self.path = path
         self.soup = None
         self.rawlen = 0
         self.logger = twnews.common.get_logger()
-        self.channel = twnews.common.detect_channel(path)
-        self.conf = twnews.common.get_channel_conf(self.channel, device)
+        self.conf = twnews.common.get_channel_conf(self.channel, layout)
         self.cache = {
             'title': None,
             'date_raw': None,
@@ -172,7 +222,7 @@ class NewsSoup:
             try:
                 if path.startswith('http'):
                     self.logger.debug('從網路載入新聞')
-                    (self.soup, self.rawlen) = soup_from_website(
+                    (self.soup, self.rawlen, self.path) = soup_from_website(
                         path,
                         self.channel,
                         refresh,

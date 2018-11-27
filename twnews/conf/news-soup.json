@@ -32,6 +32,7 @@
   "appledaily": {
     "name": "蘋果日報",
     "rwd": true,
+    "layout_list": [],
     "desktop": {
       "title_node": "article.ndArticle_leftColumn > hgroup > h1",
       "date_node": "article.ndArticle_leftColumn > hgroup > div.ndArticle_creat",
@@ -60,6 +61,7 @@
   "chinatimes": {
     "name": "中時電子報",
     "rwd": true,
+    "layout_list": [],
     "desktop": {
       "title_node": "#h1",
       "date_node": "div.reporter > time",
@@ -78,6 +80,7 @@
   "cna": {
     "name": "中央社",
     "rwd": true,
+    "layout_list": [],
     "desktop": {
       "title_node": "div.centralContent > h1",
       "title_attr": "",
@@ -135,6 +138,14 @@
   "ltn": {
     "name": "自由時報",
     "rwd": false,
+    "layout_list": [
+      { "name": "business", "prefix": "http://m.ltn.com.tw/news/business" },
+      { "name": "lifeweekly", "prefix": "http://m.ltn.com.tw/news/lifeweekly" },
+      { "name": "local", "prefix": "http://m.ltn.com.tw/news/local" },
+      { "name": "politics", "prefix": "http://m.ltn.com.tw/news/politics" },
+      { "name": "society", "prefix": "http://m.ltn.com.tw/news/society" },
+      { "name": "sports", "prefix": "http://m.ltn.com.tw/news/sports" }
+    ],
     "desktop": {
       "prefix": "https://news.ltn.com.tw",
       "title_node": "div.articlebody > h1",
@@ -148,6 +159,54 @@
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "",
+      "article_node": "div.com > div.boxTitle > p"
+    },
+    "lifeweekly": {
+      "prefix": "http://m.ltn.com.tw/news/lifeweekly",
+      "title_node": "div.com > h2",
+      "date_node": "div.com > div.h2_else > div.time",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "",
+      "article_node": "div.com > div.boxTitle > p"
+    },
+    "society": {
+      "prefix": "http://m.ltn.com.tw/news/society",
+      "title_node": "div.com > h2",
+      "date_node": "div.com > div.h2_else > div.time",
+      "date_format": "%Y-%m-%d",
+      "author_node": "",
+      "article_node": "div.com > div.boxTitle > p"
+    },
+    "business": {
+      "prefix": "http://m.ltn.com.tw/news/business",
+      "title_node": "div.com > h2",
+      "date_node": "div.com > div.h2_else > div.time",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "",
+      "article_node": "div.com > div.boxTitle > p"
+    },
+    "local": {
+      "prefix": "http://m.ltn.com.tw/news/local",
+      "title_node": "div.com > h2",
+      "date_node": "div.com > div.h2_else > div.time",
+      "date_format": "%Y-%m-%d",
+      "author_node": "",
+      "article_node": "div.com > div.boxTitle > p"
+    },
+    "sports": {
+      "prefix": "http://m.ltn.com.tw/news/sports",
+      "title_node": "div.com > h2",
+      "date_node": "div.com > div.h2_else > div.time",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "",
+      "article_node": "div.com > div.boxTitle > p"
+    },
+    "politics": {
+      "prefix": "http://m.ltn.com.tw/news/politics",
+      "title_node": "div.com > h2",
+      "date_node": "div.com > div.h2_else > div.time",
+      "date_format": "%Y-%m-%d",
       "author_node": "",
       "article_node": "div.com > div.boxTitle > p"
     },
@@ -165,6 +224,7 @@
   "setn": {
     "name": "三立新聞網",
     "rwd": false,
+    "layout_list": [],
     "desktop": {
       "prefix": "https://www.setn.com",
       "title_node": "#contFix > div.row > div.contLeft > h1",
@@ -175,6 +235,14 @@
     },
     "mobile": {
       "prefix": "https://www.setn.com/m",
+      "title_node": "section.news-all-area > h1",
+      "date_node": "section.news-all-area > div.page-date > time",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "",
+      "article_node": "#ckuse > article > p"
+    },
+    "entertainment": {
+      "prefix": "https://www.setn.com/e",
       "title_node": "section.news-all-area > h1",
       "date_node": "section.news-all-area > div.page-date > time",
       "date_format": "%Y-%m-%d %H:%M",
@@ -193,6 +261,7 @@
   "udn": {
     "name": "聯合新聞網",
     "rwd": true,
+    "layout_list": [],
     "desktop": {
       "title_node": "#story_body_content > h1",
       "date_node": "#story_bady_info > div.story_bady_info_author > span",
