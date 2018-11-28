@@ -21,10 +21,11 @@ def get_cache_dir():
     取得快取目錄
     """
     logger = twnews.common.get_logger()
-    cache_dir = '{}/{}'.format(tempfile.gettempdir(), 'twnews-cache')
+    # cache_dir = '{}/{}'.format(tempfile.gettempdir(), 'twnews-cache')
+    cache_dir = os.path.expanduser('~/.twnews/cache')
     if not os.path.isdir(cache_dir):
         logger.debug('建立快取目錄: %s', cache_dir)
-        os.mkdir(cache_dir)
+        os.makedirs(cache_dir)
     logger.debug('使用快取目錄: %s', cache_dir)
     return cache_dir
 
@@ -55,7 +56,8 @@ def url_follow_redirection(url):
                 new_url = old_url[0:old_url.find('/',10)] + dest
             else:
                 new_url = dest
-            logger.debug('變更 URL 為: %s', new_url)
+            logger.debug('原始 URL: %s', old_url)
+            logger.debug('變更 URL: %s', new_url)
             old_url = new_url
         elif status == 200:
             done = True
@@ -72,12 +74,25 @@ def url_force_https(url):
     logger = twnews.common.get_logger()
     if url.startswith('http://'):
         new_url = 'https://' + url[7:]
-        logger.debug('變更 URL 為: %s', new_url)
+        logger.debug('原始 URL: %s', url)
+        logger.debug('變更 URL: %s', new_url)
     else:
         new_url = url
     return new_url
 
-def soup_from_website(url, channel, refresh, mobile):
+def url_force_ltn_mobile(url):
+    """
+    強制使用自由時報行動版
+    """
+    logger = twnews.common.get_logger()
+    new_url = url
+    if url.startswith('https://news.ltn.com.tw'):
+        new_url = 'https://m.ltn.com.tw' + url[len('https://news.ltn.com.tw'):]
+        logger.debug('原始 URL: %s', url)
+        logger.debug('變更 URL: %s', new_url)
+    return new_url
+
+def soup_from_website(url, channel, refresh):
     """
     網址轉換成 BeautifulSoup 4 物件
     """
@@ -87,25 +102,8 @@ def soup_from_website(url, channel, refresh, mobile):
     # URL 正規化
     url = url_follow_redirection(url)
     url = url_force_https(url)
-
-    # 處理非 RWD 設計的網址轉換 (自由、三立)
-    '''
-    suffix = url[url.find('/', 10):]
-    conf = twnews.common.get_channel_conf(channel)
-    if not conf['rwd']:
-        if mobile:
-            prefix_exp = conf['mobile']['prefix']
-            prefix_uex = conf['desktop']['prefix']
-        else:
-            prefix_exp = conf['desktop']['prefix']
-            prefix_uex = conf['mobile']['prefix']
-        if not url.startswith(prefix_exp):
-            suffix = url[len(prefix_uex):]
-            url = prefix_exp + suffix
-            logger.debug('prefix: %s', prefix_exp)
-            logger.debug('suffix: %s', suffix)
-            logger.debug('變更 URL 為: %s', url)
-    '''
+    if channel == 'ltn':
+        url = url_force_ltn_mobile(url)
 
     # 嘗試使用快取
     soup = None
@@ -113,13 +111,13 @@ def soup_from_website(url, channel, refresh, mobile):
     uri = url[url.find('/', 10):]
     path = get_cache_filepath(channel, uri)
     if os.path.isfile(path) and not refresh:
-        logger.debug('發現 URL 快取: %s', url)
-        logger.debug('載入快取檔案: %s', path)
+        logger.debug('發現快取, URL: %s', url)
+        logger.debug('載入快取, PATH: %s', path)
         (soup, rawlen) = soup_from_file(path)
 
     # 下載網頁
     if soup is None:
-        logger.debug('從網路讀取 URL: %s', url)
+        logger.debug('GET URL: %s', url)
         session = twnews.common.get_session()
         resp = session.get(url, allow_redirects=False)
         if resp.status_code == 200:
@@ -190,19 +188,17 @@ class NewsSoup:
     新聞湯
     """
 
-    def __init__(self, path, refresh=False, mobile=True):
+    def __init__(self, path, refresh=False):
         """
         建立新聞分解器
         """
         self.channel = twnews.common.detect_channel(path)
-        if mobile:
-            layout = 'mobile'
-            layout_list = twnews.common.get_channel_conf(self.channel, 'layout_list')
-            for item in layout_list:
-                if path.startswith(item['prefix']):
-                    layout = item['name']
-        else:
-            layout = 'desktop'
+
+        layout = 'mobile'
+        layout_list = twnews.common.get_channel_conf(self.channel, 'layout_list')
+        for item in layout_list:
+            if path.startswith(item['prefix']):
+                layout = item['name']
 
         self.path = path
         self.soup = None
@@ -225,8 +221,7 @@ class NewsSoup:
                     (self.soup, self.rawlen, self.path) = soup_from_website(
                         path,
                         self.channel,
-                        refresh,
-                        mobile
+                        refresh
                     )
                 else:
                     self.logger.debug('從檔案載入新聞')
