@@ -1,9 +1,10 @@
 {
   "what's that": {
     "name": "頻道名稱",
-    "rwd": "(bool) 是否有響應式設計",
+    "layout_list": [
+      { "name": "特殊排版名稱", "prefix": "特殊排版網址" }
+    ],
     "mobile": {
-      "prefix": "非 RWD 網站的行動版網址開頭",
       "title_node": "標題所在的 CSS selector",
       "date_node": "日期時間所在的 CSS Selector",
       "date_format": "日期時間的格式，會用 datetime.strptime 處理",
@@ -23,7 +24,6 @@
   },
   "appledaily": {
     "name": "蘋果日報",
-    "rwd": true,
     "layout_list": [],
     "mobile": {
       "title_node": "article.nm-content > div.nm-article > header > h2",
@@ -45,7 +45,6 @@
   },
   "chinatimes": {
     "name": "中時電子報",
-    "rwd": true,
     "layout_list": [],
     "mobile": {
       "title_node": "#h1",
@@ -57,7 +56,6 @@
   },
   "cna": {
     "name": "中央社",
-    "rwd": true,
     "layout_list": [],
     "mobile": {
       "title_node": "div.centralContent > h1",
@@ -78,7 +76,6 @@
   },
   "ettoday": {
     "name": "東森新聞雲",
-    "rwd": true,
     "layout_list": [
       { "name": "pets", "prefix": "https://pets.ettoday.net/news/" },
       { "name": "sports", "prefix": "https://sports.ettoday.net/news/" },
@@ -126,7 +123,6 @@
   },
   "ltn": {
     "name": "自由時報",
-    "rwd": false,
     "layout_list": [
       { "name": "business", "prefix": "http://m.ltn.com.tw/news/business" },
       { "name": "lifeweekly", "prefix": "http://m.ltn.com.tw/news/lifeweekly" },
@@ -136,7 +132,6 @@
       { "name": "sports", "prefix": "http://m.ltn.com.tw/news/sports" }
     ],
     "mobile": {
-      "prefix": "https://m.ltn.com.tw",
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d %H:%M",
@@ -144,7 +139,6 @@
       "article_node": "div.com > div.boxTitle > p"
     },
     "lifeweekly": {
-      "prefix": "http://m.ltn.com.tw/news/lifeweekly",
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d %H:%M",
@@ -152,7 +146,6 @@
       "article_node": "div.com > div.boxTitle > p"
     },
     "society": {
-      "prefix": "http://m.ltn.com.tw/news/society",
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d",
@@ -160,7 +153,6 @@
       "article_node": "div.com > div.boxTitle > p"
     },
     "business": {
-      "prefix": "http://m.ltn.com.tw/news/business",
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d %H:%M",
@@ -168,7 +160,6 @@
       "article_node": "div.com > div.boxTitle > p"
     },
     "local": {
-      "prefix": "http://m.ltn.com.tw/news/local",
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d",
@@ -176,7 +167,6 @@
       "article_node": "div.com > div.boxTitle > p"
     },
     "sports": {
-      "prefix": "http://m.ltn.com.tw/news/sports",
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d %H:%M",
@@ -184,7 +174,6 @@
       "article_node": "div.com > div.boxTitle > p"
     },
     "politics": {
-      "prefix": "http://m.ltn.com.tw/news/politics",
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d",
@@ -204,10 +193,8 @@
   },
   "setn": {
     "name": "三立新聞網",
-    "rwd": false,
     "layout_list": [],
     "mobile": {
-      "prefix": "https://www.setn.com/m",
       "title_node": "section.news-all-area > h1",
       "date_node": "section.news-all-area > div.page-date > time",
       "date_format": "%Y-%m-%d %H:%M",
@@ -215,7 +202,6 @@
       "article_node": "#ckuse > article > p"
     },
     "entertainment": {
-      "prefix": "https://www.setn.com/e",
       "title_node": "section.news-all-area > h1",
       "date_node": "section.news-all-area > div.page-date > time",
       "date_format": "%Y-%m-%d %H:%M",
@@ -233,7 +219,6 @@
   },
   "udn": {
     "name": "聯合新聞網",
-    "rwd": true,
     "layout_list": [],
     "mobile": {
       "title_node": "#story_body_content > h1",
