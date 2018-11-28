@@ -99,12 +99,6 @@ def soup_from_website(url, channel, refresh):
     logger = twnews.common.get_logger()
     session = twnews.common.get_session()
 
-    # URL 正規化
-    url = url_follow_redirection(url)
-    url = url_force_https(url)
-    if channel == 'ltn':
-        url = url_force_ltn_mobile(url)
-
     # 嘗試使用快取
     soup = None
     rawlen = 0
@@ -130,7 +124,7 @@ def soup_from_website(url, channel, refresh):
         else:
             logger.warning('回應碼: %d', resp.status_code)
 
-    return (soup, rawlen, url)
+    return (soup, rawlen)
 
 def soup_from_file(file_path):
     """
@@ -194,11 +188,19 @@ class NewsSoup:
         """
         self.channel = twnews.common.detect_channel(path)
 
+        # URL 正規化
+        if path.startswith('http'):
+            path = url_follow_redirection(path)
+            path = url_force_https(path)
+            if self.channel == 'ltn':
+                path = url_force_ltn_mobile(path)
+
+        # Layout 偵測
         layout = 'mobile'
         layout_list = twnews.common.get_channel_conf(self.channel, 'layout_list')
         for item in layout_list:
             if path.startswith(item['prefix']):
-                layout = item['name']
+                layout = item['layout']
 
         self.path = path
         self.soup = None
@@ -218,7 +220,7 @@ class NewsSoup:
             try:
                 if path.startswith('http'):
                     self.logger.debug('從網路載入新聞')
-                    (self.soup, self.rawlen, self.path) = soup_from_website(
+                    (self.soup, self.rawlen) = soup_from_website(
                         path,
                         self.channel,
                         refresh
@@ -296,6 +298,8 @@ class NewsSoup:
             try:
                 self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
             except TypeError:
+                self.logger.error('日期格式分析失敗')
+            except ValueError:
                 self.logger.error('日期格式分析失敗')
         return self.cache['date']
 
