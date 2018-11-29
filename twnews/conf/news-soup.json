@@ -77,9 +77,15 @@
   "ettoday": {
     "name": "東森新聞雲",
     "layout_list": [
-      { "name": "pets", "prefix": "https://pets.ettoday.net/news/" },
-      { "name": "sports", "prefix": "https://sports.ettoday.net/news/" },
-      { "name": "star", "prefix": "https://star.ettoday.net/news/" }
+      { "layout": "fashion", "prefix": "https://fashion.ettoday.net/" },
+      { "layout": "game", "prefix": "https://game.ettoday.net/" },
+      { "layout": "health", "prefix": "https://health.ettoday.net/" },
+      { "layout": "game", "prefix": "https://house.ettoday.net/" },
+      { "layout": "game", "prefix": "https://pets.ettoday.net/" },
+      { "layout": "speed", "prefix": "https://speed.ettoday.net/" },
+      { "layout": "game", "prefix": "https://sports.ettoday.net/" },
+      { "layout": "game", "prefix": "https://star.ettoday.net/" },
+      { "layout": "health", "prefix": "https://travel.ettoday.net/" }
     ],
     "mobile": {
       "title_node": "div.subject_news > header > h1",
@@ -88,26 +94,33 @@
       "author_node": "",
       "article_node": "div.subject_news > div.story > p"
     },
-    "pets": {
-      "title_node": "div.subject_news > header > h1",
-      "date_node": "span.date > time",
-      "date_format": "%Y年%m月%d日 %H:%M",
+    "fashion": {
+      "title_node": "header > h1",
+      "date_node": "time",
+      "date_format": "%Y/%m/%d",
       "author_node": "",
-      "article_node": "div.subject_news > div.story > p"
+      "article_node": "article div.story > p"
     },
-    "sports": {
-      "title_node": "div.subject_news > header > h1",
-      "date_node": "span.date > time",
+    "game": {
+      "title_node": "article h1.title",
+      "date_node": "time",
       "date_format": "%Y年%m月%d日 %H:%M",
       "author_node": "",
-      "article_node": "div.subject_news > div.story > p"
+      "article_node": "article div.story > p"
     },
-    "star": {
-      "title_node": "div.subject_news > header > h1",
-      "date_node": "span.date > time",
-      "date_format": "%Y年%m月%d日 %H:%M",
+    "health": {
+      "title_node": "header > h1",
+      "date_node": "time",
+      "date_format": "時間： %Y年%m月%d日 %H:%M",
       "author_node": "",
-      "article_node": "div.subject_news > div.story > p"
+      "article_node": "article div.story > p"
+    },
+    "speed": {
+      "title_node": "article h1.title",
+      "date_node": "time",
+      "date_format": "%Y-%m-%d",
+      "author_node": "",
+      "article_node": "article div.story > p"
     },
     "search": {
       "url": "https://www.ettoday.net/news_search/doSearch.php?keywords=${KEYWORD}&page=${PAGE}&daydiff=3&idx=1",
@@ -124,12 +137,17 @@
   "ltn": {
     "name": "自由時報",
     "layout_list": [
-      { "name": "business", "prefix": "http://m.ltn.com.tw/news/business" },
-      { "name": "lifeweekly", "prefix": "http://m.ltn.com.tw/news/lifeweekly" },
-      { "name": "local", "prefix": "http://m.ltn.com.tw/news/local" },
-      { "name": "politics", "prefix": "http://m.ltn.com.tw/news/politics" },
-      { "name": "society", "prefix": "http://m.ltn.com.tw/news/society" },
-      { "name": "sports", "prefix": "http://m.ltn.com.tw/news/sports" }
+      { "layout": "3c", "prefix": "https://3c.ltn.com.tw" },
+      { "layout": "auto", "prefix": "https://auto.ltn.com.tw" },
+      { "layout": "ec", "prefix": "https://ec.ltn.com.tw" },
+      { "layout": "ent", "prefix": "https://ent.ltn.com.tw" },
+      { "layout": "estate", "prefix": "https://estate.ltn.com.tw" },
+      { "layout": "food", "prefix": "https://food.ltn.com.tw" },
+      { "layout": "istyle", "prefix": "https://istyle.ltn.com.tw" },
+      { "layout": "market", "prefix": "https://market.ltn.com.tw" },
+      { "layout": "playing", "prefix": "https://playing.ltn.com.tw" },
+      { "layout": "sports", "prefix": "https://sports.ltn.com.tw" },
+      { "layout": "talk", "prefix": "https://talk.ltn.com.tw" }
     ],
     "mobile": {
       "title_node": "div.com > h2",
@@ -138,47 +156,82 @@
       "author_node": "",
       "article_node": "div.com > div.boxTitle > p"
     },
-    "lifeweekly": {
+    "3c": {
+      "title_node": "section.nbox > h1",
+      "date_node": "section.nbox > span.writer > span:nth-of-type(1)",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "section.nbox > span.writer > span:nth-of-type(2)",
+      "article_node": "div.boxTitle > p"
+    },
+    "auto": {
+      "title_node": "section > div.title_box > h1",
+      "date_node": "section > div.title_box > div.unit_else",
+      "date_format": "%Y/%m/%d",
+      "author_node": "section > div.title_box > div.unit_else",
+      "article_node": "section > div.detail > p"
+    },
+    "ec": {
+      "title_node": "article.com > h1",
+      "date_node": "article.com > div.h1_else > div.time",
+      "date_format": "%Y-%m-%d %H:%M:%S",
+      "author_node": "",
+      "article_node": "article.com > div.textbody > p"
+    },
+    "ent": {
+      "title_node": "div.news_content > h1",
+      "date_node": "div.news_content > div.author > div.date",
+      "date_format": "%Y/%m/%d %H:%M",
+      "author_node": "",
+      "article_node": "div.news_content > p"
+    },
+    "estate": {
+      "title_node": "div.container > h1",
+      "date_node": "div.container > p.author > span.time",
+      "date_format": "%Y/%m/%d %H:%M",
+      "author_node": "div.container > p.author",
+      "article_node": "div.container > div.wordright > p"
+    },
+    "food": {
+      "title_node": "section > div.context > h2",
+      "date_node": "section > div.context > b.date",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "section > div.context > p"
+    },
+    "istyle": {
+      "title_node": "div.content > div.title_box > h1",
+      "date_node": "div.content > div.title_box > div.unit_else",
+      "date_format": "%b. %d %Y",
+      "author_node": "div.content > div.title_box > div.unit_else",
+      "article_node": "div.content > div.article_content > p"
+    },
+    "market": {
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
       "date_format": "%Y-%m-%d %H:%M",
       "author_node": "",
-      "article_node": "div.com > div.boxTitle > p"
+      "article_node": "div.com > div.h2_else > p"
     },
-    "society": {
-      "title_node": "div.com > h2",
-      "date_node": "div.com > div.h2_else > div.time",
+    "playing": {
+      "title_node": "div.left_content > div.article_header > h1",
+      "date_node": "div.left_content > div.article_header > div.author > span:nth-of-type(2)",
       "date_format": "%Y-%m-%d",
-      "author_node": "",
-      "article_node": "div.com > div.boxTitle > p"
-    },
-    "business": {
-      "title_node": "div.com > h2",
-      "date_node": "div.com > div.h2_else > div.time",
-      "date_format": "%Y-%m-%d %H:%M",
-      "author_node": "",
-      "article_node": "div.com > div.boxTitle > p"
-    },
-    "local": {
-      "title_node": "div.com > h2",
-      "date_node": "div.com > div.h2_else > div.time",
-      "date_format": "%Y-%m-%d",
-      "author_node": "",
-      "article_node": "div.com > div.boxTitle > p"
+      "author_node": "div.left_content > div.article_header > div.author > span:nth-of-type(1)",
+      "article_node": "div.left_content > div.article_body > div.text > p"
     },
     "sports": {
-      "title_node": "div.com > h2",
-      "date_node": "div.com > div.h2_else > div.time",
-      "date_format": "%Y-%m-%d %H:%M",
+      "title_node": "div.news_content > h1",
+      "date_node": "div.news_content > div.author > div.date",
+      "date_format": "%Y/%m/%d %H:%M",
       "author_node": "",
-      "article_node": "div.com > div.boxTitle > p"
+      "article_node": "div.news_content > p"
     },
-    "politics": {
-      "title_node": "div.com > h2",
-      "date_node": "div.com > div.h2_else > div.time",
-      "date_format": "%Y-%m-%d",
-      "author_node": "",
-      "article_node": "div.com > div.boxTitle > p"
+    "talk": {
+      "title_node": "div.conbox > h1",
+      "date_node": "div.conbox > div.top_share > div.writer > a > span:nth-of-type(2) > div.mobile_none",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "div.conbox > div.top_share > div.writer > a > span:nth-of-type(2)",
+      "article_node": "div.conbox > div.cont > p"
     },
     "search": {
       "url": "https://m.ltn.com.tw/search/${PAGE}?q=${KEYWORD}",
@@ -193,7 +246,9 @@
   },
   "setn": {
     "name": "三立新聞網",
-    "layout_list": [],
+    "layout_list": [
+      { "layout": "entertainment", "prefix": "https://www.setn.com/e/" }
+    ],
     "mobile": {
       "title_node": "section.news-all-area > h1",
       "date_node": "section.news-all-area > div.page-date > time",
@@ -202,11 +257,11 @@
       "article_node": "#ckuse > article > p"
     },
     "entertainment": {
-      "title_node": "section.news-all-area > h1",
-      "date_node": "section.news-all-area > div.page-date > time",
-      "date_format": "%Y-%m-%d %H:%M",
+      "title_node": "div.content1 > div.title > h1",
+      "date_node": "div.content1 > div.title > div.titleBtnBlock > div.time",
+      "date_format": "%Y/%m/%d %H:%M:%S",
       "author_node": "",
-      "article_node": "#ckuse > article > p"
+      "article_node": "div.Content2 > p"
     },
     "search": {
       "url": "https://www.setn.com/m/search.aspx?q=${KEYWORD}&p=${PAGE}",
@@ -219,13 +274,46 @@
   },
   "udn": {
     "name": "聯合新聞網",
-    "layout_list": [],
+    "layout_list": [
+      { "layout": "autos", "prefix": "https://autos.udn.com" },
+      { "layout": "game", "prefix": "https://game.udn.com" },
+      { "layout": "global", "prefix": "https://global.udn.com" },
+      { "layout": "mobile", "prefix": "https://health.udn.com" },
+      { "layout": "mobile", "prefix": "https://house.udn.com" },
+      { "layout": "mobile", "prefix": "https://nba.udn.com" },
+      { "layout": "mobile", "prefix": "https://opinion.udn.com" },
+      { "layout": "mobile", "prefix": "https://running.udn.com" },
+      { "layout": "mobile", "prefix": "https://stars.udn.com" },
+      { "layout": "mobile", "prefix": "https://style.udn.com" },
+      { "layout": "mobile", "prefix": "https://vision.udn.com" }
+    ],
     "mobile": {
       "title_node": "#story_body_content > h1",
       "date_node": "#story_bady_info > div.story_bady_info_author > span",
       "date_format": "%Y-%m-%d %H:%M",
       "author_node": "#story_bady_info > div.story_bady_info_author > a",
       "article_node": "#story_body_content > p"
+    },
+    "autos": {
+      "title_node": "#story_art_title",
+      "date_node": "#shareBar > div.shareBar__info > div.shareBar__info--author > span",
+      "date_format": "%Y-%m-%d %H:%M:%S",
+      "author_node": "#shareBar > div.shareBar__info > div.shareBar__info--author",
+      "article_node": "#story_body_content > p"
+    },
+    "game": {
+      "title_node": "#story_art_title",
+      "date_node": "#shareBar > div.shareBar__info > div.shareBar__info--author > span",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "#shareBar > div.shareBar__info > div.shareBar__info--author",
+      "article_node": "#story_body_content > p"
+    },
+    "global": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
     },
     "search": {
       "url": "https://udn.com/search/result/2/${KEYWORD}/${PAGE}",

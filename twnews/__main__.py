@@ -23,6 +23,8 @@ def soup(path):
     ndt = nsoup.date()
     if ndt is not None:
         print('日期: {}'.format(ndt.strftime('%Y-%m-%d %H:%M:%S')))
+    else:
+        print('日期: None')
     print('記者: {}'.format(nsoup.author()))
     print('內文:')
     print(nsoup.contents())
