@@ -278,14 +278,14 @@
       { "layout": "autos", "prefix": "https://autos.udn.com" },
       { "layout": "game", "prefix": "https://game.udn.com" },
       { "layout": "global", "prefix": "https://global.udn.com" },
-      { "layout": "mobile", "prefix": "https://health.udn.com" },
-      { "layout": "mobile", "prefix": "https://house.udn.com" },
-      { "layout": "mobile", "prefix": "https://nba.udn.com" },
-      { "layout": "mobile", "prefix": "https://opinion.udn.com" },
-      { "layout": "mobile", "prefix": "https://running.udn.com" },
-      { "layout": "mobile", "prefix": "https://stars.udn.com" },
-      { "layout": "mobile", "prefix": "https://style.udn.com" },
-      { "layout": "mobile", "prefix": "https://vision.udn.com" }
+      { "layout": "health", "prefix": "https://health.udn.com" },
+      { "layout": "house", "prefix": "https://house.udn.com" },
+      { "layout": "nba", "prefix": "https://nba.udn.com" },
+      { "layout": "opinion", "prefix": "https://opinion.udn.com" },
+      { "layout": "running", "prefix": "https://running.udn.com" },
+      { "layout": "stars", "prefix": "https://stars.udn.com" },
+      { "layout": "style", "prefix": "https://style.udn.com" },
+      { "layout": "vision", "prefix": "https://vision.udn.com" }
     ],
     "mobile": {
       "title_node": "#story_body_content > h1",
@@ -309,6 +309,62 @@
       "article_node": "#story_body_content > p"
     },
     "global": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
+    },
+    "health": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
+    },
+    "house": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
+    },
+    "nba": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
+    },
+    "opinion": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
+    },
+    "running": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
+    },
+    "stars": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
+    },
+    "style": {
+      "title_node": "#story_art_title",
+      "date_node": "#story_bady_info",
+      "date_format": "%Y/%m/%d",
+      "author_node": "",
+      "article_node": "#story_body > div.story_body_content > p"
+    },
+    "vision": {
       "title_node": "#story_art_title",
       "date_node": "#story_bady_info",
       "date_format": "%Y/%m/%d",

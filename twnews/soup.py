@@ -297,10 +297,10 @@ class NewsSoup:
             dfmt = self.conf['date_format']
             try:
                 self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
-            except TypeError:
-                self.logger.error('日期格式分析失敗')
-            except ValueError:
-                self.logger.error('日期格式分析失敗')
+            except TypeError as ex:
+                self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
+            except ValueError as ex:
+                self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
         return self.cache['date']
 
     def author(self):
