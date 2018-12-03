@@ -278,7 +278,7 @@
       { "layout": "autos", "prefix": "https://autos.udn.com" },
       { "layout": "game", "prefix": "https://game.udn.com" },
       { "layout": "global", "prefix": "https://global.udn.com" },
-      { "layout": "health", "prefix": "https://health.udn.com" },
+      { "layout": "game", "prefix": "https://health.udn.com" },
       { "layout": "house", "prefix": "https://house.udn.com" },
       { "layout": "nba", "prefix": "https://nba.udn.com" },
       { "layout": "opinion", "prefix": "https://opinion.udn.com" },
@@ -315,61 +315,40 @@
       "author_node": "",
       "article_node": "#story_body > div.story_body_content > p"
     },
-    "health": {
-      "title_node": "#story_art_title",
-      "date_node": "#story_bady_info",
-      "date_format": "%Y/%m/%d",
-      "author_node": "",
-      "article_node": "#story_body > div.story_body_content > p"
-    },
     "house": {
       "title_node": "#story_art_title",
-      "date_node": "#story_bady_info",
-      "date_format": "%Y/%m/%d",
-      "author_node": "",
-      "article_node": "#story_body > div.story_body_content > p"
+      "date_node": "#shareBar > div.shareBar__info > div.shareBar__info--author > span",
+      "date_format": "%Y-%m-%d %H:%M:%S",
+      "author_node": "#shareBar > div.shareBar__info > div.shareBar__info--author",
+      "article_node": "#story_body_content > p"
     },
     "nba": {
-      "title_node": "#story_art_title",
-      "date_node": "#story_bady_info",
-      "date_format": "%Y/%m/%d",
-      "author_node": "",
-      "article_node": "#story_body > div.story_body_content > p"
+      "title_node": "#story_body_content > h1",
+      "date_node": "#shareBar > div.shareBar__info > div.shareBar__info--author > span",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "#shareBar > div.shareBar__info > div.shareBar__info--author",
+      "article_node": "#story_body_content > span > p"
     },
     "opinion": {
-      "title_node": "#story_art_title",
-      "date_node": "#story_bady_info",
+      "title_node": "#container > main > h1",
+      "date_node": ".story_bady_info_author > time",
       "date_format": "%Y/%m/%d",
-      "author_node": "",
-      "article_node": "#story_body > div.story_body_content > p"
-    },
-    "running": {
-      "title_node": "#story_art_title",
-      "date_node": "#story_bady_info",
-      "date_format": "%Y/%m/%d",
-      "author_node": "",
-      "article_node": "#story_body > div.story_body_content > p"
+      "author_node": ".story_bady_info_author > a",
+      "article_node": "#container > main > p"
     },
     "stars": {
       "title_node": "#story_art_title",
-      "date_node": "#story_bady_info",
-      "date_format": "%Y/%m/%d",
-      "author_node": "",
-      "article_node": "#story_body > div.story_body_content > p"
+      "date_node": "#shareBar > div.shareBar__info > div.shareBar__info--author > span",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "#shareBar > div.shareBar__info > div.shareBar__info--author",
+      "article_node": "#story > p"
     },
     "style": {
-      "title_node": "#story_art_title",
-      "date_node": "#story_bady_info",
-      "date_format": "%Y/%m/%d",
-      "author_node": "",
-      "article_node": "#story_body > div.story_body_content > p"
-    },
-    "vision": {
-      "title_node": "#story_art_title",
-      "date_node": "#story_bady_info",
-      "date_format": "%Y/%m/%d",
-      "author_node": "",
-      "article_node": "#story_body > div.story_body_content > p"
+      "title_node": "#story_art_title > font",
+      "date_node": "#shareBar > div.shareBar__info > div.shareBar__info--author > span",
+      "date_format": "%Y-%m-%d %H:%M",
+      "author_node": "#shareBar > div.shareBar__info > div.shareBar__info--author",
+      "article_node": "#story-main > p"
     },
     "search": {
       "url": "https://udn.com/search/result/2/${KEYWORD}/${PAGE}",

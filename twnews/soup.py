@@ -4,6 +4,7 @@
 
 import io
 import re
+import copy
 import gzip
 import hashlib
 import tempfile
@@ -255,7 +256,10 @@ class NewsSoup:
             nsel = self.conf['title_node']
             found = self.soup.select(nsel)
             if found:
-                node = found[0]
+                node = copy.copy(found[0])
+                # 避免子元件干擾日期格式
+                for n in node.select('*'):
+                    n.extract()
                 self.cache['title'] = node.text.strip()
                 if len(found) > 1:
                     self.logger.warning('找到多組標題節點 (新聞台: %s)', self.channel)
@@ -276,7 +280,10 @@ class NewsSoup:
             nsel = self.conf['date_node']
             found = self.soup.select(nsel)
             if found:
-                node = found[0]
+                node = copy.copy(found[0])
+                # 避免子元件干擾日期格式
+                for n in node.select('*'):
+                    n.extract()
                 self.cache['date_raw'] = node.text.strip()
                 if len(found) > 1:
                     self.logger.warning('發現多組日期節點 (新聞台: %s)', self.channel)
@@ -296,6 +303,8 @@ class NewsSoup:
         if self.cache['date'] is None:
             dfmt = self.conf['date_format']
             try:
+                self.logger.debug(self.date_raw())
+                self.logger.debug(dfmt)
                 self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
             except TypeError as ex:
                 self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
@@ -316,8 +325,10 @@ class NewsSoup:
             if nsel != '':
                 found = self.soup.select(nsel)
                 if found:
-                    node = found[0]
-                    self.cache['author'] = node.text
+                    node = copy.copy(found[0])
+                    for n in node.select('*'):
+                        n.extract()
+                    self.cache['author'] = node.text.strip()
                     if len(found) > 1:
                         self.logger.warning('找到多組記者姓名 (新聞台: %s)', self.channel)
                 else:
