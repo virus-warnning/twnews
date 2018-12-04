@@ -13,10 +13,7 @@ import requests
 # pylint: disable=global-statement
 __LOGGER = None
 __ALLCONF = None
-__SESSION = {
-    'desktop': None,
-    'mobile': None
-}
+__SESSION = None
 
 VERSION = '0.2.2'
 
@@ -44,29 +41,19 @@ def get_logger():
 
     return __LOGGER
 
-def get_session(mobile=True):
+def get_session():
     """
     取得 requests session 如果已經存在就使用現有的
-
-    桌面版和行動版的 session 必須分開使用，否則會發生行動版網址回應桌面版網頁的問題
-    已知 setn 和 ettoday 的單元測試程式能發現此問題
     """
     global __SESSION
-
-    device = 'mobile' if mobile else 'desktop'
     logger = get_logger()
 
-    if __SESSION[device] is None:
-        if mobile:
-            user_agent = 'Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) ' \
-                + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36'
-        else:
-            user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) ' \
-                + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36'
-
-        logger.debug('產生 session[%s]', device)
-        __SESSION[device] = requests.Session()
-        __SESSION[device].headers.update({
+    if __SESSION is None:
+        logger.debug('建立新的 session')
+        user_agent = 'Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) ' \
+            + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36'
+        __SESSION = requests.Session()
+        __SESSION.headers.update({
             "Accept": "text/html,application/xhtml+xml,application/xml",
             "Accept-Encoding": "gzip, deflate",
             "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -75,9 +62,9 @@ def get_session(mobile=True):
             "User-Agent": user_agent
         })
     else:
-        logger.debug('使用既有 session[%s]', device)
+        logger.debug('使用現有 session')
 
-    return __SESSION[device]
+    return __SESSION
 
 def get_all_conf():
     """

@@ -18,29 +18,18 @@ class TestAppleDaily(unittest.TestCase):
         測試蘋果日報樣本
         """
         pkgdir = twnews.common.get_package_dir()
-        nsoup = NewsSoup(pkgdir + '/samples/appledaily.html.gz', mobile=False)
+        nsoup = NewsSoup(pkgdir + '/samples/appledaily.html.gz')
         self.assertEqual('appledaily', nsoup.channel)
         self.assertIn('和男友口角鎖門吞藥　女墜樓不治', nsoup.title())
         self.assertEqual('2016-05-21 11:44:00', nsoup.date().strftime(self.dtf))
         self.assertEqual('王煌忠', nsoup.author())
         self.assertIn('文心路的一棟住宅大樓', nsoup.contents())
 
-    def test_02_desktop(self):
-        """
-        測試蘋果日報桌面版
-        """
-        nsoup = NewsSoup(self.url, refresh=True, mobile=False)
-        self.assertEqual('appledaily', nsoup.channel)
-        self.assertIn('男子疑久病厭世　學校圍牆上吊輕生亡', nsoup.title())
-        self.assertEqual('2018-10-25 12:03:00', nsoup.date().strftime(self.dtf))
-        self.assertEqual('江宏倫', nsoup.author())
-        self.assertIn('台北市北投區西安街二段', nsoup.contents())
-
     def test_03_mobile(self):
         """
         測試蘋果日報行動版
         """
-        nsoup = NewsSoup(self.url, refresh=True, mobile=True)
+        nsoup = NewsSoup(self.url, refresh=True)
         self.assertEqual('appledaily', nsoup.channel)
         self.assertIn('男子疑久病厭世　學校圍牆上吊輕生亡', nsoup.title())
         self.assertEqual('2018-10-25 12:03:00', nsoup.date().strftime(self.dtf))
