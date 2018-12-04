@@ -55,17 +55,18 @@ def search_and_soup(keyword, channel):
     search_and_soup(keyword, channel)
     """
 
-    print('測試搜尋與分解')
+    print('測試搜尋與分解, 搜尋中 ...', end='', flush=True)
     logger = get_logger()
     nsearch = NewsSearch(channel, limit=10)
     nsoups = nsearch.by_keyword(keyword).to_soup_list()
+    print('\r測試搜尋與分解' + ' ' * 20, flush=True)
 
     for (i, nsoup) in enumerate(nsoups):
         try:
             print('{:03d}: {}'.format(i, nsoup.path))
             print('     記者: {} / 日期: {}'.format(nsoup.author(), nsoup.date()))
             print('     標題: {}'.format(nsoup.title()))
-            print('     {} ...'.format(nsoup.contents(30)))
+            print('     {} ...'.format(nsoup.contents(30)), flush=True)
         except ValueError as ex:
             logger.error('例外類型: %s', type(ex).__name__)
             logger.error(ex)
