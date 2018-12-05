@@ -170,7 +170,7 @@ class NewsSearch:
             page += 1
 
         self.result = {
-            'pages': 0,
+            'pages': page - 1,
             'elapsed': time.time() - begin_time,
             'items': filter_duplicated(results)
         }
@@ -192,6 +192,18 @@ class NewsSearch:
             nsoup = NewsSoup(result['link'])
             soup_list.append(nsoup)
         return soup_list
+
+    def elapsed(self):
+        """
+        耗費時間
+        """
+        return self.result['elapsed']
+
+    def pages(self):
+        """
+        頁數
+        """
+        return self.result['pages']
 
     def __flip_to_end_date(self, keyword):
         """
@@ -298,8 +310,6 @@ class NewsSearch:
         resp = session.get(url, allow_redirects=False)
         if resp.status_code == 200:
             logger.debug('回應 200 OK')
-            for (key, val) in resp.headers.items():
-                logger.debug('%s: %s', key, val)
             ctype = resp.headers['Content-Type']
             if 'text/html' in ctype:
                 self.context = BeautifulSoup(resp.text, 'lxml')

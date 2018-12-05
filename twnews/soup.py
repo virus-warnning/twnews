@@ -1,130 +1,134 @@
+"""
+新聞湯
+"""
+
 import io
 import re
-import os
+import copy
 import gzip
-import json
 import hashlib
-import logging
-import tempfile
-import logging.config
+import os
 import os.path
 from datetime import datetime
 
 import requests
+import requests.exceptions
 from bs4 import BeautifulSoup
 
-logdir = os.path.expanduser('~/.twnews/log')
-if not os.path.isdir(logdir):
-    os.makedirs(logdir)
-
-pkgdir = os.path.dirname(__file__)
-logini = '{}/conf/logging.ini'.format(pkgdir)
-
-if os.path.isfile(logini):
-    logging.config.fileConfig(logini)
-logger = logging.getLogger()
-
-__allconf = None
-__session = {
-    'desktop': None,
-    'mobile': None
-}
-
-def get_session(mobile=True):
-    """
-    取得 requests session 如果已經存在就使用現有的
-
-    桌面版和行動版的 session 必須分開使用，否則會發生行動版網址回應桌面版網頁的問題
-    已知 setn 和 ettoday 的單元測試程式能發現此問題
-    """
-    global __session
-
-    device = 'mobile' if mobile else 'desktop'
-    if __session[device] is None:
-        if mobile:
-            ua = 'Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36'
-        else:
-            ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36'
-
-        logger.debug('產生 session[{}]'.format(device))
-        __session[device] = requests.Session()
-        __session[device].headers.update({
-            "Accept": "text/html,application/xhtml+xml,application/xml",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-            "Cache-Control": "max-age=0",
-            "Connection": "keep-alive",
-            "User-Agent": ua
-        })
-    else:
-        logger.debug('使用既有 session[{}]'.format(device))
-
-    return __session[device]
+import twnews.common
 
 def get_cache_dir():
     """
     取得快取目錄
     """
-    cache_dir = '{}/{}'.format(tempfile.gettempdir(), 'twnews-cache')
+    logger = twnews.common.get_logger()
+    cache_dir = os.path.expanduser('~/.twnews/cache')
     if not os.path.isdir(cache_dir):
-        logger.debug('建立快取目錄: {}'.format(cache_dir))
-        os.mkdir(cache_dir)
-    logger.debug('使用快取目錄: {}'.format(cache_dir))
+        logger.debug('建立快取目錄: %s', cache_dir)
+        os.makedirs(cache_dir)
+    logger.debug('使用快取目錄: %s', cache_dir)
     return cache_dir
 
-def soup_from_website(url, channel, refresh, mobile):
+def get_cache_filepath(channel, uri):
+    """
+    取得快取檔案路徑
+    """
+    cache_id = hashlib.md5(uri.encode('ascii')).hexdigest()
+    path = '{}/{}-{}.html.gz'.format(get_cache_dir(), channel, cache_id)
+    return path
+
+def url_follow_redirection(url):
+    """
+    取得轉址後的 URL
+    """
+    logger = twnews.common.get_logger()
+    session = twnews.common.get_session()
+    old_url = url
+    new_url = ''
+    done = False
+
+    while not done:
+        try:
+            resp = session.head(old_url)
+            status = resp.status_code
+            if status // 100 == 3:
+                dest = resp.headers['Location']
+                if dest.startswith('/'):
+                    new_url = old_url[0:old_url.find('/', 10)] + dest
+                else:
+                    new_url = dest
+                logger.debug('原始 URL: %s', old_url)
+                logger.debug('變更 URL: %s', new_url)
+                old_url = new_url
+            elif status == 200:
+                done = True
+            else:
+                logger.error('檢查轉址過程發生錯誤，回應碼: %d', status)
+                done = True
+        except requests.exceptions.ConnectionError as ex:
+            logger.error('檢查轉址過程連線失敗: %s', ex)
+            done = True
+
+    return old_url
+
+def url_force_https(url):
+    """
+    強制使用 https
+    """
+    logger = twnews.common.get_logger()
+    if url.startswith('http://'):
+        new_url = 'https://' + url[7:]
+        logger.debug('原始 URL: %s', url)
+        logger.debug('變更 URL: %s', new_url)
+    else:
+        new_url = url
+    return new_url
+
+def url_force_ltn_mobile(url):
+    """
+    強制使用自由時報行動版
+    """
+    logger = twnews.common.get_logger()
+    new_url = url
+    if url.startswith('https://news.ltn.com.tw'):
+        new_url = 'https://m.ltn.com.tw' + url[len('https://news.ltn.com.tw'):]
+        logger.debug('原始 URL: %s', url)
+        logger.debug('變更 URL: %s', new_url)
+    return new_url
+
+def soup_from_website(url, channel, refresh):
     """
     網址轉換成 BeautifulSoup 4 物件
     """
-
-    # 強制使用 https
-    if url.startswith('http://'):
-        url = 'https://' + url[7:]
-        logger.debug('變更 URL 為: {}'.format(url))
-
-    # 處理非 RWD 設計的網址轉換 (自由、三立)
-    suffix = url[url.find('/', 10):]
-    (_, conf) = load_soup_conf(channel)
-    if not conf['rwd']:
-        if mobile:
-            prefix_exp = conf['mobile']['prefix']
-            prefix_uex = conf['desktop']['prefix']
-        else:
-            prefix_exp = conf['desktop']['prefix']
-            prefix_uex = conf['mobile']['prefix']
-        if not url.startswith(prefix_exp):
-            suffix = url[len(prefix_uex):]
-            url = prefix_exp + suffix
-            logger.debug('prefix: {}'.format(prefix_exp))
-            logger.debug('suffix: {}'.format(suffix))
-            logger.debug('變更 URL 為: {}'.format(url))
+    logger = twnews.common.get_logger()
+    session = twnews.common.get_session()
 
     # 嘗試使用快取
     soup = None
-    device = 'mobile' if mobile else 'desktop'
-    hash = hashlib.md5(suffix.encode('ascii')).hexdigest()
-    path = '{}/{}-{}-{}.html.gz'.format(get_cache_dir(), channel, device, hash)
+    rawlen = 0
+    uri = url[url.find('/', 10):]
+    path = get_cache_filepath(channel, uri)
     if os.path.isfile(path) and not refresh:
-        logger.debug('發現 URL 快取: {}'.format(url))
-        logger.debug('載入快取檔案: {}'.format(path))
+        logger.debug('發現快取, URL: %s', url)
+        logger.debug('載入快取, PATH: %s', path)
         (soup, rawlen) = soup_from_file(path)
 
     # 下載網頁
     if soup is None:
-        logger.debug('從網路讀取 URL: {}'.format(url))
-        session = get_session(mobile)
-        resp = session.get(url, allow_redirects=False)
-        if resp.status_code == 200:
-            logger.debug('回應 200 OK')
-            for (k,v) in resp.headers.items():
-                logger.debug('{}: {}'.format(k, v))
-            soup = BeautifulSoup(resp.text, 'lxml')
-            rawlen = len(resp.text.encode('utf-8'))
-            with gzip.open(path, 'wt') as cache_file:
-                logger.debug('寫入快取: {}'.format(path))
-                cache_file.write(resp.text)
-        else:
-            logger.warning('回應碼: {}'.format(resp.status_code))
+        logger.debug('GET URL: %s', url)
+        try:
+            resp = session.get(url, allow_redirects=False)
+            if resp.status_code == 200:
+                logger.debug('回應 200 OK')
+                soup = BeautifulSoup(resp.text, 'lxml')
+                rawlen = len(resp.text.encode('utf-8'))
+                with gzip.open(path, 'wt') as cache_file:
+                    logger.debug('寫入快取: %s', path)
+                    cache_file.write(resp.text)
+            else:
+                logger.warning('回應碼: %d', resp.status_code)
+        except requests.exceptions.ConnectionError as ex:
+            logger.error('連線失敗: %s', ex)
 
     return (soup, rawlen)
 
@@ -170,43 +174,31 @@ def scan_author(article):
         '社會中心'
     ]
 
-    for p in patterns:
-        po = re.compile(p)
-        m = po.search(article)
-        if m is not None:
-            if m.group(1) not in exclude_list:
-                return m.group(1)
+    for patt in patterns:
+        pobj = re.compile(patt)
+        match = pobj.search(article)
+        if match is not None:
+            if match.group(1) not in exclude_list:
+                return match.group(1)
 
     return None
 
-def load_soup_conf(path):
-    """
-    載入新聞解構設定
-    """
-    global __allconf
-
-    if __allconf is None:
-        soup_cfg = '{}/conf/news-soup.json'.format(pkgdir)
-        with open(soup_cfg, 'r') as conf_file:
-            __allconf = json.load(conf_file)
-
-    for (channel, conf) in __allconf.items():
-        if channel in path:
-            if channel in path:
-                return (channel, conf)
-
-    return (None, None)
-
 class NewsSoup:
+    """
+    新聞湯
+    """
 
-    def __init__(self, path, refresh=False, mobile=True):
+    def __init__(self, path, refresh=False):
         """
         建立新聞分解器
         """
         self.path = path
+        self.refresh = refresh
+        self.loaded = False
         self.soup = None
-        self.device = 'mobile' if mobile else 'desktop'
         self.rawlen = 0
+        self.logger = twnews.common.get_logger()
+        self.channel = twnews.common.detect_channel(path)
         self.cache = {
             'title': None,
             'date_raw': None,
@@ -216,41 +208,76 @@ class NewsSoup:
             'tags': None
         }
 
-        (self.channel, self.conf) = load_soup_conf(path)
+        if self.channel == '':
+            self.logger.error('不支援的新聞台，請檢查設定檔')
+            return
 
-        if self.channel is not None:
+        # URL 正規化
+        if self.path.startswith('http'):
+            self.path = url_follow_redirection(self.path)
+            self.path = url_force_https(self.path)
+            if self.channel == 'ltn':
+                self.path = url_force_ltn_mobile(self.path)
+
+        # Layout 偵測
+        layout = 'mobile'
+        layout_list = twnews.common.get_channel_conf(self.channel, 'layout_list')
+        for item in layout_list:
+            if path.startswith(item['prefix']):
+                layout = item['layout']
+
+        self.conf = twnews.common.get_channel_conf(self.channel, layout)
+
+    def __get_soup(self):
+        if not self.loaded:
             try:
-                if path.startswith('http'):
-                    (self.soup, self.rawlen) = soup_from_website(path, self.channel, refresh, mobile)
+                if self.path.startswith('http'):
+                    self.logger.debug('從網路載入新聞')
+                    (self.soup, self.rawlen) = soup_from_website(
+                        self.path,
+                        self.channel,
+                        self.refresh
+                    )
                 else:
-                    logger.debug('從檔案載入新聞')
-                    (self.soup, self.rawlen) = soup_from_file(path)
-            except Exception as ex:
-                logger.error('無法載入新聞, {}'.format(ex))
+                    self.logger.debug('從檔案載入新聞')
+                    (self.soup, self.rawlen) = soup_from_file(self.path)
+            except requests.ConnectionError as ex:
+                self.logger.error('因連線問題，無法載入新聞: %s', ex)
+                self.logger.error(self.path)
+            except FileNotFoundError as ex:
+                self.logger.error('檔案不存在，無法載入新聞: %s', ex)
+                self.logger.error(self.path)
+            except TypeError as ex:
+                self.logger.error('頻道不存在，無法載入新聞: %s', ex)
+                self.logger.error(self.path)
 
             if self.soup is None:
-                logger.error('無法轉換 BeautifulSoup，可能是網址或檔案路徑錯誤')
-        else:
-            logger.error('不支援的新聞台，請檢查設定檔')
+                self.logger.error('無法轉換 BeautifulSoup，可能是網址或檔案路徑錯誤')
+
+        return self.soup
 
     def title(self):
         """
         取得新聞標題
         """
 
-        if self.soup is None:
+        soup = self.__get_soup()
+        if soup is None:
             return None
 
         if self.cache['title'] is None:
-            nsel = self.conf[self.device]['title_node']
-            found = self.soup.select(nsel)
-            if len(found) > 0:
-                node = found[0]
+            nsel = self.conf['title_node']
+            found = soup.select(nsel)
+            if found:
+                node = copy.copy(found[0])
+                # 避免子元件干擾日期格式
+                for child_node in node.select('*'):
+                    child_node.extract()
                 self.cache['title'] = node.text.strip()
                 if len(found) > 1:
-                    logger.warning('找到多組標題節點 (新聞台: {})'.format(self.channel))
+                    self.logger.warning('找到多組標題節點 (新聞台: %s)', self.channel)
             else:
-                logger.error('找不到標題節點 (新聞台: {})'.format(self.channel))
+                self.logger.error('找不到標題節點 (新聞台: %s)', self.channel)
 
         return self.cache['title']
 
@@ -259,19 +286,23 @@ class NewsSoup:
         取得原始時間字串
         """
 
-        if self.soup is None:
+        soup = self.__get_soup()
+        if soup is None:
             return None
 
         if self.cache['date_raw'] is None:
-            nsel = self.conf[self.device]['date_node']
-            found = self.soup.select(nsel)
-            if len(found) > 0:
-                node = found[0]
+            nsel = self.conf['date_node']
+            found = soup.select(nsel)
+            if found:
+                node = copy.copy(found[0])
+                # 避免子元件干擾日期格式
+                for child_node in node.select('*'):
+                    child_node.extract()
                 self.cache['date_raw'] = node.text.strip()
                 if len(found) > 1:
-                    logger.warning('發現多組日期節點 (新聞台: {})'.format(self.channel))
+                    self.logger.warning('發現多組日期節點 (新聞台: %s)', self.channel)
             else:
-                logger.error('找不到日期時間節點 (新聞台: {})'.format(self.channel))
+                self.logger.error('找不到日期時間節點 (新聞台: %s)', self.channel)
 
         return self.cache['date_raw']
 
@@ -280,15 +311,18 @@ class NewsSoup:
         取得 datetime.datetime 格式的時間
         """
 
-        if self.soup is None:
+        soup = self.__get_soup()
+        if soup is None:
             return None
 
         if self.cache['date'] is None:
-            dfmt = self.conf[self.device]['date_format']
+            dfmt = self.conf['date_format']
             try:
                 self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
-            except Exception as ex:
-                logger.error('日期格式分析失敗')
+            except TypeError as ex:
+                self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
+            except ValueError as ex:
+                self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
         return self.cache['date']
 
     def author(self):
@@ -296,50 +330,59 @@ class NewsSoup:
         取得新聞記者/社論作者
         """
 
-        if self.soup is None:
+        soup = self.__get_soup()
+        if soup is None:
             return None
 
         if self.cache['author'] is None:
-            nsel = self.conf[self.device]['author_node']
+            nsel = self.conf['author_node']
             if nsel != '':
-                found = self.soup.select(nsel)
-                if len(found) > 0:
-                    node = found[0]
-                    self.cache['author'] = node.text
+                found = soup.select(nsel)
+                if found:
+                    node = copy.copy(found[0])
+                    for child_node in node.select('*'):
+                        child_node.extract()
+                    self.cache['author'] = node.text.strip()
                     if len(found) > 1:
-                        logger.warning('找到多組記者姓名 (新聞台: {})'.format(self.channel))
+                        self.logger.warning('找到多組記者姓名 (新聞台: %s)', self.channel)
                 else:
-                    logger.warning('找不到記者節點 (新聞台: {})'.format(self.channel))
+                    self.logger.warning('找不到記者節點 (新聞台: %s)', self.channel)
             else:
                 contents = self.contents()
                 if contents is not None:
                     self.cache['author'] = scan_author(contents)
                     if self.cache['author'] is None:
-                        logger.warning('內文中找不到記者姓名 (新聞台: {})'.format(self.channel))
+                        self.logger.warning('內文中找不到記者姓名 (新聞台: %s)', self.channel)
                 else:
-                    logger.error('因為沒有內文所以無法比對記者姓名 (新聞台: {})'.format(self.channel))
+                    self.logger.error('因為沒有內文所以無法比對記者姓名 (新聞台: %s)', self.channel)
 
         return self.cache['author']
 
-    def contents(self):
+    def contents(self, limit=0):
         """
         取得新聞內文
         """
 
-        if self.soup is None:
+        soup = self.__get_soup()
+        if soup is None:
             return None
 
         if self.cache['contents'] is None:
-            nsel = self.conf[self.device]['article_node']
-            found = self.soup.select(nsel)
-            if len(found) > 0:
+            nsel = self.conf['article_node']
+            found = soup.select(nsel)
+            if found:
                 contents = io.StringIO()
                 for node in found:
                     contents.write(node.text.strip())
                 self.cache['contents'] = contents.getvalue()
                 contents.close()
             else:
-                logger.error('找不到內文節點 (新聞台: {})'.format(self.channel))
+                self.logger.error('找不到內文節點 (新聞台: %s)', self.channel)
+
+        if isinstance(self.cache['contents'], str) and limit > 0:
+            # https://github.com/PyCQA/pylint/issues/1498
+            # pylint: disable=unsubscriptable-object
+            return self.cache['contents'][0:limit]
 
         return self.cache['contents']
 
@@ -348,7 +391,8 @@ class NewsSoup:
         計算有效內容率 (有效內容位元組數/全部位元組數)
         """
 
-        if self.soup is None or self.rawlen == 0:
+        soup = self.__get_soup()
+        if soup is None or self.rawlen == 0:
             return 0
 
         data = [
@@ -359,8 +403,8 @@ class NewsSoup:
         ]
 
         useful_len = 0
-        for d in data:
-            if d is not None:
-                useful_len += len(d.encode('utf-8'))
+        for datum in data:
+            if datum is not None:
+                useful_len += len(datum.encode('utf-8'))
 
         return useful_len / self.rawlen

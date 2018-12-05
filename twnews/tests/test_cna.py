@@ -3,7 +3,8 @@
 """
 
 import unittest
-from twnews.soup import NewsSoup, pkgdir
+import twnews.common
+from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestCna(unittest.TestCase):
@@ -16,29 +17,19 @@ class TestCna(unittest.TestCase):
         """
         測試中央社樣本
         """
-        nsoup = NewsSoup(pkgdir + '/samples/cna.html.gz', mobile=False)
+        pkgdir = twnews.common.get_package_dir()
+        nsoup = NewsSoup(pkgdir + '/samples/cna.html.gz')
         self.assertEqual('cna', nsoup.channel)
         self.assertIn('平鎮輪胎行惡火  疏散7人1女命喪', nsoup.title())
         self.assertEqual('2016-03-19 10:48:00', nsoup.date().strftime(self.dtf))
         self.assertEqual('邱俊欽', nsoup.author())
         self.assertIn('桃園市平鎮區一家輪胎行', nsoup.contents())
 
-    def test_02_desktop(self):
-        """
-        測試中央社桌面版
-        """
-        nsoup = NewsSoup(self.url, refresh=True, mobile=False)
-        self.assertEqual('cna', nsoup.channel)
-        self.assertIn('前女友輕生  前男友到殯儀館砍現任還開槍', nsoup.title())
-        self.assertEqual('2018-10-17 14:06:00', nsoup.date().strftime(self.dtf))
-        self.assertEqual('黃國芳', nsoup.author())
-        self.assertIn('民主進步黨籍嘉義市議員王美惠上午到殯儀館參加公祭', nsoup.contents())
-
     def test_03_mobile(self):
         """
         測試中央社行動版
         """
-        nsoup = NewsSoup(self.url, refresh=True, mobile=True)
+        nsoup = NewsSoup(self.url, refresh=True)
         self.assertEqual('cna', nsoup.channel)
         self.assertIn('前女友輕生  前男友到殯儀館砍現任還開槍', nsoup.title())
         self.assertEqual('2018-10-17 14:06:00', nsoup.date().strftime(self.dtf))

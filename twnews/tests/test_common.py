@@ -6,15 +6,13 @@
 
 import os
 import re
-import tempfile
 import unittest
 from twnews.soup import *
 
-#@unittest.skip
 class TestCommon(unittest.TestCase):
 
     def setUp(self):
-        self.url = 'https://tw.news.appledaily.com/local/realtime/20181025/1453825'
+        self.url = 'https://tw.appledaily.com/headline/daily/20181201/38194705/'
         self.dtf = '%Y-%m-%d %H:%M:%S'
 
     def test_01_cache(self):
@@ -24,26 +22,21 @@ class TestCommon(unittest.TestCase):
 
         # 清除快取
         cache_dir = get_cache_dir()
-        for cache_file in os.listdir(cache_dir):
-            if re.search(r'\.html\.gz$', cache_file):
-                cache_path = '{}/{}'.format(cache_dir, cache_file)
-                os.unlink(cache_path)
+        cache_path = '{}/appledaily-ed33e11740a7c95cb0852827b91cd37d.html.gz'.format(cache_dir)
+        if os.path.isfile(cache_path):
+            os.unlink(cache_path)
 
         # 讀取新聞，計算快取檔案數
-        count = 0
-        nsoup = NewsSoup(self.url)
-        for cache_file in os.listdir(cache_dir):
-            if re.search(r'\.html\.gz$', cache_file):
-                count += 1
-                news_cache = '{}/{}'.format(cache_dir, cache_file)
-                news_mtime = os.path.getmtime(news_cache)
-        self.assertEqual(1, count)
+        NewsSoup(self.url).title()
+        has_cache = os.path.isfile(cache_path)
+        self.assertTrue(has_cache)
 
         # 再次讀取新聞，確認快取檔的 mtime 沒變
-        if count == 1:
-            nsoup = NewsSoup(self.url)
-            news_mtime_new = os.path.getmtime(news_cache)
-            self.assertEqual(news_mtime, news_mtime_new)
+        if has_cache:
+            news_mtime_old = os.path.getmtime(cache_path)
+            NewsSoup(self.url).title()
+            news_mtime_new = os.path.getmtime(cache_path)
+            self.assertEqual(news_mtime_old, news_mtime_new)
 
     def test_02_soup_from_website(self):
         '''
@@ -53,7 +46,6 @@ class TestCommon(unittest.TestCase):
         # channel 不存在
         try:
             nsoup = NewsSoup('https://localhost.xxx')
-            self.assertIsNone(nsoup.soup)
             self.assertIsNone(nsoup.title(), 'channel 錯誤時，title() 應該回傳 None')
             self.assertIsNone(nsoup.date(), 'channel 錯誤時，date() 應該回傳 None')
             self.assertIsNone(nsoup.author(), 'channel 錯誤時，author() 應該回傳 None')
@@ -65,7 +57,6 @@ class TestCommon(unittest.TestCase):
         # channel 正確但 host 漏字
         try:
             nsoup = NewsSoup('https://appledaily.co')
-            self.assertIsNone(nsoup.soup)
             self.assertIsNone(nsoup.title(), 'host 錯誤時，title() 應該回傳 None')
             self.assertIsNone(nsoup.date(), 'host 錯誤時，date() 應該回傳 None')
             self.assertIsNone(nsoup.author(), 'host 錯誤時，author() 應該回傳 None')
@@ -78,7 +69,6 @@ class TestCommon(unittest.TestCase):
         try:
             url = 'https://tw.news.appledaily.com/local/realtime/WRONG/NEWS_ID'
             nsoup = NewsSoup(url)
-            self.assertIsNotNone(nsoup.soup)
             self.assertIsNone(nsoup.title(), 'url 錯誤時，title() 應該回傳 None')
             self.assertIsNone(nsoup.date(), 'url 錯誤時，date() 應該回傳 None')
             self.assertIsNone(nsoup.author(), 'url 錯誤時，author() 應該回傳 None')
@@ -95,7 +85,6 @@ class TestCommon(unittest.TestCase):
         # channel 不存在
         try:
             nsoup = NewsSoup('/tmp/badchannel.html')
-            self.assertIsNone(nsoup.soup)
             self.assertIsNone(nsoup.title(), 'channel 錯誤時，title() 應該回傳 None')
             self.assertIsNone(nsoup.date(), 'channel 錯誤時，date() 應該回傳 None')
             self.assertIsNone(nsoup.author(), 'channel 錯誤時，author() 應該回傳 None')
@@ -107,7 +96,6 @@ class TestCommon(unittest.TestCase):
         # 檔案不存在
         try:
             nsoup = NewsSoup('/tmp/appledaily-notexisted.html')
-            self.assertIsNone(nsoup.soup)
             self.assertIsNone(nsoup.title(), '檔案不存在時，title() 應該回傳 None')
             self.assertIsNone(nsoup.date(), '檔案不存在時，date() 應該回傳 None')
             self.assertIsNone(nsoup.author(), '檔案不存在時，author() 應該回傳 None')
@@ -120,7 +108,6 @@ class TestCommon(unittest.TestCase):
         try:
             open('appledaily-empty.html', 'a').close()
             nsoup = NewsSoup('appledaily-empty.html')
-            self.assertIsNotNone(nsoup.soup)
             self.assertIsNone(nsoup.title(), '空白檔案時，title() 應該回傳 None')
             self.assertIsNone(nsoup.date(), '空白檔案時，date() 應該回傳 None')
             self.assertIsNone(nsoup.author(), '空白檔案時，author() 應該回傳 None')
