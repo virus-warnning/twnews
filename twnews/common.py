@@ -7,6 +7,7 @@ import os
 import os.path
 import logging
 import logging.config
+import socket
 
 import requests
 
@@ -16,6 +17,18 @@ __ALLCONF = None
 __SESSION = None
 
 VERSION = '0.2.2'
+
+def found_socks5():
+    found = False
+    with socket.socket(socket.AF_INET) as sock:
+        try:
+            sock.connect(('localhost', 9050))
+            found = True
+        except socket.error as ex:
+            pass
+        finally:
+            sock.close()
+    return found
 
 def get_package_dir():
     """
@@ -53,6 +66,12 @@ def get_session():
         user_agent = 'Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) ' \
             + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36'
         __SESSION = requests.Session()
+        if found_socks5():
+            logger.debug('透過 proxy 連線')
+            __SESSION.proxies = {
+                'http': 'socks5h://localhost:9050',
+                'https': 'socks5h://localhost:9050'
+            }
         __SESSION.headers.update({
             "Accept": "text/html,application/xhtml+xml,application/xml",
             "Accept-Encoding": "gzip, deflate",

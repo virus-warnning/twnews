@@ -6,7 +6,6 @@ import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
-@unittest.skip
 class TestEttoday(unittest.TestCase):
 
     def setUp(self):

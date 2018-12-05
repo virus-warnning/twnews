@@ -230,6 +230,7 @@ class NewsSoup:
 
     def __get_soup(self):
         if not self.loaded:
+            self.loaded = True
             try:
                 if self.path.startswith('http'):
                     self.logger.debug('從網路載入新聞')
