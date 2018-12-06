@@ -28,7 +28,7 @@ class TestEttoday(unittest.TestCase):
         """
         測試東森新聞雲行動版
         """
-        nsoup = NewsSoup(self.url, refresh=True)
+        nsoup = NewsSoup(self.url, refresh=True, proxy_first=True)
         self.assertEqual('ettoday', nsoup.channel)
         self.assertIn('快訊／整日沒出房門！三重無業男半夜住處2樓上吊　母開門才發現', nsoup.title())
         self.assertEqual('2018-10-20 04:11:00', nsoup.date().strftime(self.dtf))
