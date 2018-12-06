@@ -14,7 +14,10 @@ import requests
 # pylint: disable=global-statement
 __LOGGER = None
 __ALLCONF = None
-__SESSION = None
+__SESSION = {
+    "direct": None,
+    "proxy": None
+}
 
 VERSION = '0.2.2'
 
@@ -54,25 +57,25 @@ def get_logger():
 
     return __LOGGER
 
-def get_session():
+def get_session(proxy_first):
     """
     取得 requests session 如果已經存在就使用現有的
     """
     global __SESSION
     logger = get_logger()
 
-    if __SESSION is None:
+    if proxy_first and found_socks5():
+        logger.debug('透過 proxy 連線')
+        session_type = 'proxy'
+    else:
+        session_type = 'direct'
+
+    if __SESSION[session_type] is None:
         logger.debug('建立新的 session')
         user_agent = 'Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) ' \
             + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36'
-        __SESSION = requests.Session()
-        if found_socks5():
-            logger.debug('透過 proxy 連線')
-            __SESSION.proxies = {
-                'http': 'socks5h://localhost:9050',
-                'https': 'socks5h://localhost:9050'
-            }
-        __SESSION.headers.update({
+        __SESSION[session_type] = requests.Session()
+        __SESSION[session_type].headers.update({
             "Accept": "text/html,application/xhtml+xml,application/xml",
             "Accept-Encoding": "gzip, deflate",
             "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -80,10 +83,15 @@ def get_session():
             "Connection": "keep-alive",
             "User-Agent": user_agent
         })
+        if session_type == 'proxy':
+            __SESSION[session_type].proxies = {
+                'http': 'socks5h://localhost:9050',
+                'https': 'socks5h://localhost:9050'
+            }
     else:
         logger.debug('使用現有 session')
 
-    return __SESSION
+    return __SESSION[session_type]
 
 def get_all_conf():
     """
@@ -113,12 +121,10 @@ def get_channel_conf(channel, action=None):
     載入新聞台設定
     """
     all_conf = get_all_conf()
-
     if channel in all_conf:
         chconf = all_conf[channel]
         if action is None:
             return chconf
         if action in chconf:
             return chconf[action]
-
     return None
