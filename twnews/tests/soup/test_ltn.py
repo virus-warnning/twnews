@@ -1,5 +1,5 @@
 """
-自由時報單元測試
+自由時報單元分解測試
 """
 
 import unittest
@@ -25,7 +25,7 @@ class TestLtn(unittest.TestCase):
         self.assertEqual(None, nsoup.author())
         self.assertIn('台北市萬華區萬大路一帶公寓的蘇姓男子', nsoup.contents())
 
-    def test_03_mobile(self):
+    def test_02_mobile(self):
         """
         測試自由時報行動版
         """

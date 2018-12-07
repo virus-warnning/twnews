@@ -1,5 +1,5 @@
 """
-東森新聞雲單元測試
+東森新聞雲分解測試
 """
 
 import unittest
@@ -24,7 +24,7 @@ class TestEttoday(unittest.TestCase):
         self.assertEqual('林悅', nsoup.author())
         self.assertIn('台南市永康區永安路住處後陽台上吊', nsoup.contents())
 
-    def test_03_mobile(self):
+    def test_02_mobile(self):
         """
         測試東森新聞雲行動版
         """

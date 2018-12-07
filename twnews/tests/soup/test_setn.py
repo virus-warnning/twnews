@@ -1,5 +1,5 @@
 """
-三立新聞網單元測試
+三立新聞網分解測試
 """
 
 import time
@@ -26,7 +26,7 @@ class TestSetn(unittest.TestCase):
         self.assertEqual(None, nsoup.author())
         self.assertIn('新北市新店區中正路今（21）日下午3時許發生墜樓案件', nsoup.contents())
 
-    def test_03_mobile(self):
+    def test_02_mobile(self):
         """
         測試三立新聞網行動版
         """

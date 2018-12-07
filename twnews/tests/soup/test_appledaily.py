@@ -1,5 +1,5 @@
 """
-蘋果日報單元測試
+蘋果日報分解測試
 """
 
 import unittest
@@ -25,7 +25,7 @@ class TestAppleDaily(unittest.TestCase):
         self.assertEqual('王煌忠', nsoup.author())
         self.assertIn('文心路的一棟住宅大樓', nsoup.contents())
 
-    def test_03_mobile(self):
+    def test_02_mobile(self):
         """
         測試蘋果日報行動版
         """

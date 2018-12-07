@@ -1,5 +1,5 @@
 """
-中央社單元測試
+中央社分解測試
 """
 
 import unittest
@@ -25,7 +25,7 @@ class TestCna(unittest.TestCase):
         self.assertEqual('邱俊欽', nsoup.author())
         self.assertIn('桃園市平鎮區一家輪胎行', nsoup.contents())
 
-    def test_03_mobile(self):
+    def test_02_mobile(self):
         """
         測試中央社行動版
         """

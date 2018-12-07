@@ -1,5 +1,5 @@
 """
-聯合新聞網單元測試
+聯合新聞網分解測試
 """
 
 import unittest
@@ -25,7 +25,7 @@ class TestUdn(unittest.TestCase):
         self.assertEqual(None, nsoup.author())
         self.assertIn('馬公水仙宮旁的一處廢棄破屋內', nsoup.contents())
 
-    def test_03_mobile(self):
+    def test_02_mobile(self):
         """
         測試聯合新聞網行動版
         """
