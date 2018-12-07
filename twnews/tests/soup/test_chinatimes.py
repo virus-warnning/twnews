@@ -1,5 +1,5 @@
 """
-中時電子報單元測試
+中時電子報分解測試
 """
 
 import unittest
@@ -25,7 +25,7 @@ class TestChinatimes(unittest.TestCase):
         self.assertEqual('謝明俊', nsoup.author())
         self.assertIn('北市士林區葫蘆街一處民宅', nsoup.contents())
 
-    def test_03_mobile(self):
+    def test_02_mobile(self):
         """
         測試中時電子報行動版
         """

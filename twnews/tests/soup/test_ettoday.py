@@ -1,12 +1,11 @@
 """
-東森新聞雲單元測試
+東森新聞雲分解測試
 """
 
 import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
-@unittest.skip
 class TestEttoday(unittest.TestCase):
 
     def setUp(self):
@@ -25,11 +24,11 @@ class TestEttoday(unittest.TestCase):
         self.assertEqual('林悅', nsoup.author())
         self.assertIn('台南市永康區永安路住處後陽台上吊', nsoup.contents())
 
-    def test_03_mobile(self):
+    def test_02_mobile(self):
         """
         測試東森新聞雲行動版
         """
-        nsoup = NewsSoup(self.url, refresh=True)
+        nsoup = NewsSoup(self.url, refresh=True, proxy_first=True)
         self.assertEqual('ettoday', nsoup.channel)
         self.assertIn('快訊／整日沒出房門！三重無業男半夜住處2樓上吊　母開門才發現', nsoup.title())
         self.assertEqual('2018-10-20 04:11:00', nsoup.date().strftime(self.dtf))

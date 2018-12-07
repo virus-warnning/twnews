@@ -1,5 +1,5 @@
 """
-__main__.py
+工具程式
 """
 
 import sys
@@ -12,9 +12,8 @@ from twnews.search import NewsSearch
 
 def soup(path):
     """
-    soup(path)
+    分解新聞
     """
-
     print('-' * 75)
     nsoup = NewsSoup(path)
     print('路徑: {}'.format(path))
@@ -33,9 +32,8 @@ def soup(path):
 
 def search_and_list(keyword, channel):
     """
-    search_and_list(keyword, channel)
+    搜尋，然後列出新聞標題
     """
-
     print('測試搜尋')
     nsearch = NewsSearch(channel, limit=10)
     results = nsearch.by_keyword(keyword).to_dict_list()
@@ -52,9 +50,8 @@ def search_and_list(keyword, channel):
 
 def search_and_soup(keyword, channel):
     """
-    search_and_soup(keyword, channel)
+    搜尋，然後分解新聞
     """
-
     print('測試搜尋與分解, 搜尋中 ...', end='', flush=True)
     logger = get_logger()
     nsearch = NewsSearch(channel, limit=10)
@@ -73,10 +70,9 @@ def search_and_soup(keyword, channel):
 
 def search_and_compare_performance(keyword):
     """
-    search_and_compare_performance(keyword):
+    測試各新聞台搜尋效能
     """
-
-    print('測試各家新聞台的搜尋效能')
+    print('測試各新聞台搜尋效能')
     summary = {}
 
     for channel in ['appledaily', 'cna', 'ettoday', 'ltn', 'setn', 'udn']:
@@ -143,7 +139,7 @@ def compare_keyword(keyword):
 
 def usage():
     """
-    usage()
+    使用說明
     """
     print('twnews {} (預設編碼: {})'.format(
         VERSION, locale.getpreferredencoding()))
@@ -154,7 +150,7 @@ def usage():
 
 def get_cmd_param(index, default=None):
     """
-    get_cmd_param(index, default=None)
+    取得 shell 參數
     """
     if len(sys.argv) > index:
         return sys.argv[index]

@@ -37,12 +37,12 @@ def get_cache_filepath(channel, uri):
     path = '{}/{}-{}.html.gz'.format(get_cache_dir(), channel, cache_id)
     return path
 
-def url_follow_redirection(url):
+def url_follow_redirection(url, proxy_first):
     """
     取得轉址後的 URL
     """
     logger = twnews.common.get_logger()
-    session = twnews.common.get_session()
+    session = twnews.common.get_session(proxy_first)
     old_url = url
     new_url = ''
     done = False
@@ -96,12 +96,12 @@ def url_force_ltn_mobile(url):
         logger.debug('變更 URL: %s', new_url)
     return new_url
 
-def soup_from_website(url, channel, refresh):
+def soup_from_website(url, channel, refresh, proxy_first):
     """
     網址轉換成 BeautifulSoup 4 物件
     """
     logger = twnews.common.get_logger()
-    session = twnews.common.get_session()
+    session = twnews.common.get_session(proxy_first)
 
     # 嘗試使用快取
     soup = None
@@ -188,12 +188,13 @@ class NewsSoup:
     新聞湯
     """
 
-    def __init__(self, path, refresh=False):
+    def __init__(self, path, refresh=False, proxy_first=False):
         """
         建立新聞分解器
         """
         self.path = path
         self.refresh = refresh
+        self.proxy_first = proxy_first
         self.loaded = False
         self.soup = None
         self.rawlen = 0
@@ -214,7 +215,7 @@ class NewsSoup:
 
         # URL 正規化
         if self.path.startswith('http'):
-            self.path = url_follow_redirection(self.path)
+            self.path = url_follow_redirection(self.path, self.proxy_first)
             self.path = url_force_https(self.path)
             if self.channel == 'ltn':
                 self.path = url_force_ltn_mobile(self.path)
@@ -230,13 +231,15 @@ class NewsSoup:
 
     def __get_soup(self):
         if not self.loaded:
+            self.loaded = True
             try:
                 if self.path.startswith('http'):
                     self.logger.debug('從網路載入新聞')
                     (self.soup, self.rawlen) = soup_from_website(
                         self.path,
                         self.channel,
-                        self.refresh
+                        self.refresh,
+                        self.proxy_first
                     )
                 else:
                     self.logger.debug('從檔案載入新聞')
