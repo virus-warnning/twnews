@@ -94,6 +94,12 @@ def url_force_ltn_mobile(url):
         new_url = 'https://m.ltn.com.tw' + url[len('https://news.ltn.com.tw'):]
         logger.debug('原始 URL: %s', url)
         logger.debug('變更 URL: %s', new_url)
+    elif re.match('^https://(3c|auto|ec|ent|food|istyle|market|playing|sports).ltn.com.tw/[^m].+', url):
+        uri_pos = url.find('/', 10)
+        new_url = url[:uri_pos] + '/m' + url[uri_pos:]
+        logger.debug('原始 URL: %s', url)
+        logger.debug('變更 URL: %s', new_url)
+
     return new_url
 
 def soup_from_website(url, channel, refresh, proxy_first):
@@ -224,7 +230,7 @@ class NewsSoup:
         layout = 'mobile'
         layout_list = twnews.common.get_channel_conf(self.channel, 'layout_list')
         for item in layout_list:
-            if path.startswith(item['prefix']):
+            if self.path.startswith(item['prefix']):
                 layout = item['layout']
 
         self.conf = twnews.common.get_channel_conf(self.channel, layout)

@@ -6,15 +6,15 @@ import unittest
 from twnews.search import NewsSearch
 
 #@unittest.skip
-class TestEttoday(unittest.TestCase):
+class TestSetn(unittest.TestCase):
 
     def setUp(self):
         self.keyword = '上吊'
-        self.nsearch = NewsSearch('ettoday', limit=10)
+        self.nsearch = NewsSearch('setn', limit=10)
 
     def test_01_filter_title(self):
         """
-        測試蘋果日報搜尋
+        測試三立新聞網搜尋
         """
         results = self.nsearch.by_keyword(self.keyword, title_only=True).to_dict_list()
         for topic in results:
@@ -23,7 +23,7 @@ class TestEttoday(unittest.TestCase):
 
     def test_02_search_and_soup(self):
         """
-        測試蘋果日報搜尋+分解
+        測試三立新聞網搜尋+分解
         """
         nsoups = self.nsearch.by_keyword(self.keyword).to_soup_list()
         for nsoup in nsoups:
