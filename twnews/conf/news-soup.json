@@ -152,7 +152,7 @@
     "mobile": {
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
-      "date_format": "%Y-%m-%d %H:%M",
+      "date_format": [ "%Y-%m-%d %H:%M", "%Y-%m-%d" ],
       "author_node": "",
       "article_node": "div.com > div.boxTitle > p"
     },

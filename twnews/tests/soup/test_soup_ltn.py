@@ -144,3 +144,15 @@ class TestLtn(unittest.TestCase):
         self.assertEqual('2018-11-28 14:21:00', nsoup.date().strftime(self.dtf))
         self.assertEqual(None, nsoup.author())
         self.assertIn('鮑爾目前只剩兩年控制權，而他今年有望靠著優異表現在薪資上大幅躍進', nsoup.contents())
+
+    def test_05_multiple_date_format(self):
+        """
+        測試多重日期格式
+        """
+        url = 'https://m.ltn.com.tw/news/politics/paper/1249335'
+        nsoup = NewsSoup(url, refresh=True)
+        self.assertEqual('ltn', nsoup.channel)
+        self.assertIn('狂拿15席 吳總教頭首戰告捷', nsoup.title())
+        self.assertEqual('2018-11-25 00:00:00', nsoup.date().strftime(self.dtf))
+        self.assertEqual('施曉光', nsoup.author())
+        self.assertIn('由黨魁吳敦義扮演「總教頭」並宣稱要擊出二十二支全壘打的國民黨', nsoup.contents())

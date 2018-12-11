@@ -327,13 +327,21 @@ class NewsSoup:
             return None
 
         if self.cache['date'] is None:
-            dfmt = self.conf['date_format']
-            try:
-                self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
-            except TypeError as ex:
-                self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
-            except ValueError as ex:
-                self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
+            formats = self.conf['date_format']
+            if isinstance(formats, str):
+                formats = [formats]
+
+            for dfmt in formats:
+                try:
+                    self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
+                except TypeError as ex:
+                    errmsg = '日期格式分析失敗 {} (新聞台: {})'.format(ex, self.channel)
+                except ValueError as ex:
+                    errmsg = '日期格式分析失敗 {} (新聞台: {})'.format(ex, self.channel)
+
+            if self.cache['date'] is None:
+                self.logger.error(errmsg)
+
         return self.cache['date']
 
     def author(self):
