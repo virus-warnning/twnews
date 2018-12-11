@@ -41,6 +41,7 @@ def filter_duplicated(results):
             previous = results[pidx]
             if result['link'] == previous['link']:
                 duplicated = True
+                break
 
         if not duplicated:
             filtered.append(result)
