@@ -45,14 +45,14 @@ class TestUdn(unittest.TestCase):
                 'url': 'https://autos.udn.com/autos/story/7826/3506163',
                 'title': '2018洛杉磯車展／更洗鍊有型！全新第四代Mazda3發表前廠照先曝光',
                 'date': '2018-11-28 11:35:11',
-                'author': '聯合新聞網 記者張振群／綜合報導',
+                'author': '張振群',
                 'contents': 'Mazda汽車今年壓軸重頭戲全新第四代Mazda3，在正式發表前外觀定裝照率先曝光。'
             },
             {
                 'url': 'https://game.udn.com/game/story/10449/3489517',
                 'title': '《轉校生》新手生存指南 對戰？先活下來再說吧！',
                 'date': '2018-11-19 17:14:00',
-                'author': '遊戲角落 老宅',
+                'author': '老宅',
                 'contents': '遊戲中兩大生產建設在教室下方的紙杯跟爐架，在這邊可以生產飲料跟食物'
             },
             {
@@ -62,28 +62,25 @@ class TestUdn(unittest.TestCase):
                 'author': None,
                 'contents': '廢除脫歐決定、舉行二次脫歐公投的聲量也越來越強'
             },
-            # TODO: 改善作者精準度
             {
                 'url': 'https://health.udn.com/health/story/6037/3504950',
                 'title': '喝奶茶不如單喝紅茶 日本紅茶協會：加牛奶會失去兩大功效',
                 'date': '2018-11-28 00:41:00',
-                'author': '每日健康 廖思涵／綜合報導',
+                'author': '廖思涵',
                 'contents': '茶葉含有咖啡鹼、茶鹼、鞣酸、可可鹼、葉酸、維生素B群、C、P及少量的礦物質'
             },
-            # TODO: 改善作者精準度
             {
                 'url': 'https://house.udn.com/house/story/5887/3506297',
                 'title': '一戶19萬也沒人要！ 神才賣得掉的217戶又流標了',
                 'date': '2018-11-28 12:26:17',
-                'author': '經濟日報 記者游智文╱即時報導',
+                'author': '游智文',
                 'contents': '北海岸喜凱亞渡假村法拍屋，今（28）日進行第17次拍賣'
             },
-            # TODO: 改善作者精準度
             {
                 'url': 'https://nba.udn.com/nba/story/6780/3506854',
                 'title': '「鳥人」現身丹佛主場 期盼能重返NBA',
                 'date': '2018-11-28 16:24:00',
-                'author': 'NBA台灣 / udn記者蔡佳霖／綜合外電報導',
+                'author': '蔡佳霖',
                 'contents': '今天現身丹佛主場，在中場時間擊鼓助威，和球迷進行互動'
             },
             {
@@ -93,20 +90,18 @@ class TestUdn(unittest.TestCase):
                 'author': '陳柏謙',
                 'contents': '九合一大選結果全面潰敗，縣市首長從選前13席崩盤到僅守住6席'
             },
-            # TODO: 改善作者精準度
             {
                 'url': 'https://stars.udn.com/star/story/10090/3507027',
                 'title': '自嘲和李進良「大餅跟鳥」 小禎妙答李婉鈺田欣誰戰力強',
                 'date': '2018-11-28 17:11:00',
-                'author': '聯合報 記者梅衍儂╱即時報導',
+                'author': '梅衍儂',
                 'contents': '很心疼小禎，願意把生活裡的體驗用演技來給大家看'
             },
-            # TODO: 改善作者精準度
             {
                 'url': 'https://style.udn.com/style/story/8065/3500832',
                 'title': '《我身後的陶斯》林世美長髮時浪漫感十足 但短髮的她更有看頭',
                 'date': '2018-11-25 10:02:00',
-                'author': 'udn STYLE 記者魏家娸',
+                'author': '魏家娸',
                 'contents': '第二女主角林世美在戲中深情愛著蘇志燮的情感也令人為之動容'
             }
         ]

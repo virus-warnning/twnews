@@ -46,15 +46,15 @@ class TestLtn(unittest.TestCase):
                 'url': 'http://3c.ltn.com.tw/m/news/35179',
                 'title': 'iPhone XR 開箱體驗（三）！相機對比 iPhone XS、Google Pixel 3',
                 'date': '2018-11-28 14:08:00',
-                'author': '文／記者黃敬淳',
+                'author': '黃敬淳',
                 'contents': '曝光控制也是 XR 相比 iPhone 8 Plus 的主要升級點'
             },
-            # TODO: 改善作者、日期精準度
+            # TODO: 改善日期精準度
             {
                 'url': 'http://auto.ltn.com.tw/m/news/11334/3',
                 'title': '瞄準 Toyota Auris，大改款 Mazda 3 洛杉磯車展正式亮相！（內有相片集）',
                 'date': None,
-                'author': '2018/11/28\n		文／記者徐煜展 圖片來源／Mazda',
+                'author': '徐煜展',
                 'contents': '其中新造型的 LED 尾燈組也與先前公佈的 Kai Concept 概念車相仿'
             },
             {
@@ -71,12 +71,11 @@ class TestLtn(unittest.TestCase):
                 'author': '蕭宇涵',
                 'contents': '但吳易展以旗下公司美仕特牛排公司才剛起步'
             },
-            # TODO: 改善作者精準度
             {
                 'url': 'http://estate.ltn.com.tw/article/6493',
                 'title': '台南新吉工業區地上權招租 提供優惠方案',
                 'date': '2018-11-26 18:27:00',
-                'author': '文/記者林耀文',
+                'author': '林耀文',
                 'contents': '台南市新吉工業區位於臺南市安南區、安定區交界處招商也頗為亮麗'
             },
             {
@@ -86,12 +85,12 @@ class TestLtn(unittest.TestCase):
                 'author': None,
                 'contents': '坊間常有說法認為菠菜中大量的「草酸」會阻礙鈣質吸收、影響幼兒生長'
             },
-            # TODO: 改善日期、作者精準度
+            # TODO: 改善日期精準度
             {
                 'url': 'http://istyle.ltn.com.tw/m/article/9168',
                 'title': '明星瘋這咖》張鈞甯、陳庭妮私下都揹小包！「小叮噹大袋」暫退...',
                 'date': None,
-                'author': 'Nov. 28 2018\n		文／記者余崇慧　圖／記者余崇慧、品牌提供、IG',
+                'author': '余崇慧',
                 'contents': '一頭復古味十足的劉海，帶著六、七零年代阿哥哥風格'
             },
             {
@@ -101,13 +100,12 @@ class TestLtn(unittest.TestCase):
                 'author': None,
                 'contents': '台北國際旅展設置形象館，推出全台36個部落的精彩遊程'
             },
-            # TODO: 改善作者精準度
             {
                 'url': 'http://playing.ltn.com.tw/m/article/11191',
                 'title': '北高韓粉吃雞排囉！3千份雞排賀韓國瑜當選，今起發送到週末',
                 'date': '2018-11-28 00:00:00',
-                'author': '文／即時新聞綜合報導　攝影／即時新聞綜合報導',
-                'contents': '。網友打趣地解釋，原先說是900份。後來加碼至1000份'
+                'author': None,
+                'contents': '網友打趣地解釋，原先說是900份。後來加碼至1000份'
             },
             {
                 'url': 'http://sports.ltn.com.tw/m/news/breakingnews/2626821',
@@ -128,7 +126,7 @@ class TestLtn(unittest.TestCase):
             nsoup = NewsSoup(layout['url'], refresh=True, proxy_first=True)
             self.assertEqual('ltn', nsoup.channel)
             self.assertIn(layout['title'], nsoup.title())
-            if layout['date'] is not None:
+            if nsoup.date() is not None:
                 self.assertEqual(layout['date'], nsoup.date().strftime(self.dtf))
             else:
                 self.assertEqual(layout['date'], nsoup.date())

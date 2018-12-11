@@ -1,5 +1,5 @@
 """
-新聞湯
+新聞分解模組
 """
 
 import io
@@ -166,32 +166,34 @@ def scan_author(article):
     """
 
     patterns = [
-        r'\((.{2,5})／.+報導\)',
-        r'（(.{2,5})／.+報導）',
-        r'記者(.{2,5})／.+報導',
-        r'中心(.{2,5})／.+報導',
-        r'記者(.{2,3}).{2}[縣市]?\d{1,2}日電',
-        r'（譯者：(.{2,5})/.+）'
+        (r'(記者|中心)(\w{2,5})[/／╱](.+報導|特稿)', 2),
+        (r'文[/／╱]記者(\w{2,5})', 1),
+        (r'[\(（](\w{2,5})[/／╱].+報導[\)）]', 1),
+        (r'記者(\w{2,3}).{2}[縣市]?\d{1,2}日電', 1),
+        (r'(記者|遊戲角落 )(\w{2,5})$', 2),
+        (r'\s(\w{2,5})[/／╱].+報導$', 1),
+        (r'（譯者：(\w{2,5})/.+）', 1)
     ]
 
     exclude_list = [
         '國際中心',
         '地方中心',
-        '社會中心'
+        '社會中心',
+        '攝影'
     ]
 
-    for patt in patterns:
+    for (patt, gidx) in patterns:
         pobj = re.compile(patt)
         match = pobj.search(article)
         if match is not None:
             if match.group(1) not in exclude_list:
-                return match.group(1)
+                return match.group(gidx)
 
     return None
 
 class NewsSoup:
     """
-    新聞湯
+    新聞分解器
     """
 
     def __init__(self, path, refresh=False, proxy_first=False):
@@ -351,7 +353,11 @@ class NewsSoup:
                     node = copy.copy(found[0])
                     for child_node in node.select('*'):
                         child_node.extract()
-                    self.cache['author'] = node.text.strip()
+                    author_raw = node.text.strip()
+                    if author_raw[0] != '記' and len(author_raw) <= 5:
+                        self.cache['author'] = author_raw
+                    else:
+                        self.cache['author'] = scan_author(author_raw)
                     if len(found) > 1:
                         self.logger.warning('找到多組記者姓名 (新聞台: %s)', self.channel)
                 else:
