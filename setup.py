@@ -21,7 +21,7 @@ setup(
     license='MIT',
     author='Raymond Wu',
     package_data={
-        'twnews': ['conf/*', 'samples/*']
+        'twnews': ['conf/*', 'samples/*', 'tests/soup/*', 'tests/search/*']
     },
     install_requires=[
         'beautifulsoup4',

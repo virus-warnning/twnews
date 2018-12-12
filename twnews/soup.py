@@ -356,20 +356,26 @@ class NewsSoup:
         if self.cache['author'] is None:
             nsel = self.conf['author_node']
             if nsel != '':
-                found = soup.select(nsel)
-                if found:
-                    node = copy.copy(found[0])
-                    for child_node in node.select('*'):
-                        child_node.extract()
-                    author_raw = node.text.strip()
-                    if author_raw[0] != '記' and len(author_raw) <= 5:
-                        self.cache['author'] = author_raw
-                    else:
-                        self.cache['author'] = scan_author(author_raw)
-                    if len(found) > 1:
-                        self.logger.warning('找到多組記者姓名 (新聞台: %s)', self.channel)
+                if isinstance(nsel, str):
+                    selectors = [nsel]
                 else:
-                    self.logger.warning('找不到記者節點 (新聞台: %s)', self.channel)
+                    selectors = nsel
+                for nsel in selectors:
+                    found = soup.select(nsel)
+                    if found:
+                        node = copy.copy(found[0])
+                        for child_node in node.select('*'):
+                            child_node.extract()
+                        author_raw = node.text.strip()
+                        if author_raw[0] != '記' and len(author_raw) <= 5:
+                            self.cache['author'] = author_raw
+                        else:
+                            self.cache['author'] = scan_author(author_raw)
+                        if len(found) > 1:
+                            self.logger.warning('找到多組記者姓名 (新聞台: %s)', self.channel)
+                        break
+                    else:
+                        self.logger.warning('找不到記者節點 (新聞台: %s)', self.channel)
             else:
                 contents = self.contents()
                 if contents is not None:

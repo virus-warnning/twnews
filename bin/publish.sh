@@ -30,13 +30,12 @@ fi
 echo 'OK'
 
 # 封裝前跑一次單元測試，確認程式邏輯正確
-echo -n '發佈前測試 ... '
-python3 -m unittest discover -f twnews.tests 2> /dev/null
+echo -n '發佈前測試 '
+green -q -f twnews.tests
 if [ $? -ne 0 ]; then
   echo '發佈前測試失敗，停止封裝'
   exit 4
 fi
-echo 'OK'
 
 # 封裝
 echo -n '封裝 ... '
@@ -66,18 +65,17 @@ else
     rm -rf sandbox
   fi
   virtualenv -q sandbox
-  sandbox/bin/pip -q install dist/$WHEEL
+  sandbox/bin/pip -q install dist/$WHEEL green
   echo 'OK'
 
   # 在 sandbox 跑一次單元測試
-  echo -n '發佈後測試 ... '
+  echo -n '發佈後測試 '
   cd sandbox
-  bin/python -m unittest discover -f twnews.tests 2> /dev/null
+  bin/green -q -f twnews.tests
   if [ $? -ne 0 ]; then
     echo '發佈後測試失敗，進入 sandbox 目錄查一下環境問題吧'
     exit 4
   fi
-  echo 'OK'
 
   # 成功後顯示下一步提示
   echo '-----------------------------------------------------'
@@ -92,7 +90,7 @@ else
   echo '    bin/publish.sh release'
   echo ''
   cd ..
-  rm -rf sandbox
+  # rm -rf sandbox
 fi
 
 exit 0

@@ -50,7 +50,7 @@
       "title_node": "#h1",
       "date_node": "div.reporter > time",
       "date_format": "%Y年%m月%d日 %H:%M",
-      "author_node": "div.reporter > div.rp_name > cite > a",
+      "author_node": [ "div.reporter > div.rp_name > cite > a", "div.reporter > div.rp_name" ],
       "article_node": "article.arttext > p"
     }
   },
