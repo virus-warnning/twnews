@@ -1,5 +1,5 @@
 """
-新聞湯
+新聞分解模組
 """
 
 import io
@@ -37,12 +37,12 @@ def get_cache_filepath(channel, uri):
     path = '{}/{}-{}.html.gz'.format(get_cache_dir(), channel, cache_id)
     return path
 
-def url_follow_redirection(url):
+def url_follow_redirection(url, proxy_first):
     """
     取得轉址後的 URL
     """
     logger = twnews.common.get_logger()
-    session = twnews.common.get_session()
+    session = twnews.common.get_session(proxy_first)
     old_url = url
     new_url = ''
     done = False
@@ -94,14 +94,20 @@ def url_force_ltn_mobile(url):
         new_url = 'https://m.ltn.com.tw' + url[len('https://news.ltn.com.tw'):]
         logger.debug('原始 URL: %s', url)
         logger.debug('變更 URL: %s', new_url)
+    elif re.match('^https://(3c|auto|ec|ent|food|istyle|market|playing|sports).ltn.com.tw/[^m].+', url):
+        uri_pos = url.find('/', 10)
+        new_url = url[:uri_pos] + '/m' + url[uri_pos:]
+        logger.debug('原始 URL: %s', url)
+        logger.debug('變更 URL: %s', new_url)
+
     return new_url
 
-def soup_from_website(url, channel, refresh):
+def soup_from_website(url, channel, refresh, proxy_first):
     """
     網址轉換成 BeautifulSoup 4 物件
     """
     logger = twnews.common.get_logger()
-    session = twnews.common.get_session()
+    session = twnews.common.get_session(proxy_first)
 
     # 嘗試使用快取
     soup = None
@@ -160,40 +166,43 @@ def scan_author(article):
     """
 
     patterns = [
-        r'\((.{2,5})／.+報導\)',
-        r'（(.{2,5})／.+報導）',
-        r'記者(.{2,5})／.+報導',
-        r'中心(.{2,5})／.+報導',
-        r'記者(.{2,3}).{2}[縣市]?\d{1,2}日電',
-        r'（譯者：(.{2,5})/.+）'
+        (r'(記者|中心)(\w{2,5})[/／╱](.+報導|特稿)', 2),
+        (r'文[/／╱]記者(\w{2,5})', 1),
+        (r'[\(（](\w{2,5})[/／╱].+報導[\)）]', 1),
+        (r'記者(\w{2,3}).{2}[縣市]?\d{1,2}日電', 1),
+        (r'(記者|遊戲角落 )(\w{2,5})$', 2),
+        (r'\s(\w{2,5})[/／╱].+報導$', 1),
+        (r'（譯者：(\w{2,5})/.+）', 1)
     ]
 
     exclude_list = [
         '國際中心',
         '地方中心',
-        '社會中心'
+        '社會中心',
+        '攝影'
     ]
 
-    for patt in patterns:
+    for (patt, gidx) in patterns:
         pobj = re.compile(patt)
         match = pobj.search(article)
         if match is not None:
             if match.group(1) not in exclude_list:
-                return match.group(1)
+                return match.group(gidx)
 
     return None
 
 class NewsSoup:
     """
-    新聞湯
+    新聞分解器
     """
 
-    def __init__(self, path, refresh=False):
+    def __init__(self, path, refresh=False, proxy_first=False):
         """
         建立新聞分解器
         """
         self.path = path
         self.refresh = refresh
+        self.proxy_first = proxy_first
         self.loaded = False
         self.soup = None
         self.rawlen = 0
@@ -214,7 +223,7 @@ class NewsSoup:
 
         # URL 正規化
         if self.path.startswith('http'):
-            self.path = url_follow_redirection(self.path)
+            self.path = url_follow_redirection(self.path, self.proxy_first)
             self.path = url_force_https(self.path)
             if self.channel == 'ltn':
                 self.path = url_force_ltn_mobile(self.path)
@@ -223,20 +232,22 @@ class NewsSoup:
         layout = 'mobile'
         layout_list = twnews.common.get_channel_conf(self.channel, 'layout_list')
         for item in layout_list:
-            if path.startswith(item['prefix']):
+            if self.path.startswith(item['prefix']):
                 layout = item['layout']
 
         self.conf = twnews.common.get_channel_conf(self.channel, layout)
 
     def __get_soup(self):
         if not self.loaded:
+            self.loaded = True
             try:
                 if self.path.startswith('http'):
                     self.logger.debug('從網路載入新聞')
                     (self.soup, self.rawlen) = soup_from_website(
                         self.path,
                         self.channel,
-                        self.refresh
+                        self.refresh,
+                        self.proxy_first
                     )
                 else:
                     self.logger.debug('從檔案載入新聞')
@@ -316,13 +327,21 @@ class NewsSoup:
             return None
 
         if self.cache['date'] is None:
-            dfmt = self.conf['date_format']
-            try:
-                self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
-            except TypeError as ex:
-                self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
-            except ValueError as ex:
-                self.logger.error('日期格式分析失敗 %s (新聞台: %s)', ex, self.channel)
+            formats = self.conf['date_format']
+            if isinstance(formats, str):
+                formats = [formats]
+
+            for dfmt in formats:
+                try:
+                    self.cache['date'] = datetime.strptime(self.date_raw(), dfmt)
+                except TypeError as ex:
+                    errmsg = '日期格式分析失敗 {} (新聞台: {})'.format(ex, self.channel)
+                except ValueError as ex:
+                    errmsg = '日期格式分析失敗 {} (新聞台: {})'.format(ex, self.channel)
+
+            if self.cache['date'] is None:
+                self.logger.error(errmsg)
+
         return self.cache['date']
 
     def author(self):
@@ -337,16 +356,26 @@ class NewsSoup:
         if self.cache['author'] is None:
             nsel = self.conf['author_node']
             if nsel != '':
-                found = soup.select(nsel)
-                if found:
-                    node = copy.copy(found[0])
-                    for child_node in node.select('*'):
-                        child_node.extract()
-                    self.cache['author'] = node.text.strip()
-                    if len(found) > 1:
-                        self.logger.warning('找到多組記者姓名 (新聞台: %s)', self.channel)
+                if isinstance(nsel, str):
+                    selectors = [nsel]
                 else:
-                    self.logger.warning('找不到記者節點 (新聞台: %s)', self.channel)
+                    selectors = nsel
+                for nsel in selectors:
+                    found = soup.select(nsel)
+                    if found:
+                        node = copy.copy(found[0])
+                        for child_node in node.select('*'):
+                            child_node.extract()
+                        author_raw = node.text.strip()
+                        if author_raw[0] != '記' and len(author_raw) <= 5:
+                            self.cache['author'] = author_raw
+                        else:
+                            self.cache['author'] = scan_author(author_raw)
+                        if len(found) > 1:
+                            self.logger.warning('找到多組記者姓名 (新聞台: %s)', self.channel)
+                        break
+                    else:
+                        self.logger.warning('找不到記者節點 (新聞台: %s)', self.channel)
             else:
                 contents = self.contents()
                 if contents is not None:

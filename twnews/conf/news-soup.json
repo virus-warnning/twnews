@@ -33,7 +33,7 @@
       "article_node": "article.nm-content > div.nm-article > div.nm-article-body > div.text"
     },
     "search": {
-      "url": "https://tw.appledaily.com/search/ajaxresult?querystrS=${KEYWORD}&page=${PAGE}",
+      "url": "https://tw.appledaily.com/search/ajaxresult/page/${PAGE}?querystrS=${KEYWORD}&sort=time&searchType=all",
       "begin_date_format": "&dateStart=%Y/%m/%d",
       "end_date_format": "&dateEnd=%Y/%m/%d",
       "result_node": "",
@@ -50,7 +50,7 @@
       "title_node": "#h1",
       "date_node": "div.reporter > time",
       "date_format": "%Y年%m月%d日 %H:%M",
-      "author_node": "div.reporter > div.rp_name > cite > a",
+      "author_node": [ "div.reporter > div.rp_name > cite > a", "div.reporter > div.rp_name" ],
       "article_node": "article.arttext > p"
     }
   },
@@ -152,7 +152,7 @@
     "mobile": {
       "title_node": "div.com > h2",
       "date_node": "div.com > div.h2_else > div.time",
-      "date_format": "%Y-%m-%d %H:%M",
+      "date_format": [ "%Y-%m-%d %H:%M", "%Y-%m-%d" ],
       "author_node": "",
       "article_node": "div.com > div.boxTitle > p"
     },

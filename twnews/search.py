@@ -41,6 +41,7 @@ def filter_duplicated(results):
             previous = results[pidx]
             if result['link'] == previous['link']:
                 duplicated = True
+                break
 
         if not duplicated:
             filtered.append(result)
@@ -60,7 +61,7 @@ class NewsSearch:
     新聞搜尋器
     """
 
-    def __init__(self, channel, limit=25, beg_date=None, end_date=None):
+    def __init__(self, channel, limit=25, beg_date=None, end_date=None, proxy_first=False):
         """
         配置新聞搜尋器
         """
@@ -83,7 +84,8 @@ class NewsSearch:
             'beg_date': None,
             'end_date': None,
             'channel': channel,
-            'limit': limit
+            'limit': limit,
+            'proxy_first': proxy_first
         }
         try:
             if beg_date is not None:
@@ -304,7 +306,7 @@ class NewsSearch:
             url += self.params['end_date'].strftime(self.conf['end_date_format'])
 
         # 查詢
-        session = twnews.common.get_session()
+        session = twnews.common.get_session(proxy_first=self.params['proxy_first'])
         logger = twnews.common.get_logger()
         logger.info('新聞搜尋 %s', url)
         resp = session.get(url, allow_redirects=False)
