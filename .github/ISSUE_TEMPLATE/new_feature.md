@@ -1,7 +1,7 @@
 ---
 name: New feature
 about: 許個願望讓我看看能不能幫得上忙
-title: ''
+title: 摘要一下願望吧
 labels: enhancement
 assignees: virus-warnning
 
