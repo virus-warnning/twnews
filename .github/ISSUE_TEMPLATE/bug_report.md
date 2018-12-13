@@ -8,17 +8,21 @@ assignees: virus-warnning
 ---
 
 **問題描述**
+
 盡可能清楚地描述狀況，讓我觀落陰不會走火入魔
 
 **重現方法**
+
 用下列步驟可以讓程式爆掉
 1. python3 -m twnews ...
 2. ...
 
 **預期行為**
+
 我本來覺得應該會這樣 ...
 
 **實際行為**
+
 結果變成這樣 ...
 ```bash
 $ python3 -m twnews soup 
@@ -33,5 +37,6 @@ $ python3 -m twnews soup
 ```
 
 **系統環境**
+
  - Python: [至少要 3.5 以上喔]
  - OS: [例如 Ubuntu 18.04]
