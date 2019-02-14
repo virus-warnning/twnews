@@ -51,19 +51,27 @@ def url_follow_redirection(url, proxy_first):
         try:
             resp = session.head(old_url)
             status = resp.status_code
-            if status // 100 == 3:
+            if status == 301 or status == 302:
                 dest = resp.headers['Location']
-                if dest.startswith('/'):
+                if dest.startswith('//'):
+                    new_url = 'https:' + dest
+                elif dest.startswith('/'):
                     new_url = old_url[0:old_url.find('/', 10)] + dest
                 else:
                     new_url = dest
+                logger.debug('===== 轉址細節 =====')
+                logger.debug('HTTP Status: %d', status)
+                logger.debug('Location: %s', dest)
                 logger.debug('原始 URL: %s', old_url)
                 logger.debug('變更 URL: %s', new_url)
+                logger.debug('====================')
                 old_url = new_url
             elif status == 200:
                 done = True
             else:
-                logger.error('檢查轉址過程發生錯誤，回應碼: %d', status)
+                logger.error('檢查轉址過程發生錯誤')
+                logger.error('HTTP Status: %d，', status)
+                logger.error('URL: %s，', old_url)
                 done = True
         except requests.exceptions.ConnectionError as ex:
             logger.error('檢查轉址過程連線失敗: %s', ex)

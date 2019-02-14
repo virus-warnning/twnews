@@ -16,7 +16,8 @@ def soup(path):
     """
     print('-' * 75)
     nsoup = NewsSoup(path)
-    print('路徑: {}'.format(path))
+    print('原始路徑: {}'.format(path))
+    print('最終路徑: {}'.format(nsoup.path))
     print('頻道: {}'.format(nsoup.channel))
     print('標題: {}'.format(nsoup.title()))
     ndt = nsoup.date()
