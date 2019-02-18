@@ -38,6 +38,16 @@ def holder_dist(refresh=False):
         if save_it:
             with open(csv_file, 'wt') as csvf:
                 csvf.write(csv)
+
+            # 匯入步驟:
+            # 1. 確認 table 存在, 一季一個 table
+            #    cat dist-template.sql | sed 's/{YYYY}/2019/' | sed 's/{Q}/3/' | sqlite3 holder-dist.sqlite
+            # 2. 消除 csv header
+            #    tail -n +2 hd-20190215.csv > hd-20190215-wo-header.csv
+            # 3. 匯入 csv
+            #    sqlite3 -separator ',' holder-dist.sqlite '.import hd-20190215-wo-header.csv dist_2019q1'
+            # 4. 移除暫存檔
+            #    rm -f hd-20190215-wo-header.csv
         else:
             print('檔案已存在，不用儲存')
     else:
