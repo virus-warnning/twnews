@@ -1,6 +1,8 @@
 import os
+import re
 import os.path
 import requests
+import subprocess
 
 def holder_dist(refresh=False):
     """
@@ -36,18 +38,37 @@ def holder_dist(refresh=False):
                 save_it = True
 
         if save_it:
+            # 存檔
             with open(csv_file, 'wt') as csvf:
                 csvf.write(csv)
 
-            # 匯入步驟:
+            # 匯入:
             # 1. 確認 table 存在, 一季一個 table
-            #    cat dist-template.sql | sed 's/{YYYY}/2019/' | sed 's/{Q}/3/' | sqlite3 holder-dist.sqlite
             # 2. 消除 csv header
-            #    tail -n +2 hd-20190215.csv > hd-20190215-wo-header.csv
             # 3. 匯入 csv
-            #    sqlite3 -separator ',' holder-dist.sqlite '.import hd-20190215-wo-header.csv dist_2019q1'
             # 4. 移除暫存檔
-            #    rm -f hd-20190215-wo-header.csv
+            y = csv_date[0:4]
+            q = str(int(csv_date[4:6]) // 4 + 1)
+            qtable = 'dist_{}q{}'.format(y, q)
+            nh_file = '{}/hd-{}-nh.csv'.format(csv_dir, csv_date)
+            sql1 = re.sub('\n\s+', '', '''
+            CREATE TABLE IF NOT EXISTS "{}" (
+            	`stock_id` TEXT NOT NULL,
+            	`date` TEXT NOT NULL,
+            	`level` INTEGER NOT NULL,
+            	`numof_holders` INTEGER NOT NULL,
+            	`numof_stocks` INTEGER NOT NULL,
+            	`percentof_stocks` REAL NOT NULL,
+            	PRIMARY KEY(`stock_id`,`date`,`level`)
+            );
+            '''.format(qtable))
+            sql2 = '.import {} {}'.format(nh_file, qtable)
+
+            subprocess.run(['sqlite3', 'holder-dist.sqlite', sql1], cwd=csv_dir)
+            with open(csv_file, 'r') as stdin, open(nh_file, 'w') as stdout:
+                subprocess.run(['tail', '-n', '+2'], stdin=stdin, stdout=stdout)
+            subprocess.run(['sqlite3', '-separator', ',', 'holder-dist.sqlite', sql2], cwd=csv_dir)
+            os.remove(nh_file)
         else:
             print('檔案已存在，不用儲存')
     else:
