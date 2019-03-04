@@ -53,13 +53,13 @@ def holder_dist(refresh=False):
             nh_file = '{}/hd-{}-nh.csv'.format(csv_dir, csv_date)
             sql1 = re.sub('\n\s+', '', '''
             CREATE TABLE IF NOT EXISTS "{}" (
+                `date` TEXT NOT NULL,
             	`stock_id` TEXT NOT NULL,
-            	`date` TEXT NOT NULL,
             	`level` INTEGER NOT NULL,
             	`numof_holders` INTEGER NOT NULL,
             	`numof_stocks` INTEGER NOT NULL,
             	`percentof_stocks` REAL NOT NULL,
-            	PRIMARY KEY(`stock_id`,`date`,`level`)
+            	PRIMARY KEY(`date`,`stock_id`,`level`)
             );
             '''.format(qtable))
             sql2 = '.import {} {}'.format(nh_file, qtable)
