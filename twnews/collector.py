@@ -4,16 +4,55 @@ import os.path
 import requests
 import subprocess
 
+def holder_import(csv_file):
+    y = csv_file[-12:-8]
+    q = (int(csv_file[-8:-6]) // 4) + 1
+    qtable = 'hd{}q{}'.format(y, q)
+    ddl = re.sub(r'\n\s+', ' ', '''
+        CREATE TABLE IF NOT EXISTS `{}` (
+            `date` TEXT NOT NULL,
+            `stock_id` TEXT NOT NULL,
+            `level` INTEGER NOT NULL,
+            `numof_holders` INTEGER NOT NULL,
+            `numof_stocks` INTEGER NOT NULL,
+            `percentof_stocks` REAL NOT NULL,
+            PRIMARY KEY(`date`, `stock_id`, `level`)
+        );
+    ''').format(qtable)
+
+    nh_file = csv_file[:-4] + '-nh.csv'
+    dml = '.import {} {}'.format(nh_file, qtable)
+
+    with open(csv_file, 'r') as stdin, open(nh_file, 'w') as stdout:
+        subprocess.run(['tail', '-n', '+2'], stdin=stdin, stdout=stdout)
+
+    db_file = os.path.expanduser('~/.twnews/holder-dist/holder-dist.sqlite')
+    subprocess.run(['rm', '-f', db_file])
+    subprocess.run(['sqlite3', db_file, ddl])
+    subprocess.run(['sqlite3', '-separator', ',', db_file, dml])
+    os.remove(nh_file)
+
+def holder_rebuild():
+    csv_list = []
+    csv_dir = os.path.expanduser('~/.twnews/holder-dist')
+    for fname in os.listdir(csv_dir):
+        if re.match(r'hd-\d{8}.csv', fname) is not None:
+            csv_path = '{}/{}'.format(csv_dir, fname)
+            csv_list.append(csv_path)
+
+    print('重建資料庫 ...')
+    for csv_file in csv_list:
+        msg = '* {}'.format(csv_file[-12:-4])
+        print(msg)
+        holder_import(csv_file)
+    print('搞定!')
+
 def holder_dist(refresh=False):
-    """
-    取得最新的股權分散表完整檔
-    - 換行符: '\r\n'
-    - 分隔符: ','
-    """
+    # 取得最新的股權分散表完整檔
     url = 'https://smart.tdcc.com.tw/opendata/getOD.ashx?id=1-5'
     resp = requests.get(url)
     if resp.status_code == 200:
-        csv_dir = os.path.expanduser('~') + '/.twnews/holder-dist'
+        csv_dir = os.path.expanduser('~/.twnews/holder-dist')
         if not os.path.isdir(csv_dir):
             os.makedirs(csv_dir)
 
@@ -41,38 +80,11 @@ def holder_dist(refresh=False):
             # 存檔
             with open(csv_file, 'wt') as csvf:
                 csvf.write(csv)
-
-            # 匯入:
-            # 1. 確認 table 存在, 一季一個 table
-            # 2. 消除 csv header
-            # 3. 匯入 csv
-            # 4. 移除暫存檔
-            y = csv_date[0:4]
-            q = str(int(csv_date[4:6]) // 4 + 1)
-            qtable = 'dist_{}q{}'.format(y, q)
-            nh_file = '{}/hd-{}-nh.csv'.format(csv_dir, csv_date)
-            sql1 = re.sub('\n\s+', '', '''
-            CREATE TABLE IF NOT EXISTS "{}" (
-                `date` TEXT NOT NULL,
-            	`stock_id` TEXT NOT NULL,
-            	`level` INTEGER NOT NULL,
-            	`numof_holders` INTEGER NOT NULL,
-            	`numof_stocks` INTEGER NOT NULL,
-            	`percentof_stocks` REAL NOT NULL,
-            	PRIMARY KEY(`date`,`stock_id`,`level`)
-            );
-            '''.format(qtable))
-            sql2 = '.import {} {}'.format(nh_file, qtable)
-
-            subprocess.run(['sqlite3', 'holder-dist.sqlite', sql1], cwd=csv_dir)
-            with open(csv_file, 'r') as stdin, open(nh_file, 'w') as stdout:
-                subprocess.run(['tail', '-n', '+2'], stdin=stdin, stdout=stdout)
-            subprocess.run(['sqlite3', '-separator', ',', 'holder-dist.sqlite', sql2], cwd=csv_dir)
-            os.remove(nh_file)
+            holder_import(csv_file)
         else:
             print('檔案已存在，不用儲存')
     else:
         print('無法下載')
 
 if __name__ == '__main__':
-    holder_dist()
+    holder_rebuild()
