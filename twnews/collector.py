@@ -27,7 +27,6 @@ def holder_import(csv_file):
         subprocess.run(['tail', '-n', '+2'], stdin=stdin, stdout=stdout)
 
     db_file = os.path.expanduser('~/.twnews/holder-dist/holder-dist.sqlite')
-    subprocess.run(['rm', '-f', db_file])
     subprocess.run(['sqlite3', db_file, ddl])
     subprocess.run(['sqlite3', '-separator', ',', db_file, dml])
     os.remove(nh_file)
@@ -41,6 +40,8 @@ def holder_rebuild():
             csv_list.append(csv_path)
 
     print('重建資料庫 ...')
+    db_file = os.path.expanduser('~/.twnews/holder-dist/holder-dist.sqlite')
+    subprocess.run(['rm', '-f', db_file])
     for csv_file in csv_list:
         msg = '* {}'.format(csv_file[-12:-4])
         print(msg)
