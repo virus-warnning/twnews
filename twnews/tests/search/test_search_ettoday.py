@@ -10,7 +10,7 @@ class TestEttoday(unittest.TestCase):
 
     def setUp(self):
         self.keyword = '上吊'
-        self.nsearch = NewsSearch('ettoday', limit=10)
+        self.nsearch = NewsSearch('ettoday', limit=10, proxy_first=True)
 
     def test_01_filter_title(self):
         """
