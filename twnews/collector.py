@@ -23,9 +23,11 @@ def holder_import(csv_file):
     nh_file = csv_file[:-4] + '-nh.csv'
     dml = '.import {} {}'.format(nh_file, qtable)
 
+    # 消除 csv header (sqlite3 無法跳過 header)
     with open(csv_file, 'r') as stdin, open(nh_file, 'w') as stdout:
         subprocess.run(['tail', '-n', '+2'], stdin=stdin, stdout=stdout)
 
+    # 建表與匯入
     db_file = os.path.expanduser('~/.twnews/holder-dist/holder-dist.sqlite')
     subprocess.run(['sqlite3', db_file, ddl])
     subprocess.run(['sqlite3', '-separator', ',', db_file, dml])
