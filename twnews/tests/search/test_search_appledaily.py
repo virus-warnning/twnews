@@ -28,4 +28,5 @@ class TestAppleDaily(unittest.TestCase):
         nsoups = self.nsearch.by_keyword(self.keyword).to_soup_list()
         for nsoup in nsoups:
             if nsoup.contents() is None:
-                self.fail('內文不可為 None')
+                msg = '內文不可為 None, URL={}'.format(nsoup.path)
+                self.fail(msg)
