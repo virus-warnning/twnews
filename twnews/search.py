@@ -191,7 +191,7 @@ class NewsSearch:
         """
         soup_list = []
         for result in self.result['items']:
-            nsoup = NewsSoup(result['link'])
+            nsoup = NewsSoup(result['link'], proxy_first=self.params['proxy_first'])
             soup_list.append(nsoup)
         return soup_list
 
