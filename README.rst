@@ -10,6 +10,11 @@
 - 解決 Python for Windows CP950 編碼問題，節省處理鳥事的時間
 - 每週執行自動化測試檢查分解程式的時效性
 
+0.3.0 新功能
+
+- 股權分散表 CSV 檔蒐集程式
+- 修正自由時報娛樂新聞分解問題 `#50 <https://github.com/virus-warnning/twnews/issues/50>`_ (回報者: `CpOuyang <https://github.com/CpOuyang>`_)
+
 0.2.4 新功能
 
 - 改善記者姓名辨識能力
