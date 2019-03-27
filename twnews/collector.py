@@ -4,33 +4,40 @@ import os.path
 import requests
 import subprocess
 
+def mlstr_reduce(mlstr):
+    return re.sub(r'\n\s+', ' ', mlstr)
+
 def holder_import(csv_file):
-    y = csv_file[-12:-8]
-    q = (int(csv_file[-8:-6]) // 4) + 1
-    qtable = 'hd{}q{}'.format(y, q)
-    ddl = re.sub(r'\n\s+', ' ', '''
-        CREATE TABLE IF NOT EXISTS `{}` (
-            `date` TEXT NOT NULL,
-            `stock_id` TEXT NOT NULL,
-            `level` INTEGER NOT NULL,
-            `numof_holders` INTEGER NOT NULL,
-            `numof_stocks` INTEGER NOT NULL,
-            `percentof_stocks` REAL NOT NULL,
-            PRIMARY KEY(`date`, `stock_id`, `level`)
-        );
-    ''').format(qtable)
-
-    nh_file = csv_file[:-4] + '-nh.csv'
-    dml = '.import {} {}'.format(nh_file, qtable)
-
     # 消除 csv header (sqlite3 無法跳過 header)
+    nh_file = csv_file[:-4] + '-nh.csv'
     with open(csv_file, 'r') as stdin, open(nh_file, 'w') as stdout:
         subprocess.run(['tail', '-n', '+2'], stdin=stdin, stdout=stdout)
 
-    # 建表與匯入
+    # 匯入資料
     db_file = os.path.expanduser('~/.twnews/holder-dist/holder-dist.sqlite')
-    subprocess.run(['sqlite3', db_file, ddl])
+    dml = '.import {} temp_for_csv'.format(nh_file)
     subprocess.run(['sqlite3', '-separator', ',', db_file, dml])
+
+    # 依 level 分配
+    for lv in range(1, 18):
+        dml = mlstr_reduce('''
+            INSERT INTO level{}
+            SELECT
+                `stock_id`,
+                `date`,
+                `numof_holders`,
+                `numof_stocks`,
+                `percentof_stocks`
+                FROM temp_for_csv
+                WHERE level={}
+        ''').format(lv, lv)
+        subprocess.run(['sqlite3', db_file, dml])
+
+    # 刪除匯入資料
+    dml = 'DELETE FROM temp_for_csv'
+    subprocess.run(['sqlite3', db_file, dml])
+
+    # 刪除無 header csv 檔
     os.remove(nh_file)
 
 def holder_rebuild():
@@ -42,12 +49,48 @@ def holder_rebuild():
             csv_list.append(csv_path)
 
     print('重建資料庫 ...')
+
+    # 移除 database
     db_file = os.path.expanduser('~/.twnews/holder-dist/holder-dist.sqlite')
-    subprocess.run(['rm', '-f', db_file])
+    r = subprocess.run(['rm', '-f', db_file])
+
+    # 產生匯入暫存表
+    ddl = []
+    ddl.append(mlstr_reduce('''
+        CREATE TABLE temp_for_csv (
+            `date` TEXT NOT NULL,
+            `stock_id` TEXT NOT NULL,
+            `level` INTEGER NOT NULL,
+            `numof_holders` INTEGER NOT NULL,
+            `numof_stocks` INTEGER NOT NULL,
+            `percentof_stocks` REAL NOT NULL,
+            PRIMARY KEY(`date`, `stock_id`, `level`)
+        );
+    '''))
+
+    # 產生 level 表 (1-17)
+    for lv in range(1, 18):
+        ddl.append(mlstr_reduce('''
+            CREATE TABLE level{} (
+                `stock_id` TEXT NOT NULL,
+                `date` TEXT NOT NULL,
+                `numof_holders` INTEGER NOT NULL,
+                `numof_stocks` INTEGER NOT NULL,
+                `percentof_stocks` REAL NOT NULL,
+                PRIMARY KEY(`date`, `stock_id`)
+            );
+        ''').format(lv))
+
+    # 執行所有的 create table
+    for sql in ddl:
+        subprocess.run(['sqlite3', db_file, sql])
+
+    # 重新匯入 csv
     for csv_file in csv_list:
         msg = '* {}'.format(csv_file[-12:-4])
         print(msg)
         holder_import(csv_file)
+
     print('搞定!')
 
 def holder_dist(refresh=False):
