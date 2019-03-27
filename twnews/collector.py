@@ -34,20 +34,13 @@ def holder_import(csv_file):
         subprocess.run(['sqlite3', db_file, dml])
 
     # 刪除匯入資料
-    dml = 'DELETE FROM temp_for_csv'
-    subprocess.run(['sqlite3', db_file, dml])
+    subprocess.run(['sqlite3', db_file, 'DELETE FROM temp_for_csv'])
+    subprocess.run(['sqlite3', db_file, 'VACUUM'])
 
     # 刪除無 header csv 檔
     os.remove(nh_file)
 
 def holder_rebuild():
-    csv_list = []
-    csv_dir = os.path.expanduser('~/.twnews/holder-dist')
-    for fname in os.listdir(csv_dir):
-        if re.match(r'hd-\d{8}.csv', fname) is not None:
-            csv_path = '{}/{}'.format(csv_dir, fname)
-            csv_list.append(csv_path)
-
     print('重建資料庫 ...')
 
     # 移除 database
@@ -86,8 +79,15 @@ def holder_rebuild():
         subprocess.run(['sqlite3', db_file, sql])
 
     # 重新匯入 csv
+    csv_list = []
+    csv_dir = os.path.expanduser('~/.twnews/holder-dist')
+    for fname in os.listdir(csv_dir):
+        if re.match(r'hd-\d{8}.csv', fname) is not None:
+            csv_path = '{}/{}'.format(csv_dir, fname)
+            csv_list.append(csv_path)
+    csv_list.sort()
     for csv_file in csv_list:
-        msg = '* {}'.format(csv_file[-12:-4])
+        msg = '* 匯入 {}'.format(csv_file[-12:-4])
         print(msg)
         holder_import(csv_file)
 
