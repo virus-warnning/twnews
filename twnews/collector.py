@@ -24,7 +24,7 @@ def holder_import(csv_file):
             INSERT INTO level{}
             SELECT
                 `stock_id`,
-                `date`,
+                substr(`date`,1,4) || '-' || substr(`date`,5,2) || '-' || substr(`date`,7,2),
                 `numof_holders`,
                 `numof_stocks`,
                 `percentof_stocks`
