@@ -10,7 +10,7 @@ class TestEttoday(unittest.TestCase):
 
     def setUp(self):
         self.keyword = '上吊'
-        self.nsearch = NewsSearch('ettoday', limit=10)
+        self.nsearch = NewsSearch('ettoday', limit=10, proxy_first=True)
 
     def test_01_filter_title(self):
         """
@@ -28,4 +28,5 @@ class TestEttoday(unittest.TestCase):
         nsoups = self.nsearch.by_keyword(self.keyword).to_soup_list()
         for nsoup in nsoups:
             if nsoup.contents() is None:
-                self.fail('內文不可為 None')
+                msg = '內文不可為 None, URL={}'.format(nsoup.path)
+                self.fail(msg)

@@ -156,3 +156,16 @@ class TestLtn(unittest.TestCase):
         self.assertEqual('2018-11-25 00:00:00', nsoup.date().strftime(self.dtf))
         self.assertEqual('施曉光', nsoup.author())
         self.assertIn('由黨魁吳敦義扮演「總教頭」並宣稱要擊出二十二支全壘打的國民黨', nsoup.contents())
+
+    def test_06_http_redirect(self):
+        """
+        測試轉址效果
+        """
+        url = 'https://news.ltn.com.tw/news/entertainment/breakingnews/2697368'
+        nsoup = NewsSoup(url, refresh=True)
+        self.assertEqual('ltn', nsoup.channel)
+        self.assertEqual('https://ent.ltn.com.tw/m/news/breakingnews/2697368', nsoup.path)
+        self.assertIn('摸胸夾腿都來！邵翔小蠻交往6年公布「有了」', nsoup.title())
+        self.assertEqual('2019-02-13 11:46:00', nsoup.date().strftime(self.dtf))
+        self.assertEqual('蕭宇涵', nsoup.author())
+        self.assertIn('小蠻一席黑色小禮服大露蜜腿，雙手游移挑逗扒開邵翔的襯衫', nsoup.contents())

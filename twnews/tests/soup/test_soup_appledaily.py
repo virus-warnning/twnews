@@ -35,3 +35,27 @@ class TestAppleDaily(unittest.TestCase):
         self.assertEqual('2018-10-25 12:03:00', nsoup.date().strftime(self.dtf))
         self.assertEqual('江宏倫', nsoup.author())
         self.assertIn('台北市北投區西安街二段', nsoup.contents())
+
+    def test_03_layouts(self):
+        """
+        測試蘋果地產
+        """
+        layouts = [
+            {
+                'url': 'http://home.appledaily.com.tw/article/index/20190313/38279127',
+                'title': '潮牌概念店撤離 東區房東陷定位危機',
+                'date': '2019-03-13 00:00:00',
+                'author': '唐家儀',
+                'contents': '英國人氣潮牌Superdry（超級乾燥）位大安區忠孝東路四段的形象概念門市竟已歇業'
+            }
+        ]
+        for layout in layouts:
+            nsoup = NewsSoup(layout['url'], refresh=True, proxy_first=True)
+            self.assertEqual('appledaily', nsoup.channel)
+            self.assertIn(layout['title'], nsoup.title())
+            if nsoup.date() is not None:
+                self.assertEqual(layout['date'], nsoup.date().strftime(self.dtf))
+            else:
+                self.assertEqual(layout['date'], nsoup.date())
+            self.assertEqual(layout['author'], nsoup.author())
+            self.assertIn(layout['contents'], nsoup.contents())

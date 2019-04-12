@@ -8,7 +8,7 @@ wget -U "$USER_AGENT" -O $SAMPLE_DIR/cna.html https://www.cna.com.tw/news/asoc/2
 wget -U "$USER_AGENT" -O $SAMPLE_DIR/ettoday.html https://www.ettoday.net/news/20171209/1069025.htm
 wget -U "$USER_AGENT" -O $SAMPLE_DIR/ltn.html https://m.ltn.com.tw/news/life/breakingnews/2504351
 wget -U "$USER_AGENT" -O $SAMPLE_DIR/setn.html https://www.setn.com/m/News.aspx?NewsID=350370
-wget -U "$USER_AGENT" -O $SAMPLE_DIR/udn.html https://udn.com/news/story/7315/3004543
+wget -U "$USER_AGENT" -O $SAMPLE_DIR/udn.html https://udn.com/news/story/7315/3705102
 
 # $WGET -O $SAMPLE_DIR/judicial-cp950.html http://aomp.judicial.gov.tw/abbs/wkw/WHD2ASHOW.jsp?rowid=%2Fsld%2F10703%2F09162840289.020
 # iconv -f cp950 -t utf8 $SAMPLE_DIR/judicial-cp950.html > $SAMPLE_DIR/judicial.html

@@ -9,6 +9,7 @@ from datetime import datetime
 from twnews.common import get_logger, VERSION
 from twnews.soup import NewsSoup
 from twnews.search import NewsSearch
+import twnews.collector as collector
 
 def soup(path):
     """
@@ -16,7 +17,8 @@ def soup(path):
     """
     print('-' * 75)
     nsoup = NewsSoup(path)
-    print('路徑: {}'.format(path))
+    print('原始路徑: {}'.format(path))
+    print('最終路徑: {}'.format(nsoup.path))
     print('頻道: {}'.format(nsoup.channel))
     print('標題: {}'.format(nsoup.title()))
     ndt = nsoup.date()
@@ -137,6 +139,9 @@ def compare_keyword(keyword):
         msg = '{}: {}'.format(name, len(results))
         print(msg, flush=True)
 
+def holder_dist():
+    collector.holder_dist()
+
 def usage():
     """
     使用說明
@@ -179,6 +184,8 @@ def main():
     elif action == 'cpkw':
         keyword = get_cmd_param(2, '酒駕')
         compare_keyword(keyword)
+    elif action == 'dist':
+        holder_dist()
     else:
         if action != 'help':
             print('動作名稱錯誤')

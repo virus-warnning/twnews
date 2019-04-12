@@ -29,18 +29,18 @@ ret = pipe.close()
 
 # 組信
 if ret is None:
-    subject = '[twnews] 每週單元測試 - 成功 ⭕️'
+    subject = '[twnews] 每週測試 - 成功 ⭕️'
     contents = re.sub(r'\n\s+\| ', '\n', '''
-        | <h3 style="color:#00f;">每週單元測試成功</h3>
+        | <h3 style="color:#00f;">每週測試成功</h3>
         | <p>詳細內容：</p>
         | <pre style="border:1px solid #aaa; background:#eee; padding:10px;">
         | {}
         | </pre>
         ''', re.M).strip().format(detail)
 else:
-    subject = '[twnews] 每週單元測試 - 失敗 ❌'
+    subject = '[twnews] 每週測試 - 失敗 ❌'
     contents = re.sub(r'\n\s+\| ', '\n', '''
-        | <h3 style="color:#f00;">每週單元測試失敗 ({})</h3>
+        | <h3 style="color:#f00;">每週測試失敗 ({})</h3>
         | <p>詳細內容：</p>
         | <pre style="border:1px solid #aaa; background:#eee; padding:10px;">
         | {}
