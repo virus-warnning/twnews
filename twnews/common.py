@@ -19,7 +19,7 @@ __SESSION = {
     "proxy": None
 }
 
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 
 def found_socks5():
     found = False
