@@ -90,6 +90,11 @@ def url_force_https(url):
         logger.debug('變更 URL: %s', new_url)
     else:
         new_url = url
+
+    # 蘋果地產例外，要喬回來
+    if new_url.startswith('https://home.appledaily.com.tw'):
+        new_url = 'http://home.appledaily.com.tw' + new_url[30:]
+
     return new_url
 
 def url_force_ltn_mobile(url):
@@ -180,7 +185,8 @@ def scan_author(article):
         (r'記者(\w{2,3}).{2}[縣市]?\d{1,2}日電', 1),
         (r'(記者|遊戲角落 )(\w{2,5})$', 2),
         (r'\s(\w{2,5})[/／╱].+報導$', 1),
-        (r'（譯者：(\w{2,5})/.+）', 1)
+        (r'（譯者：(\w{2,5})/.+）', 1),
+        (r'【(\w{2,5})╱.+報導】', 1)
     ]
 
     exclude_list = [
