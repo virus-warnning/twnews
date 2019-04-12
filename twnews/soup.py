@@ -315,6 +315,7 @@ class NewsSoup:
             if found:
                 node = copy.copy(found[0])
                 # 避免子元件干擾日期格式
+                # TODO: 這個作法中時不行，但是其他家會需要
                 for child_node in node.select('*'):
                     child_node.extract()
                 self.cache['date_raw'] = node.text.strip()

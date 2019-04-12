@@ -47,11 +47,11 @@
     "name": "中時電子報",
     "layout_list": [],
     "mobile": {
-      "title_node": "#h1",
-      "date_node": "div.reporter > time",
-      "date_format": "%Y年%m月%d日 %H:%M",
-      "author_node": [ "div.reporter > div.rp_name > cite > a", "div.reporter > div.rp_name" ],
-      "article_node": "article.arttext > p"
+      "title_node": "article.article-box h1.article-title",
+      "date_node": "article.article-box div.meta-info > time",
+      "date_format": "%H:%M%Y/%m/%d",
+      "author_node": "article.article-box div.author > a",
+      "article_node": "article.article-box div.article-body > p"
     }
   },
   "cna": {
@@ -333,7 +333,7 @@
       "title_node": "#container > main > h1",
       "date_node": ".story_bady_info_author > time",
       "date_format": "%Y/%m/%d",
-      "author_node": ".story_bady_info_author > a",
+      "author_node": ".story_bady_info_author > .story_bady_info > a",
       "article_node": "#container > main > p"
     },
     "stars": {
