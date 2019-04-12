@@ -314,10 +314,12 @@ class NewsSoup:
             found = soup.select(nsel)
             if found:
                 node = copy.copy(found[0])
-                # 避免子元件干擾日期格式
-                # TODO: 這個作法中時不行，但是其他家會需要
-                for child_node in node.select('*'):
-                    child_node.extract()
+                # 中時: 日期散落在兩個子節點，不可丟棄子節點
+                # 聯合: 日期在這個節點，子節點有其他文字，必須丟棄子節點
+                if 'date_with_children' not in self.conf or not self.conf['date_with_children']:
+                    # 丟棄子節點
+                    for child_node in node.select('*'):
+                        child_node.extract()
                 self.cache['date_raw'] = node.text.strip()
                 if len(found) > 1:
                     self.logger.warning('發現多組日期節點 (新聞台: %s)', self.channel)

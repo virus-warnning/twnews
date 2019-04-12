@@ -49,6 +49,7 @@
     "mobile": {
       "title_node": "article.article-box h1.article-title",
       "date_node": "article.article-box div.meta-info > time",
+      "date_with_children": true,
       "date_format": "%H:%M%Y/%m/%d",
       "author_node": "article.article-box div.author > a",
       "article_node": "article.article-box div.article-body > p"
@@ -59,7 +60,6 @@
     "layout_list": [],
     "mobile": {
       "title_node": "div.centralContent > h1",
-      "title_attr": "",
       "date_node": "div.centralContent > div.timeBox > div.updatetime > span",
       "date_format": "%Y/%m/%d %H:%M",
       "author_node": "",
