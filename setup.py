@@ -24,9 +24,9 @@ setup(
         'twnews': ['conf/*', 'samples/*', 'tests/soup/*', 'tests/search/*']
     },
     install_requires=[
-        'beautifulsoup4',
-        'lxml',
-        'requests'
+        'beautifulsoup4>=4.7.1',
+        'lxml>=4.3.3',
+        'requests>=2.21.0'
     ],
     python_requires='>=3.5'
 )
