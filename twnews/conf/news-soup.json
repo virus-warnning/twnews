@@ -24,13 +24,22 @@
   },
   "appledaily": {
     "name": "蘋果日報",
-    "layout_list": [],
+    "layout_list": [
+      { "layout": "home", "prefix": "http://home.appledaily.com.tw/" }
+    ],
     "mobile": {
       "title_node": "article.nm-content > div.nm-article > header > h2",
       "date_node": "article.nm-content > div.nm-article > header > div.time-and-share > time",
       "date_format": "建立時間：%Y/%m/%d %H:%M",
       "author_node": "",
       "article_node": "article.nm-content > div.nm-article > div.nm-article-body > div.text"
+    },
+    "home": {
+      "title_node": "#maincontent > section > div.ncbox_cont > h1",
+      "date_node": "#maincontent > section > div.ncbox_cont > div.nctimeshare > time",
+      "date_format": "%Y年%m月%d日",
+      "author_node": "",
+      "article_node": "#maincontent > section > div.ncbox_cont > div.articulum > p"
     },
     "search": {
       "url": "https://tw.appledaily.com/search/ajaxresult/page/${PAGE}?querystrS=${KEYWORD}&sort=time&searchType=all",
@@ -49,6 +58,7 @@
     "mobile": {
       "title_node": "article.article-box h1.article-title",
       "date_node": "article.article-box div.meta-info > time",
+      "date_with_children": true,
       "date_format": "%H:%M%Y/%m/%d",
       "author_node": "article.article-box div.author > a",
       "article_node": "article.article-box div.article-body > p"
@@ -59,7 +69,6 @@
     "layout_list": [],
     "mobile": {
       "title_node": "div.centralContent > h1",
-      "title_attr": "",
       "date_node": "div.centralContent > div.timeBox > div.updatetime > span",
       "date_format": "%Y/%m/%d %H:%M",
       "author_node": "",

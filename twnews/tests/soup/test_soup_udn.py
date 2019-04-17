@@ -20,10 +20,10 @@ class TestUdn(unittest.TestCase):
         pkgdir = twnews.common.get_package_dir()
         nsoup = NewsSoup(pkgdir + '/samples/udn.html.gz')
         self.assertEqual('udn', nsoup.channel)
-        self.assertIn('澎湖重度殘障男子 陳屍馬公水仙宮旁空屋', nsoup.title())
-        self.assertEqual('2018-02-28 14:31:00', nsoup.date().strftime(self.dtf))
-        self.assertEqual(None, nsoup.author())
-        self.assertIn('馬公水仙宮旁的一處廢棄破屋內', nsoup.contents())
+        self.assertIn('血濺桃機 他把老婆丟下樓再跳樓', nsoup.title())
+        self.assertEqual('2019-03-18 23:59:00', nsoup.date().strftime(self.dtf))
+        self.assertEqual('陳嘉寧', nsoup.author())
+        self.assertIn('萬與張女站在第二航廈出境大廳管制區外南側四樓往三樓樓梯迴轉處爭吵', nsoup.contents())
 
     def test_02_mobile(self):
         """

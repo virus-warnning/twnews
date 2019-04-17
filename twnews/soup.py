@@ -90,6 +90,11 @@ def url_force_https(url):
         logger.debug('變更 URL: %s', new_url)
     else:
         new_url = url
+
+    # 蘋果地產例外，要喬回來
+    if new_url.startswith('https://home.appledaily.com.tw'):
+        new_url = 'http://home.appledaily.com.tw' + new_url[30:]
+
     return new_url
 
 def url_force_ltn_mobile(url):
@@ -180,7 +185,8 @@ def scan_author(article):
         (r'記者(\w{2,3}).{2}[縣市]?\d{1,2}日電', 1),
         (r'(記者|遊戲角落 )(\w{2,5})$', 2),
         (r'\s(\w{2,5})[/／╱].+報導$', 1),
-        (r'（譯者：(\w{2,5})/.+）', 1)
+        (r'（譯者：(\w{2,5})/.+）', 1),
+        (r'【(\w{2,5})╱.+報導】', 1)
     ]
 
     exclude_list = [
@@ -314,10 +320,12 @@ class NewsSoup:
             found = soup.select(nsel)
             if found:
                 node = copy.copy(found[0])
-                # 避免子元件干擾日期格式
-                # TODO: 這個作法中時不行，但是其他家會需要
-                for child_node in node.select('*'):
-                    child_node.extract()
+                # 中時: 日期散落在兩個子節點，不可丟棄子節點
+                # 聯合: 日期在這個節點，子節點有其他文字，必須丟棄子節點
+                if 'date_with_children' not in self.conf or not self.conf['date_with_children']:
+                    # 丟棄子節點
+                    for child_node in node.select('*'):
+                        child_node.extract()
                 self.cache['date_raw'] = node.text.strip()
                 if len(found) > 1:
                     self.logger.warning('發現多組日期節點 (新聞台: %s)', self.channel)
