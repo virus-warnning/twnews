@@ -43,7 +43,7 @@ class TestEttoday(unittest.TestCase):
             {
                 'url': 'https://fashion.ettoday.net/news/1316942',
                 'title': '漫長的冬日夜晚想閱讀　不妨參考誠品2018年度暢銷書單',
-                'date': '2018-11-28 00:00:00',
+                'date': '2018-11-28 10:10:00',
                 'author': '蔡惠如',
                 'contents': '我輩中人：寫給中年人的情書'
             },
@@ -78,7 +78,7 @@ class TestEttoday(unittest.TestCase):
             {
                 'url': 'https://speed.ettoday.net/news/1316854',
                 'title': '休旅車＆轎車誰安全？數據顯示這種車「死亡率低一半」',
-                'date': '2018-11-27 00:00:00',
+                'date': '2018-11-27 20:03:00',
                 'author': None,
                 'contents': '發生各類車禍事故時，普通轎車乘客死亡率為39%，而SUV只有21%'
             },
