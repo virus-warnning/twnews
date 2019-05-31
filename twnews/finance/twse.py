@@ -3,6 +3,7 @@ import json
 import os.path
 
 import twnews.common as common
+import twnews.finance.db as db
 
 def get_cache_path(item, datestr):
     cache_dir = common.get_cache_dir('twse')
@@ -53,15 +54,33 @@ def sync_margin_trading(datestr):
             logger.error('無法取的 %s 的融資融券資料, 原因: %s', datestr, status)
             return
 
+    db_conn = db.get_connection()
+    sql = '''
+        INSERT INTO `margin` (
+            trading_date, security_id, security_name,
+            buying_balance, selling_balance
+        ) VALUES (?,?,?,?,?)
+    '''
     for detail in ds['data']:
-        print('[%s %s] 前日融資: %s 今日融資: %s, 前日融券: %s 今日融券: %s' % (
-            detail[0],
-            detail[1].strip(),
-            int(detail[5].replace(',', '')),
-            int(detail[6].replace(',', '')),
-            int(detail[11].replace(',', '')),
-            int(detail[12].replace(',', ''))
+        security_id = detail[0]
+        security_name = detail[1].strip()
+        buying_balance = int(detail[6].replace(',', ''))
+        selling_balance = int(detail[12].replace(',', ''))
+        db_conn.execute(sql, (
+            datestr,
+            security_id,
+            security_name,
+            buying_balance,
+            selling_balance
         ))
+        logger.debug('[%s %s] 融資餘額: %s, 融券餘額: %s' % (
+            security_id,
+            security_name,
+            buying_balance,
+            selling_balance
+        ))
+    db_conn.commit()
+    db_conn.close()
 
 def sync_block_trading(datestr):
     """
@@ -92,16 +111,49 @@ def sync_block_trading(datestr):
             logger.error('無法取的 %s 的鉅額交易資料, 原因: %s', datestr, status)
             return
 
+    db_conn = db.get_connection(True)
+    sql = '''
+        INSERT INTO `block` (
+            trading_date, security_id, security_name,
+            tick_rank, tick_type,
+            close, volume, total
+        ) VALUES (?,?,?,?,?,?,?,?)
+    '''
+    tick_rank = {}
     for trade in ds['data']:
-        if trade[0] != '總計':
-            print('[%s %s] %s 成交價: %s 股數: %s 金額: %s' % (
-                trade[0],
-                trade[1],
-                trade[2],
-                trade[3].replace(',', ''),
-                trade[4].replace(',', ''),
-                trade[5].replace(',', '')
-            ))
+        if trade[0] == '總計':
+            break
+        security_id = trade[0]
+        security_name = trade[1]
+        tick_type = trade[2]
+        close = float(trade[3].replace(',', ''))
+        volume = int(trade[4].replace(',', ''))
+        total = int(trade[5].replace(',', ''))
+        if security_id not in tick_rank:
+            tick_rank[security_id] = 1
+        else:
+            tick_rank[security_id] += 1
+        db_conn.execute(sql, (
+            datestr,
+            security_id,
+            security_name,
+            tick_rank[security_id],
+            tick_type,
+            close,
+            volume,
+            total
+        ))
+        logger.debug('[%s %s] #%d %s 成交價: %s 股數: %s 金額: %s' % (
+            security_id,
+            security_name,
+            tick_rank[security_id],
+            tick_type,
+            close,
+            volume,
+            total
+        ))
+    db_conn.commit()
+    db_conn.close()
 
 def sync_institution_trading(datestr):
     """
@@ -132,14 +184,30 @@ def sync_institution_trading(datestr):
             logger.error('無法取的 %s 的三大法人資料, 原因: %s', datestr, status)
             return
 
+    # 匯入 SQLite
+    db_conn = db.get_connection()
+    sql = '''
+        INSERT INTO `institution` (
+            trading_date, security_id, security_name,
+            foreign_trend, stic_trend, dealer_trend
+        ) VALUES (?,?,?,?,?,?)
+    '''
     for detail in ds['data']:
-        print('[%s %s] 外資: %s 投信: %s 自營商: %s' % (
-            detail[0],
-            detail[1].strip(),
-            int(detail[4].replace(',', '')) // 1000,
-            int(detail[7].replace(',', '')) // 1000,
-            int(detail[8].replace(',', '')) // 1000
+        security_id = detail[0]
+        security_name = detail[1].strip()
+        foreign_trend = int(detail[4].replace(',', '')) // 1000
+        stic_trend = int(detail[10].replace(',', '')) // 1000
+        dealer_trend = int(detail[11].replace(',', '')) // 1000
+        db_conn.execute(sql, (
+            datestr, security_id, security_name,
+            foreign_trend, stic_trend, dealer_trend
         ))
+        logger.debug('[%s %s] 外資: %s 投信: %s 自營商: %s',
+            security_id, security_name,
+            foreign_trend, stic_trend, dealer_trend
+        )
+    db_conn.commit()
+    db_conn.close()
 
 def sync_short_sell(datestr):
     """
@@ -147,7 +215,7 @@ def sync_short_sell(datestr):
     """
     pass
 
-def sync_etf_net():
+def sync_etf_net(datestr):
     """
     https://mis.twse.com.tw/stock/data/all_etf.txt
     {
@@ -180,7 +248,6 @@ def sync_etf_net():
     }
     """
     logger = common.get_logger('finance')
-    datestr = datetime.now().strftime('%Y%m%d')
 
     # 快取處理
     if has_cache('etf_net', datestr):
@@ -207,18 +274,22 @@ def sync_etf_net():
                 etf_dict[etf['a']] = etf
 
     # 依證券代碼順序處理
-    # TODO: 寫入 SQLite
-    max_name_len = 0
+    db_conn = db.get_connection()
+    sql = '''
+        INSERT INTO `etf_offset` (
+            trading_date, security_id, security_name,
+            close, net, offset
+        ) VALUES (?,?,?,?,?,?)
+    '''
     for k in sorted(etf_dict.keys()):
         etf = etf_dict[k]
-        name_len = len(etf['b'])
-        if name_len > max_name_len:
-            max_name_len = name_len
-        print('%s, %s, %s, %s%%' % (etf['a'], etf['b'], etf['f'], etf['g']))
-    print(max_name_len)
+        db_conn.execute(sql, (datestr, etf['a'], etf['b'], etf['e'], etf['f'], etf['g']))
+        logger.debug('%s, %s, %s, %s%%', etf['a'], etf['b'], etf['f'], etf['g'])
+    db_conn.commit()
+    db_conn.close()
 
 if __name__ == '__main__':
-    #sync_etf_net()
-    #sync_institution_trading('20190529')
+    #sync_etf_net('20190531')
+    #sync_institution_trading('20190531')
     #sync_margin_trading('20190529')
-    #sync_block_trading('20190529')
+    sync_block_trading('20190531')
