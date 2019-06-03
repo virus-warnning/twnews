@@ -111,7 +111,7 @@ def sync_block_trading(datestr):
             logger.error('無法取的 %s 的鉅額交易資料, 原因: %s', datestr, status)
             return
 
-    db_conn = db.get_connection(True)
+    db_conn = db.get_connection()
     sql = '''
         INSERT INTO `block` (
             trading_date, security_id, security_name,
@@ -213,7 +213,52 @@ def sync_short_sell(datestr):
     """
     http://www.twse.com.tw/exchangeReport/TWT93U?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}
     """
-    pass
+    dsitem = 'short_sell'
+    logger = common.get_logger('finance')
+
+    # 快取處理
+    if has_cache(dsitem, datestr):
+        logger.info('載入 %s 的借券賣出', datestr)
+        ds = load_cache(dsitem, datestr)
+    else:
+        logger.info('沒有 %s 的借券賣出', datestr)
+        session = common.get_session(False)
+        url = 'http://www.twse.com.tw/exchangeReport/TWT93U?response=json&date=%s' % datestr
+        resp = session.get(url)
+        ds = resp.json()
+        status = ds['stat']
+        # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
+        # 成功: OK
+        # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
+        #      很抱歉，目前線上人數過多，請您稍候再試
+        if status == 'OK':
+            logger.info('儲存 %s 的借券賣出', datestr)
+            save_cache(dsitem, datestr, ds)
+        else:
+            logger.error('無法取的 %s 的借券賣出資料, 原因: %s', datestr, status)
+            return
+
+    db_conn = db.get_connection()
+    sql = '''
+        INSERT INTO `short_sell` (
+            trading_date, security_id, security_name,
+            balance
+        ) VALUES (?,?,?,?)
+    '''
+    for detail in ds['data']:
+        security_id = detail[0]
+        security_name = detail[1].strip()
+        balance = int(detail[12].replace(',', '')) // 1000
+        if security_id != '':
+            db_conn.execute(sql, (
+                datestr, security_id, security_name,
+                balance
+            ))
+            logger.debug('[%s %s] 借券賣出餘額: %s',
+                security_id, security_name, balance
+            )
+    db_conn.commit()
+    db_conn.close()
 
 def sync_etf_net(datestr):
     """
@@ -292,4 +337,6 @@ if __name__ == '__main__':
     #sync_etf_net('20190531')
     #sync_institution_trading('20190531')
     #sync_margin_trading('20190529')
-    sync_block_trading('20190531')
+    #sync_block_trading('20190531')
+    #sync_short_sell('20190531')
+    pass
