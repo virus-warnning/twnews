@@ -28,7 +28,7 @@ DDL_LIST = [
     ''',
     # 借券賣出
     '''
-    CREATE TABLE IF NOT EXISTS `short_selling` (
+    CREATE TABLE IF NOT EXISTS `short_sell` (
         trading_date TEXT,
         security_id TEXT,
         security_name TEXT,
@@ -61,8 +61,29 @@ DDL_LIST = [
         offset REAL,
         PRIMARY KEY (`trading_date`, `security_id`)
     );
+    ''',
+    # CSV 暫存表
+    '''
+    CREATE TABLE IF NOT EXISTS `csv_temp` (
+        c00 TEXT, c01 TEXT, c02 TEXT, c03 TEXT,
+        c04 TEXT, c05 TEXT, c06 TEXT, c07 TEXT,
+        c08 TEXT, c09 TEXT, c10 TEXT, c11 TEXT,
+        c12 TEXT, c13 TEXT, c14 TEXT, c15 TEXT
+    )
     '''
 ]
+
+# 股權分散
+DDL_DIST = '''
+CREATE TABLE IF NOT EXISTS level{:02d} (
+    `trading_date` TEXT NOT NULL,
+    `security_id` TEXT NOT NULL,
+    `numof_holders` INTEGER NOT NULL,
+    `numof_stocks` INTEGER NOT NULL,
+    `percentof_stocks` REAL NOT NULL,
+    PRIMARY KEY(`trading_date`, `security_id`)
+);
+'''
 
 def get_connection(rebuild=False):
     """
@@ -79,8 +100,15 @@ def get_connection(rebuild=False):
 
     db_conn = sqlite3.connect(db_path)
     if not db_ready:
+        # 產生籌碼資料表
         for ddl in DDL_LIST:
             db_conn.execute(ddl)
+
+        # 產生各級股權分散表, 有 1~17 級
+        for level in range(1,18):
+            ddl = DDL_DIST.format(level)
+            db_conn.execute(ddl)
+
         db_conn.commit()
 
     return db_conn
