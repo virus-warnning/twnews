@@ -51,7 +51,7 @@ def sync_margin_trading(datestr):
             logger.info('儲存 %s 的融資融券', datestr)
             save_cache(dsitem, datestr, ds)
         else:
-            logger.error('無法取的 %s 的融資融券資料, 原因: %s', datestr, status)
+            logger.error('無法取得 %s 的融資融券資料, 原因: %s', datestr, status)
             return
 
     db_conn = db.get_connection()
@@ -108,7 +108,7 @@ def sync_block_trading(datestr):
             logger.info('儲存 %s 的鉅額交易', datestr)
             save_cache(dsitem, datestr, ds)
         else:
-            logger.error('無法取的 %s 的鉅額交易資料, 原因: %s', datestr, status)
+            logger.error('無法取得 %s 的鉅額交易資料, 原因: %s', datestr, status)
             return
 
     db_conn = db.get_connection()
@@ -181,7 +181,7 @@ def sync_institution_trading(datestr):
             logger.info('儲存 %s 的三大法人', datestr)
             save_cache(dsitem, datestr, ds)
         else:
-            logger.error('無法取的 %s 的三大法人資料, 原因: %s', datestr, status)
+            logger.error('無法取得 %s 的三大法人資料, 原因: %s', datestr, status)
             return
 
     # 匯入 SQLite
@@ -235,7 +235,7 @@ def sync_short_sell(datestr):
             logger.info('儲存 %s 的借券賣出', datestr)
             save_cache(dsitem, datestr, ds)
         else:
-            logger.error('無法取的 %s 的借券賣出資料, 原因: %s', datestr, status)
+            logger.error('無法取得 %s 的借券賣出資料, 原因: %s', datestr, status)
             return
 
     db_conn = db.get_connection()
@@ -333,10 +333,16 @@ def sync_etf_net(datestr):
     db_conn.commit()
     db_conn.close()
 
-if __name__ == '__main__':
+def main():
+    # 2019-06-04 18:21 實測紀錄
+    # * 三大法人、巨額交易資料已產生
+    # * 融資融券、借券賣出資料未產生
+    datestr = datetime.today().strftime('%Y%m%d')
+    sync_institution_trading(datestr)
+    sync_margin_trading(datestr)
+    sync_block_trading(datestr)
+    sync_short_sell(datestr)
     #sync_etf_net('20190531')
-    #sync_institution_trading('20190531')
-    #sync_margin_trading('20190529')
-    #sync_block_trading('20190531')
-    #sync_short_sell('20190531')
-    pass
+
+if __name__ == '__main__':
+    main()
