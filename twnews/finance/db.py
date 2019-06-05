@@ -32,7 +32,8 @@ DDL_LIST = [
         trading_date TEXT,
         security_id TEXT,
         security_name TEXT,
-        balance INTEGER,
+        borrowed INTEGER,
+        selled INTEGER,
         PRIMARY KEY (`trading_date`, `security_id`)
     );
     ''',
@@ -61,15 +62,6 @@ DDL_LIST = [
         offset REAL,
         PRIMARY KEY (`trading_date`, `security_id`)
     );
-    ''',
-    # CSV 暫存表
-    '''
-    CREATE TABLE IF NOT EXISTS `csv_temp` (
-        c00 TEXT, c01 TEXT, c02 TEXT, c03 TEXT,
-        c04 TEXT, c05 TEXT, c06 TEXT, c07 TEXT,
-        c08 TEXT, c09 TEXT, c10 TEXT, c11 TEXT,
-        c12 TEXT, c13 TEXT, c14 TEXT, c15 TEXT
-    )
     '''
 ]
 
