@@ -257,7 +257,7 @@ def sync_short_borrowed(trading_date):
 
     db_conn = db.get_connection()
     sql = '''
-        INSERT OR REPLACE INTO `short_sell` (
+        INSERT INTO `short_sell` (
             trading_date, security_id, borrowed
         ) VALUES (?,?,?)
     '''
@@ -274,7 +274,7 @@ def sync_short_borrowed(trading_date):
         security_id = row['sec2'].strip('="')
         if security_id != '_':
             borrowed = int(row['vol2'].replace(',', ''))
-            db_conn.execute(sql, (datestr, security_id, borrowed))
+            db_conn.execute(sql, (trading_date, security_id, borrowed))
             cnt += 1
     db_conn.commit()
     db_conn.close()
@@ -313,10 +313,8 @@ def sync_short_selled(trading_date):
 
     db_conn = db.get_connection()
     sql = '''
-        INSERT OR REPLACE INTO `short_sell` (
-            trading_date, security_id, security_name,
-            selled
-        ) VALUES (?,?,?,?)
+        UPDATE `short_sell` SET `security_name`=?, `selled`=?
+        WHERE `trading_date`=? AND `security_id`=?
     '''
     for detail in ds['data']:
         security_id = detail[0]
@@ -324,8 +322,8 @@ def sync_short_selled(trading_date):
         balance = int(detail[12].replace(',', '')) // 1000
         if security_id != '':
             db_conn.execute(sql, (
-                trading_date, security_id, security_name,
-                balance
+                security_name, balance,
+                trading_date, security_id
             ))
             logger.debug('[%s %s] 已借券賣出餘額: %s',
                 security_id, security_name, balance
