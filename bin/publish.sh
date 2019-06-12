@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # 封裝前檢查 logging.ini，確認 root logger 使用 INFO level
-echo -n '檢查 root logger 是否設定成 INFO 等級 ... '
-head -n 6 twnews/conf/logging.ini | grep 'INFO' > /dev/null
-if [ $? -ne 0 ]; then
-  echo 'Root logger 沒使用 INFO level，停止封裝'
-  exit 1
-fi
-echo 'OK'
+#echo -n '檢查 root logger 是否設定成 INFO 等級 ... '
+#head -n 12 twnews/conf/logging.ini | grep 'INFO' > /dev/null
+#if [ $? -ne 0 ]; then
+#  echo 'Root logger 沒使用 INFO level，停止封裝'
+#  exit 1
+#fi
+#echo 'OK'
 
 # 封裝前檢查 reStructedText 語法
 echo -n '檢查 README.rst 語法 ... '
