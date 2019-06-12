@@ -105,8 +105,8 @@
     },
     "fashion": {
       "title_node": "header > h1",
-      "date_node": "time",
-      "date_format": "%Y/%m/%d",
+      "date_node": "time.date",
+      "date_format": "%Y/%m/%d %H:%M",
       "author_node": "",
       "article_node": "article div.story > p"
     },
@@ -127,7 +127,7 @@
     "speed": {
       "title_node": "article h1.title",
       "date_node": "time",
-      "date_format": "%Y-%m-%d",
+      "date_format": "%Y-%m-%d %H:%M",
       "author_node": "",
       "article_node": "article div.story > p"
     },

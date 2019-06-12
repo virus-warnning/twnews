@@ -83,7 +83,7 @@ class TestLtn(unittest.TestCase):
                 'title': '菠菜影響鈣吸收？吃多了會結石？別再相信謠言了！',
                 'date': '2018-11-28 00:00:00',
                 'author': None,
-                'contents': '坊間常有說法認為菠菜中大量的「草酸」會阻礙鈣質吸收、影響幼兒生長'
+                'contents': '許多民眾擔心菠菜富含「草酸」，會抑制鈣質吸收'
             },
             # TODO: 改善日期精準度
             {

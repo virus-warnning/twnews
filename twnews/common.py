@@ -12,14 +12,14 @@ import socket
 import requests
 
 # pylint: disable=global-statement
-__LOGGER = None
+__LOGGER_LOADED = False
 __ALLCONF = None
 __SESSION = {
     "direct": None,
     "proxy": None
 }
 
-VERSION = '0.3.1'
+VERSION = '0.3.2'
 
 def found_socks5():
     found = False
@@ -39,13 +39,13 @@ def get_package_dir():
     """
     return os.path.dirname(__file__)
 
-def get_logger():
+def get_logger(name='news'):
     """
     取得 logger 如果已經存在就使用現有的
     """
-    global __LOGGER
+    global __LOGGER_LOADED
 
-    if __LOGGER is None:
+    if not __LOGGER_LOADED:
         logdir = os.path.expanduser('~/.twnews/log')
         if not os.path.isdir(logdir):
             os.makedirs(logdir)
@@ -53,9 +53,14 @@ def get_logger():
         logini = '{}/conf/logging.ini'.format(get_package_dir())
         if os.path.isfile(logini):
             logging.config.fileConfig(logini)
-        __LOGGER = logging.getLogger()
 
-    return __LOGGER
+        __LOGGER_LOADED = True
+
+    logger = None
+    if __LOGGER_LOADED:
+        logger = logging.getLogger(name)
+
+    return logger
 
 def get_session(proxy_first):
     """
@@ -128,3 +133,15 @@ def get_channel_conf(channel, action=None):
         if action in chconf:
             return chconf[action]
     return None
+
+def get_cache_dir(category):
+    """
+    取得快取目錄
+    """
+    logger = get_logger()
+    cache_dir = os.path.expanduser('~/.twnews/cache/' + category)
+    if not os.path.isdir(cache_dir):
+        logger.debug('建立快取目錄: %s', cache_dir)
+        os.makedirs(cache_dir)
+    logger.debug('使用快取目錄: %s', cache_dir)
+    return cache_dir

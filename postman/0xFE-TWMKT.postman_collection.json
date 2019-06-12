@@ -1,0 +1,570 @@
+{
+	"info": {
+		"_postman_id": "bf667ff4-7df7-441f-b613-e8d71516639e",
+		"name": "0xFE-TWMKT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "[TWSE] 上市大股東股權異動",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://siis.twse.com.tw/publish/sii/106IRB110_01.HTM",
+					"protocol": "http",
+					"host": [
+						"siis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"publish",
+						"sii",
+						"106IRB110_01.HTM"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] 上櫃大股東股權異動",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://siis.twse.com.tw/publish/otc/107IRB110_12.HTM",
+					"protocol": "http",
+					"host": [
+						"siis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"publish",
+						"otc",
+						"107IRB110_12.HTM"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] 興櫃大股東股權異動",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://siis.twse.com.tw/publish/rotc/106IRB110_01.HTM",
+					"protocol": "http",
+					"host": [
+						"siis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"publish",
+						"rotc",
+						"106IRB110_01.HTM"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] ETF 溢價",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://mis.twse.com.tw/stock/data/all_etf.txt",
+					"protocol": "https",
+					"host": [
+						"mis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"stock",
+						"data",
+						"all_etf.txt"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] 三大法人明細",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://www.twse.com.tw/fund/T86?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}&selectType=ALL",
+					"protocol": "http",
+					"host": [
+						"www",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"fund",
+						"T86"
+					],
+					"query": [
+						{
+							"key": "response",
+							"value": "{{TWSE_EXPORT_FORMAT}}"
+						},
+						{
+							"key": "date",
+							"value": "{{TWSE_EXPORT_DATE}}"
+						},
+						{
+							"key": "selectType",
+							"value": "ALL"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] 融資融券明細",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://www.twse.com.tw/exchangeReport/MI_MARGN?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}&selectType=ALL",
+					"protocol": "http",
+					"host": [
+						"www",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"exchangeReport",
+						"MI_MARGN"
+					],
+					"query": [
+						{
+							"key": "response",
+							"value": "{{TWSE_EXPORT_FORMAT}}"
+						},
+						{
+							"key": "date",
+							"value": "{{TWSE_EXPORT_DATE}}"
+						},
+						{
+							"key": "selectType",
+							"value": "ALL"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] 借券賣出餘額",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://www.twse.com.tw/exchangeReport/TWT93U?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}",
+					"protocol": "http",
+					"host": [
+						"www",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"exchangeReport",
+						"TWT93U"
+					],
+					"query": [
+						{
+							"key": "response",
+							"value": "{{TWSE_EXPORT_FORMAT}}"
+						},
+						{
+							"key": "date",
+							"value": "{{TWSE_EXPORT_DATE}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] 鉅額交易",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://www.twse.com.tw/block/BFIAUU?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}&selectType=S",
+					"protocol": "http",
+					"host": [
+						"www",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"block",
+						"BFIAUU"
+					],
+					"query": [
+						{
+							"key": "response",
+							"value": "{{TWSE_EXPORT_FORMAT}}"
+						},
+						{
+							"key": "date",
+							"value": "{{TWSE_EXPORT_DATE}}"
+						},
+						{
+							"key": "selectType",
+							"value": "S"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TPEX] 三大法人明細 JSON",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.tpex.org.tw/web/stock/3insti/daily_trade/3itrade_hedge_result.php?l=zh_tw&o=json&se=EW&t=D&d={{TPEX_EXPORT_DATE}}&s=0,asc",
+					"protocol": "https",
+					"host": [
+						"www",
+						"tpex",
+						"org",
+						"tw"
+					],
+					"path": [
+						"web",
+						"stock",
+						"3insti",
+						"daily_trade",
+						"3itrade_hedge_result.php"
+					],
+					"query": [
+						{
+							"key": "l",
+							"value": "zh_tw"
+						},
+						{
+							"key": "o",
+							"value": "json"
+						},
+						{
+							"key": "se",
+							"value": "EW"
+						},
+						{
+							"key": "t",
+							"value": "D"
+						},
+						{
+							"key": "d",
+							"value": "{{TPEX_EXPORT_DATE}}"
+						},
+						{
+							"key": "s",
+							"value": "0,asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TPEX] 融資融券明細 JSON",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.tpex.org.tw/web/stock/margin_trading/margin_balance/margin_bal_result.php?l=zh_tw&o=json&d={{TPEX_EXPORT_DATE}}",
+					"protocol": "https",
+					"host": [
+						"www",
+						"tpex",
+						"org",
+						"tw"
+					],
+					"path": [
+						"web",
+						"stock",
+						"margin_trading",
+						"margin_balance",
+						"margin_bal_result.php"
+					],
+					"query": [
+						{
+							"key": "l",
+							"value": "zh_tw"
+						},
+						{
+							"key": "o",
+							"value": "json"
+						},
+						{
+							"key": "d",
+							"value": "{{TPEX_EXPORT_DATE}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TPEX] 鉅額交易明細 CSV",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.tpex.org.tw/web/stock/block_trade/daily_qutoes/block_day_download.php?l=zh_tw&d={{TPEX_EXPORT_DATE}}&s=0,asc,0&charset=UTF-8",
+					"protocol": "https",
+					"host": [
+						"www",
+						"tpex",
+						"org",
+						"tw"
+					],
+					"path": [
+						"web",
+						"stock",
+						"block_trade",
+						"daily_qutoes",
+						"block_day_download.php"
+					],
+					"query": [
+						{
+							"key": "l",
+							"value": "zh_tw"
+						},
+						{
+							"key": "d",
+							"value": "{{TPEX_EXPORT_DATE}}"
+						},
+						{
+							"key": "s",
+							"value": "0,asc,0"
+						},
+						{
+							"key": "charset",
+							"value": "UTF-8"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TPEX] 當沖明細 CSV",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.tpex.org.tw/web/stock/trading/intraday_stat/intraday_trading_stat_download.php?l=zh-tw&d={{TPEX_EXPORT_DATE}}&s=0,asc,0&charset=UTF-8",
+					"protocol": "https",
+					"host": [
+						"www",
+						"tpex",
+						"org",
+						"tw"
+					],
+					"path": [
+						"web",
+						"stock",
+						"trading",
+						"intraday_stat",
+						"intraday_trading_stat_download.php"
+					],
+					"query": [
+						{
+							"key": "l",
+							"value": "zh-tw"
+						},
+						{
+							"key": "d",
+							"value": "{{TPEX_EXPORT_DATE}}"
+						},
+						{
+							"key": "s",
+							"value": "0,asc,0"
+						},
+						{
+							"key": "charset",
+							"value": "UTF-8"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TDCC] 股權分散表最新週報 CSV",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://smart.tdcc.com.tw/opendata/getOD.ashx?id=1-5",
+					"protocol": "https",
+					"host": [
+						"smart",
+						"tdcc",
+						"com",
+						"tw"
+					],
+					"path": [
+						"opendata",
+						"getOD.ashx"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1-5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TDCC] 股權分散表\b結算日期 JSON",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Referer",
+						"type": "text",
+						"value": "https://www.tdcc.com.tw/smWeb/QryStockAjax.do"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "REQ_OPR",
+							"value": "qrySelScaDates",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://www.tdcc.com.tw/smWeb/QryStockAjax.do",
+					"protocol": "https",
+					"host": [
+						"www",
+						"tdcc",
+						"com",
+						"tw"
+					],
+					"path": [
+						"smWeb",
+						"QryStockAjax.do"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TDCC] 股權分散表個股 HTML",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					},
+					{
+						"key": "Referer",
+						"value": "https://www.tdcc.com.tw/smWeb/QryStockAjax.do",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "scaDate",
+							"value": "20190119",
+							"type": "text"
+						},
+						{
+							"key": "SqlMethod",
+							"value": "StockNo",
+							"type": "text"
+						},
+						{
+							"key": "REQ_OPR",
+							"value": "SELECT",
+							"type": "text"
+						},
+						{
+							"key": "clkStockNo",
+							"value": "3049",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://www.tdcc.com.tw/smWeb/QryStockAjax.do",
+					"protocol": "https",
+					"host": [
+						"www",
+						"tdcc",
+						"com",
+						"tw"
+					],
+					"path": [
+						"smWeb",
+						"QryStockAjax.do"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "2a60f749-9ad5-4f69-91c7-981502d34dd4",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "716c094f-8f7b-42e6-98ee-e62977e4633d",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
