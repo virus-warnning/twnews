@@ -6,6 +6,7 @@ import requests
 import subprocess
 import sys
 
+import busm
 import pandas
 
 import twnews.common as common
@@ -138,6 +139,7 @@ def get_action():
         return sys.argv[1]
     return 'update'
 
+@busm.through_telegram
 def main():
     """
     下載最新的股權分散表，轉檔到資料庫:

@@ -4,6 +4,7 @@ import os.path
 import re
 import sys
 
+import busm
 import pandas
 
 import twnews.common as common
@@ -411,6 +412,7 @@ def get_argument(index, default=''):
         return default
     return sys.argv[index]
 
+@busm.through_telegram
 def main():
     """
     python3 -m twnews.finance.twse {action}
