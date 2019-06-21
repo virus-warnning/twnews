@@ -49,7 +49,7 @@ def sync_margin_trading(trading_date):
         logger.info('載入 %s 的融資融券', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的融資融券', datestr)
+        logger.info('沒有 %s 的融資融券快取, 準備取得最新資料', datestr)
         session = common.get_session(False)
         url = 'http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date=%s&selectType=ALL' % datestr
         resp = session.get(url)
@@ -109,7 +109,7 @@ def sync_block_trading(trading_date):
         logger.info('載入 %s 的鉅額交易', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的鉅額交易', datestr)
+        logger.info('沒有 %s 的鉅額交易快取, 準備取得最新資料', datestr)
         session = common.get_session(False)
         url = 'http://www.twse.com.tw/block/BFIAUU?response=json&date=%s&selectType=S' % datestr
         resp = session.get(url)
@@ -185,7 +185,7 @@ def sync_institution_trading(trading_date):
         logger.info('載入 %s 的三大法人', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的三大法人', datestr)
+        logger.info('沒有 %s 的三大法人快取, 準備取得最新資料', datestr)
         session = common.get_session(False)
         url = 'http://www.twse.com.tw/fund/T86?response=json&date=%s&selectType=ALL' % datestr
         resp = session.get(url)
@@ -253,7 +253,7 @@ def sync_short_borrowed(trading_date):
         if dsdate != datestr:
             logger.error('可借券賣出的資料日期與指定日期不同, 資料日期 %s, 指定日期 %s', dsdate, datestr)
             return
-        logger.error('可借券賣出的資料寫入快取: %s', datestr)
+        logger.info('可借券賣出的資料寫入快取: %s', datestr)
         save_cache(dsitem, datestr, ds, 'csv')
 
     db_conn = db.get_connection()
@@ -293,7 +293,7 @@ def sync_short_selled(trading_date):
         logger.info('載入 %s 的已借券賣出', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的已借券賣出', datestr)
+        logger.info('沒有 %s 的已借券賣出快取, 準備取得最新資料', datestr)
         session = common.get_session(False)
         url = 'http://www.twse.com.tw/exchangeReport/TWT93U?response=json&date=%s' % datestr
         resp = session.get(url)
@@ -373,7 +373,7 @@ def sync_etf_net(trading_date):
         logger.info('載入 %s 的 ETF 溢價率快取', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的 ETF 溢價率快取', datestr)
+        logger.info('沒有 %s 的 ETF 溢價率快取快取, 準備取得最新資料', datestr)
         session = common.get_session(False)
         resp = session.get('https://mis.twse.com.tw/stock/data/all_etf.txt')
         ds = resp.json()
@@ -382,7 +382,7 @@ def sync_etf_net(trading_date):
             logger.info('儲存 %s 的 ETF 溢價率快取', datestr)
             save_cache(dsitem, datestr, ds)
         else:
-            logger.info('無法取得 %s 的 ETF 溢價率資料', datestr)
+            logger.error('無法取得 %s 的 ETF 溢價率資料', datestr)
             return
 
     # 來源資料轉換 key/value 形式
