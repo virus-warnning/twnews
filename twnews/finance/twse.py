@@ -3,12 +3,16 @@ import json
 import os.path
 import re
 import sys
+import time
 
 import busm
 import pandas
 
 import twnews.common as common
 import twnews.finance.db as db
+
+REPEAT_LIMIT = 3
+REPEAT_INTERVAL = 5
 
 def get_cache_path(item, datestr, format='json'):
     cache_dir = common.get_cache_dir('twse')
@@ -49,24 +53,37 @@ def sync_margin_trading(trading_date):
         logger.info('載入 %s 的融資融券', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的融資融券快取, 準備取得最新資料', datestr)
+        logger.info('下載 %s 的融資融券資料', datestr)
+        repeat = 0
+        success = False
         session = common.get_session(False)
-        url = 'http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date=%s&selectType=ALL' % datestr
-        resp = session.get(url)
-        ds = resp.json()
-        status = ds['stat']
-        # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
-        # 成功: OK
-        # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
-        #      很抱歉，目前線上人數過多，請您稍候再試
-        if status != 'OK':
-            logger.error('無法取得 %s 的融資融券資料, 原因: %s', datestr, status)
-            return
-        if len(ds['data']) == 0:
-            logger.error('沒有 %s 的融資融券資料, 可能尚未結算或是非交易日', datestr)
-            return
-        logger.info('儲存 %s 的融資融券', datestr)
-        save_cache(dsitem, datestr, ds)
+        while not success and repeat < REPEAT_LIMIT:
+            repeat += 1
+            url = 'http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date=%s&selectType=ALL' % datestr
+            resp = session.get(url)
+            if resp.status_code == 200:
+                # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
+                # 成功: OK
+                # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
+                #      很抱歉，目前線上人數過多，請您稍候再試
+                ds = resp.json()
+                status = ds['stat']
+                if status == 'OK':
+                    if len(ds['data']) > 0:
+                        logger.info('儲存 %s 的融資融券', datestr)
+                        save_cache(dsitem, datestr, ds)
+                        success = True
+                    else:
+                        logger.error('沒有 %s 的融資融券資料 (重試: %d, 可能尚未結算或是非交易日)', datestr, repeat)
+                else:
+                    logger.error('無法取得 %s 的融資融券資料 (重試: %d, %s)', datestr, repeat, status)
+            else:
+                logger.error('無法取得 %s 的融資融券 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
+
+            if not success and repeat < REPEAT_LIMIT:
+                time.sleep(REPEAT_INTERVAL)
+            else:
+                return
 
     db_conn = db.get_connection()
     sql = '''
@@ -109,24 +126,37 @@ def sync_block_trading(trading_date):
         logger.info('載入 %s 的鉅額交易', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的鉅額交易快取, 準備取得最新資料', datestr)
+        logger.info('下載 %s 的鉅額交易資料', datestr)
+        repeat = 0
+        success = False
         session = common.get_session(False)
-        url = 'http://www.twse.com.tw/block/BFIAUU?response=json&date=%s&selectType=S' % datestr
-        resp = session.get(url)
-        ds = resp.json()
-        status = ds['stat']
-        # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
-        # 成功: OK
-        # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
-        #      很抱歉，目前線上人數過多，請您稍候再試
-        if status != 'OK':
-            logger.error('無法取得 %s 的鉅額交易資料, 原因: %s', datestr, status)
-            return
-        if len(ds['data']) == 0:
-            logger.error('沒有 %s 的鉅額交易資料, 可能尚未結算或是非交易日', datestr)
-            return
-        logger.info('儲存 %s 的鉅額交易', datestr)
-        save_cache(dsitem, datestr, ds)
+        while not success and repeat < REPEAT_LIMIT:
+            repeat += 1
+            url = 'http://www.twse.com.tw/block/BFIAUU?response=json&date=%s&selectType=S' % datestr
+            resp = session.get(url)
+            if resp.status_code == 200:
+                # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
+                # 成功: OK
+                # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
+                #      很抱歉，目前線上人數過多，請您稍候再試
+                ds = resp.json()
+                status = ds['stat']
+                if status == 'OK':
+                    if len(ds['data']) > 0:
+                        logger.info('儲存 %s 的鉅額交易', datestr)
+                        save_cache(dsitem, datestr, ds)
+                        success = True
+                    else:
+                        logger.error('沒有 %s 的鉅額交易資料 (重試: %d, 可能尚未結算或是非交易日)', datestr, repeat)
+                else:
+                    logger.error('無法取得 %s 的鉅額交易資料 (重試: %d, %s)', datestr, repeat, status)
+            else:
+                logger.error('無法取得 %s 的鉅額交易 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
+
+            if not success and repeat < REPEAT_LIMIT:
+                time.sleep(REPEAT_INTERVAL)
+            else:
+                return
 
     db_conn = db.get_connection()
     sql = '''
@@ -185,21 +215,34 @@ def sync_institution_trading(trading_date):
         logger.info('載入 %s 的三大法人', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的三大法人快取, 準備取得最新資料', datestr)
+        logger.info('下載 %s 的三大法人資料', datestr)
+        repeat = 0
+        success = False
         session = common.get_session(False)
-        url = 'http://www.twse.com.tw/fund/T86?response=json&date=%s&selectType=ALL' % datestr
-        resp = session.get(url)
-        ds = resp.json()
-        status = ds['stat']
-        # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
-        # 成功: OK
-        # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
-        #      很抱歉，目前線上人數過多，請您稍候再試
-        if status != 'OK':
-            logger.error('無法取得 %s 的三大法人資料, 原因: %s', datestr, status)
-            return
-        logger.info('儲存 %s 的三大法人', datestr)
-        save_cache(dsitem, datestr, ds)
+        while not success and repeat < REPEAT_LIMIT:
+            repeat += 1
+            url = 'http://www.twse.com.tw/fund/T86?response=json&date=%s&selectType=ALL' % datestr
+            resp = session.get(url)
+            if resp.status_code == 200:
+                # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
+                # 成功: OK
+                # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
+                #      很抱歉，目前線上人數過多，請您稍候再試
+                ds = resp.json()
+                status = ds['stat']
+                if status == 'OK':
+                    logger.info('儲存 %s 的三大法人', datestr)
+                    save_cache(dsitem, datestr, ds)
+                    success = True
+                else:
+                    logger.error('無法取得 %s 的三大法人 (重試: %d, %s)', datestr, repeat, status)
+            else:
+                logger.error('無法取得 %s 的三大法人 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
+
+            if not success and repeat < REPEAT_LIMIT:
+                time.sleep(REPEAT_INTERVAL)
+            else:
+                return
 
     # 匯入 SQLite
     db_conn = db.get_connection()
@@ -237,24 +280,36 @@ def sync_short_borrowed(trading_date):
     datestr = trading_date.replace('-', '')
 
     if not has_cache(dsitem, datestr, 'csv'):
+        repeat = 0
+        success = False
         session = common.get_session(False)
-        url = 'http://www.twse.com.tw/SBL/TWT96U?response=csv'
-        resp = session.get(url)
-        ds = resp.text
-        line1 = ds[:ds.find('\r\n')]
-        match = re.search(r'(\d{3})年(\d{2})月(\d{2})日', line1)
-        if match is None:
-            logger.error('可借券賣出的 CSV 無法取得日期字串')
-            return
-        yy = int(match.group(1)) + 1911
-        mm = match.group(2)
-        dd = match.group(3)
-        dsdate = '%04d%s%s' % (yy, mm, dd)
-        if dsdate != datestr:
-            logger.error('可借券賣出的資料日期與指定日期不同, 資料日期 %s, 指定日期 %s', dsdate, datestr)
-            return
-        logger.info('可借券賣出的資料寫入快取: %s', datestr)
-        save_cache(dsitem, datestr, ds, 'csv')
+        while not success and repeat < REPEAT_LIMIT:
+            repeat += 1
+            url = 'http://www.twse.com.tw/SBL/TWT96U?response=csv'
+            resp = session.get(url)
+            if resp.status_code == 200:
+                ds = resp.text
+                line1 = ds[:ds.find('\r\n')]
+                match = re.search(r'(\d{3})年(\d{2})月(\d{2})日', line1)
+                if match is None:
+                    logger.error('可借券賣出的 CSV 無法取得日期字串')
+                    return
+                yy = int(match.group(1)) + 1911
+                mm = match.group(2)
+                dd = match.group(3)
+                dsdate = '%04d%s%s' % (yy, mm, dd)
+                if dsdate != datestr:
+                    logger.error('可借券賣出的資料日期與指定日期不同, 資料日期 %s, 指定日期 %s', dsdate, datestr)
+                    return
+                logger.info('可借券賣出的資料寫入快取: %s', datestr)
+                save_cache(dsitem, datestr, ds, 'csv')
+            else:
+                logger.error('無法取得 %s 的可借券賣出 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
+
+            if not success and repeat < REPEAT_LIMIT:
+                time.sleep(REPEAT_INTERVAL)
+            else:
+                return
 
     db_conn = db.get_connection()
     sql = '''
@@ -293,24 +348,36 @@ def sync_short_selled(trading_date):
         logger.info('載入 %s 的已借券賣出', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的已借券賣出快取, 準備取得最新資料', datestr)
+        logger.info('下載 %s 的已借券賣出資料', datestr)
+        repeat = 0
+        success = False
         session = common.get_session(False)
-        url = 'http://www.twse.com.tw/exchangeReport/TWT93U?response=json&date=%s' % datestr
-        resp = session.get(url)
-        ds = resp.json()
-        status = ds['stat']
-        # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
-        # 成功: OK
-        # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
-        #      很抱歉，目前線上人數過多，請您稍候再試
-        if status != 'OK':
-            logger.error('無法取得 %s 的已借券賣出資料, 原因: %s', datestr, status)
-            return
-        if len(ds['data']) == 0:
-            logger.error('尚未生成 %s 的已借券賣出資料, 可能尚未結算或非交易日', datestr)
-            return
-        logger.info('儲存 %s 的已借券賣出', datestr)
-        save_cache(dsitem, datestr, ds)
+        while not success and repeat < REPEAT_LIMIT:
+            repeat += 1
+            url = 'http://www.twse.com.tw/exchangeReport/TWT93U?response=json&date=%s' % datestr
+            resp = session.get(url)
+            if resp.status_code == 200:
+                ds = resp.json()
+                status = ds['stat']
+                # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
+                # 成功: OK
+                # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
+                #      很抱歉，目前線上人數過多，請您稍候再試
+                if status != 'OK':
+                    logger.error('無法取得 %s 的已借券賣出資料, 原因: %s', datestr, status)
+                    return
+                if len(ds['data']) == 0:
+                    logger.error('尚未生成 %s 的已借券賣出資料, 可能尚未結算或非交易日', datestr)
+                    return
+                logger.info('儲存 %s 的已借券賣出', datestr)
+                save_cache(dsitem, datestr, ds)
+            else:
+                logger.error('無法取得 %s 的已借券賣出 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
+
+            if not success and repeat < REPEAT_LIMIT:
+                time.sleep(REPEAT_INTERVAL)
+            else:
+                return
 
     db_conn = db.get_connection()
     sql = '''
@@ -373,17 +440,27 @@ def sync_etf_net(trading_date):
         logger.info('載入 %s 的 ETF 溢價率快取', datestr)
         ds = load_cache(dsitem, datestr)
     else:
-        logger.info('沒有 %s 的 ETF 溢價率快取快取, 準備取得最新資料', datestr)
+        logger.info('下載 %s 的 ETF 溢價率資料', datestr)
         session = common.get_session(False)
-        resp = session.get('https://mis.twse.com.tw/stock/data/all_etf.txt')
-        ds = resp.json()
-        dsdate = ds['a1'][1]['msgArray'][0]['i']
-        if datestr == dsdate:
-            logger.info('儲存 %s 的 ETF 溢價率快取', datestr)
-            save_cache(dsitem, datestr, ds)
-        else:
-            logger.error('無法取得 %s 的 ETF 溢價率資料', datestr)
-            return
+        while not success and repeat < REPEAT_LIMIT:
+            repeat += 1
+            resp = session.get('https://mis.twse.com.tw/stock/data/all_etf.txt')
+            if resp.status_code == 200:
+                ds = resp.json()
+                dsdate = ds['a1'][1]['msgArray'][0]['i']
+                if datestr == dsdate:
+                    logger.info('儲存 %s 的 ETF 溢價率快取', datestr)
+                    save_cache(dsitem, datestr, ds)
+                else:
+                    logger.error('無法取得 %s 的 ETF 溢價率資料', datestr)
+                    return
+            else:
+                logger.error('無法取得 %s 的 ETF 溢價率 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
+
+            if not success and repeat < REPEAT_LIMIT:
+                time.sleep(REPEAT_INTERVAL)
+            else:
+                return
 
     # 來源資料轉換 key/value 形式
     etf_dict = {}
