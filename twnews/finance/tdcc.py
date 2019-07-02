@@ -63,7 +63,7 @@ def import_dist(csv_date='latest'):
         ))
         if index > 0 and index % 5000 == 0:
             msg = '已儲存 %s 的 %d 筆股權分散資料' % (iso_date, index)
-            logger.debug(msg)
+            logger.info(msg)
     db_conn.commit()
     db_conn.close()
 
@@ -126,9 +126,9 @@ def backup_dist(refresh=False):
         if changed:
             with open(csv_file, 'wt') as csvf:
                 csvf.write(csv)
-                logger.debug('已更新股權分散表: %s', csv_date)
+                logger.info('已更新股權分散表: %s', csv_date)
         else:
-            logger.debug('已存在股權分散表: %s, 不需更新', csv_date)
+            logger.info('已存在股權分散表: %s, 不需更新', csv_date)
     else:
         logger.error('無法更新股權分散表')
 
