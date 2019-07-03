@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: 回報錯誤讓我提供協助
+about: 回報錯誤
 title: 摘要一下問題吧
 labels: bug
 assignees: virus-warnning
