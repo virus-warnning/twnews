@@ -2,7 +2,7 @@
 name: Improvement
 about: 現有功能改善
 title: OOO效能改善
-labels: enhancement
+labels: improvement
 assignees: virus-warnning
 
 ---

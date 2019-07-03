@@ -2,7 +2,7 @@
 name: Magic
 about: 變個魔法 (不提供訪客使用)
 title: 變個魔法
-labels: enhancement
+labels: magic
 assignees: virus-warnning
 
 ---
