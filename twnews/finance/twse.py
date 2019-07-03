@@ -291,18 +291,22 @@ def sync_short_borrowed(trading_date):
                 ds = resp.text
                 line1 = ds[:ds.find('\r\n')]
                 match = re.search(r'(\d{3})年(\d{2})月(\d{2})日', line1)
-                if match is None:
-                    logger.error('可借券賣出的 CSV 無法取得日期字串')
-                    return
-                yy = int(match.group(1)) + 1911
-                mm = match.group(2)
-                dd = match.group(3)
-                dsdate = '%04d%s%s' % (yy, mm, dd)
-                if dsdate != datestr:
-                    logger.error('可借券賣出的資料日期與指定日期不同, 資料日期 %s, 指定日期 %s', dsdate, datestr)
-                    return
-                logger.info('可借券賣出的資料寫入快取: %s', datestr)
-                save_cache(dsitem, datestr, ds, 'csv')
+                if match is not None:
+                    yy = int(match.group(1)) + 1911
+                    mm = match.group(2)
+                    dd = match.group(3)
+                    dsdate = '%04d%s%s' % (yy, mm, dd)
+                    if dsdate == datestr:
+                        logger.info('可借券賣出的資料寫入快取: %s', datestr)
+                        save_cache(dsitem, datestr, ds, 'csv')
+                        success = True
+                    else:
+                        logger.error(
+                            '無法取得 %s 的可借券賣出 (重試: %d, 資料日期 %s 與指定日期不同)',
+                            datestr, repeat, dsdate
+                        )
+                else:
+                    logger.error('無法取得 %s 的可借券賣出 (重試: %d, 無法取得 CSV 內的日期字串)', dsdate, datestr)
             else:
                 logger.error('無法取得 %s 的可借券賣出 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
 
@@ -357,20 +361,21 @@ def sync_short_selled(trading_date):
             url = 'http://www.twse.com.tw/exchangeReport/TWT93U?response=json&date=%s' % datestr
             resp = session.get(url)
             if resp.status_code == 200:
-                ds = resp.json()
-                status = ds['stat']
                 # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
                 # 成功: OK
                 # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
                 #      很抱歉，目前線上人數過多，請您稍候再試
-                if status != 'OK':
-                    logger.error('無法取得 %s 的已借券賣出資料, 原因: %s', datestr, status)
-                    return
-                if len(ds['data']) == 0:
-                    logger.error('尚未生成 %s 的已借券賣出資料, 可能尚未結算或非交易日', datestr)
-                    return
-                logger.info('儲存 %s 的已借券賣出', datestr)
-                save_cache(dsitem, datestr, ds)
+                ds = resp.json()
+                status = ds['stat']
+                if status == 'OK':
+                    if len(ds['data']) > 0:
+                        logger.info('儲存 %s 的已借券賣出', datestr)
+                        save_cache(dsitem, datestr, ds)
+                        success = True
+                    else:
+                        logger.error('無法取得 %s 的已借券賣出 (重試: %d, 可能尚未結算或非交易日)', datestr, repeatß)
+                else:
+                    logger.error('無法取得 %s 的已借券賣出 (重試: %d, 原因: %s)', datestr, repeat, status)
             else:
                 logger.error('無法取得 %s 的已借券賣出 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
 
@@ -441,6 +446,8 @@ def sync_etf_net(trading_date):
         ds = load_cache(dsitem, datestr)
     else:
         logger.info('下載 %s 的 ETF 溢價率資料', datestr)
+        repeat = 0
+        success = False
         session = common.get_session(False)
         while not success and repeat < REPEAT_LIMIT:
             repeat += 1
@@ -451,9 +458,9 @@ def sync_etf_net(trading_date):
                 if datestr == dsdate:
                     logger.info('儲存 %s 的 ETF 溢價率快取', datestr)
                     save_cache(dsitem, datestr, ds)
+                    success = True
                 else:
-                    logger.error('無法取得 %s 的 ETF 溢價率資料', datestr)
-                    return
+                    logger.error('無法取得 %s 的 ETF 溢價率 (重試: %d, 資料日期 %s 與指定日期不同)', datestr, repeat, dsdate)
             else:
                 logger.error('無法取得 %s 的 ETF 溢價率 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
 
