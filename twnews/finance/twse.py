@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import os.path
 import re
+import sqlite3
 import sys
 import time
 
@@ -13,6 +14,10 @@ import twnews.finance.db as db
 
 REPEAT_LIMIT = 3
 REPEAT_INTERVAL = 5
+
+class SyncException(Exception):
+    def __init__(self, reason):
+        self.reason = reason
 
 def get_cache_path(item, datestr, format='json'):
     cache_dir = common.get_cache_dir('twse')
@@ -40,125 +45,79 @@ def save_cache(item, datestr, content, format='json'):
         else:
             f_cache.write(content)
 
-def sync_margin_trading(trading_date):
+def download_margin(datestr):
     """
-    融資融券
+    下載信用交易資料集
     """
-    dsitem = 'margin_trading'
-    logger = common.get_logger('finance')
-    datestr = trading_date.replace('-', '')
-
-    # 快取處理
-    if has_cache(dsitem, datestr):
-        logger.info('載入 %s 的融資融券', datestr)
-        ds = load_cache(dsitem, datestr)
+    session = common.get_session(False)
+    url = 'http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date=%s&selectType=ALL' % datestr
+    resp = session.get(url)
+    if resp.status_code == 200:
+        dataset = resp.json()
+        status = dataset['stat']
+        if status == 'OK':
+            if len(dataset['data']) == 0:
+                raise SyncException('可能尚未結算或是非交易日')
+        else:
+            raise SyncException(status)
     else:
-        logger.info('下載 %s 的融資融券資料', datestr)
-        repeat = 0
-        success = False
-        session = common.get_session(False)
-        while not success and repeat < REPEAT_LIMIT:
-            repeat += 1
-            url = 'http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date=%s&selectType=ALL' % datestr
-            resp = session.get(url)
-            if resp.status_code == 200:
-                # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
-                # 成功: OK
-                # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
-                #      很抱歉，目前線上人數過多，請您稍候再試
-                ds = resp.json()
-                status = ds['stat']
-                if status == 'OK':
-                    if len(ds['data']) > 0:
-                        logger.info('儲存 %s 的融資融券', datestr)
-                        save_cache(dsitem, datestr, ds)
-                        success = True
-                    else:
-                        logger.error('沒有 %s 的融資融券資料 (重試: %d, 可能尚未結算或是非交易日)', datestr, repeat)
-                else:
-                    logger.error('無法取得 %s 的融資融券資料 (重試: %d, %s)', datestr, repeat, status)
-            else:
-                logger.error('無法取得 %s 的融資融券 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
+        raise SyncException('HTTP ERROR %d' % resp.status_code)
 
-            if not success and repeat < REPEAT_LIMIT:
-                time.sleep(REPEAT_INTERVAL)
-            else:
-                return
+    return dataset
 
-    db_conn = db.get_connection()
+def download_block(datestr):
+    """
+    下載鉅額交易資料集
+    """
+    session = common.get_session(False)
+    url = 'http://www.twse.com.tw/block/BFIAUU?response=json&date=%s&selectType=S' % datestr
+    resp = session.get(url)
+    if resp.status_code == 200:
+        dataset = resp.json()
+        status = dataset['stat']
+        if status == 'OK':
+            if len(dataset['data']) == 0:
+                raise SyncException('可能尚未結算或是非交易日')
+        else:
+            raise SyncException(status)
+    else:
+        raise SyncException('HTTP ERROR %d' % resp.status_code)
+
+    return dataset
+
+def import_margin(dbcon, trading_date, dataset):
+    """
+    匯入信用交易資料集
+    """
     sql = '''
         INSERT INTO `margin` (
             trading_date, security_id, security_name,
             buying_balance, selling_balance
         ) VALUES (?,?,?,?,?)
     '''
-    for detail in ds['data']:
+    for detail in dataset['data']:
         security_id = detail[0]
         security_name = detail[1].strip()
         buying_balance = int(detail[6].replace(',', ''))
         selling_balance = int(detail[12].replace(',', ''))
-        db_conn.execute(sql, (
+        dbcon.execute(sql, (
             trading_date,
             security_id,
             security_name,
             buying_balance,
             selling_balance
         ))
+        """
+        logger = common.get_logger('finance')
         logger.debug('[%s %s] 融資餘額: %s, 融券餘額: %s' % (
             security_id,
             security_name,
             buying_balance,
             selling_balance
         ))
-    db_conn.commit()
-    db_conn.close()
+        """
 
-def sync_block_trading(trading_date):
-    """
-    鉅額交易
-    """
-    dsitem = 'block_trading'
-    logger = common.get_logger('finance')
-    datestr = trading_date.replace('-', '')
-
-    # 快取處理
-    if has_cache(dsitem, datestr):
-        logger.info('載入 %s 的鉅額交易', datestr)
-        ds = load_cache(dsitem, datestr)
-    else:
-        logger.info('下載 %s 的鉅額交易資料', datestr)
-        repeat = 0
-        success = False
-        session = common.get_session(False)
-        while not success and repeat < REPEAT_LIMIT:
-            repeat += 1
-            url = 'http://www.twse.com.tw/block/BFIAUU?response=json&date=%s&selectType=S' % datestr
-            resp = session.get(url)
-            if resp.status_code == 200:
-                # 注意! 即使發生問題, HTTP 回應碼也是 200, 必須依 JSON 分辨成功或失敗
-                # 成功: OK
-                # 失敗: 查詢日期大於可查詢最大日期，請重新查詢!
-                #      很抱歉，目前線上人數過多，請您稍候再試
-                ds = resp.json()
-                status = ds['stat']
-                if status == 'OK':
-                    if len(ds['data']) > 0:
-                        logger.info('儲存 %s 的鉅額交易', datestr)
-                        save_cache(dsitem, datestr, ds)
-                        success = True
-                    else:
-                        logger.error('沒有 %s 的鉅額交易資料 (重試: %d, 可能尚未結算或是非交易日)', datestr, repeat)
-                else:
-                    logger.error('無法取得 %s 的鉅額交易資料 (重試: %d, %s)', datestr, repeat, status)
-            else:
-                logger.error('無法取得 %s 的鉅額交易 (重試: %d, HTTP %d)', datestr, repeat, resp.status_code)
-
-            if not success and repeat < REPEAT_LIMIT:
-                time.sleep(REPEAT_INTERVAL)
-            else:
-                return
-
-    db_conn = db.get_connection()
+def import_block(dbcon, trading_date, dataset):
     sql = '''
         INSERT INTO `block` (
             trading_date, security_id, security_name,
@@ -167,7 +126,7 @@ def sync_block_trading(trading_date):
         ) VALUES (?,?,?,?,?,?,?,?)
     '''
     tick_rank = {}
-    for trade in ds['data']:
+    for trade in dataset['data']:
         if trade[0] == '總計':
             break
         security_id = trade[0]
@@ -180,7 +139,7 @@ def sync_block_trading(trading_date):
             tick_rank[security_id] = 1
         else:
             tick_rank[security_id] += 1
-        db_conn.execute(sql, (
+        dbcon.execute(sql, (
             trading_date,
             security_id,
             security_name,
@@ -190,6 +149,7 @@ def sync_block_trading(trading_date):
             volume,
             total
         ))
+        """
         logger.debug('[%s %s] #%d %s 成交價: %s 股數: %s 金額: %s' % (
             security_id,
             security_name,
@@ -199,8 +159,64 @@ def sync_block_trading(trading_date):
             volume,
             total
         ))
-    db_conn.commit()
-    db_conn.close()
+        """
+
+def sync_dataset(dsitem, trading_date):
+    """
+    同步資料集共用流程
+    """
+
+    # 下載流程對應 function
+    download_hook = {
+        'margin': download_margin,
+        'block': download_block
+    }
+
+    # 匯入流程對應 function
+    import_hook = {
+        'margin': import_margin,
+        'block': import_block
+    }
+
+    logger = common.get_logger('finance')
+    datestr = trading_date.replace('-', '')
+
+    if has_cache(dsitem, datestr):
+        # 載入快取資料集
+        logger.info('載入 %s 的 %s', trading_date, dsitem)
+        dataset = load_cache(dsitem, datestr)
+    else:
+        # 下載資料集
+        dataset = None
+        repeat = 0
+        hookfunc = download_hook[dsitem]
+        while dataset is None and repeat < REPEAT_LIMIT:
+            repeat += 1
+            if repeat > 1:
+                time.sleep(REPEAT_INTERVAL)
+            try:
+                dataset = hookfunc(datestr)
+                logger.info('儲存 %s 的 %s', trading_date, dsitem)
+                save_cache(dsitem, datestr, dataset)
+            except Exception as ex:
+                logger.error('無法取得 %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
+
+    if dataset is None:
+        return
+
+    # 匯入資料庫
+    dbcon = db.get_connection()
+    hookfunc = import_hook[dsitem]
+    try:
+        hookfunc(dbcon, trading_date, dataset)
+        logger.info('匯入 %s 的 %s', trading_date, dsitem)
+    except sqlite3.IntegrityError as ex:
+        logger.error('已經匯入過 %s 的 %s', trading_date, dsitem)
+    except Exception as ex:
+        # TODO: ex.args[0] 不確定是否可靠, 需要再確認
+        logger.error('無法匯入 %s 的 %s (%s)', trading_date, dsitem, ex.args[0])
+    dbcon.commit()
+    dbcon.close()
 
 def sync_institution_trading(trading_date):
     """
@@ -496,7 +512,7 @@ def get_argument(index, default=''):
         return default
     return sys.argv[index]
 
-@busm.through_telegram
+# @busm.through_telegram
 def main():
     """
     python3 -m twnews.finance.twse {action}
@@ -506,11 +522,11 @@ def main():
     # 16:00 爬三大法人、鉅額交易、ETF折溢價
     # 19:00 爬融資融券、已借券賣出餘額
     action_funcs = {
-        'block': sync_block_trading,
+        # 'block': sync_block_trading,
         'borrowed': sync_short_borrowed,
         'etfnet': sync_etf_net,
         'institution': sync_institution_trading,
-        'margin': sync_margin_trading,
+        # 'margin': sync_margin_trading,
         'selled': sync_short_selled
     }
     today = datetime.today().strftime('%Y-%m-%d')
@@ -524,7 +540,10 @@ def main():
     if action in action_funcs:
         action_funcs[action](trading_date)
     else:
-        print('參數錯誤')
+        if action in ['block', 'margin']:
+            sync_dataset(action, trading_date)
+        else:
+            print('參數錯誤')
 
 if __name__ == '__main__':
     main()
