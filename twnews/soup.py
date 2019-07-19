@@ -127,11 +127,17 @@ def soup_from_website(url, channel, refresh, proxy_first):
             resp = session.get(url, allow_redirects=False)
             if resp.status_code == 200:
                 logger.debug('回應 200 OK')
-                soup = BeautifulSoup(resp.text, 'lxml')
+                if resp.headers['content-type'].find('charset=') == -1:
+                    # #80: 蘋果日報主頻道 Content-Type: text/html
+                    #      因為沒有指定編碼造成 requests 誤判, 使用小伎倆迴避
+                    content = resp.content.decode('utf-8')
+                else:
+                    content = resp.text
+                soup = BeautifulSoup(content, 'lxml')
                 rawlen = len(resp.text.encode('utf-8'))
                 with lzma.open(path, 'wt') as cache_file:
                     logger.debug('寫入快取: %s', path)
-                    cache_file.write(resp.text)
+                    cache_file.write(content)
             else:
                 logger.warning('回應碼: %d', resp.status_code)
         except requests.exceptions.ConnectionError as ex:
