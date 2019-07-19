@@ -1,4 +1,5 @@
 import logging
+import lzma
 import os
 import os.path
 import re
@@ -17,21 +18,21 @@ def import_dist(csv_date='latest'):
     匯入指定日期的股權分散表到資料庫
     """
     logger = common.get_logger('finance')
+    csv_dir = common.get_cache_dir('tdcc')
 
     if csv_date == 'latest':
         max_date = ''
-        dir = os.path.expanduser('~/.twnews/cache/tdcc')
-        for filename in os.listdir(dir):
-            match = re.match(r'dist-(\d{8}).csv', filename)
+        for filename in os.listdir(csv_dir):
+            match = re.match(r'dist-(\d{8}).csv.xz', filename)
             if match is not None:
                 if max_date < match.group(1):
                     max_date = match.group(1)
         csv_date = max_date
 
+    csv_file = '{}/dist-{}.csv.xz'.format(csv_dir, csv_date)
     iso_date = re.sub(r'(\d{4})(\d{2})(\d{2})', r'\1-\2-\3', csv_date)
-    csv_path = os.path.expanduser('~/.twnews/cache/tdcc/dist-%s.csv' % csv_date)
-    if not os.path.isfile(csv_path):
-        logger.error('沒有這個日期的股權分散表檔案: %s', csv_path)
+    if not os.path.isfile(csv_file):
+        logger.error('沒有 %s 的股權分散表檔案: %s', iso_date, csv_file)
         return
 
     db_conn = db.get_connection()
@@ -43,7 +44,8 @@ def import_dist(csv_date='latest'):
         'numof_stocks',
         'percentof_stocks'
     ]
-    df = pandas.read_csv(csv_path, skiprows=1, header=None, names=col_names)
+    # Pandas 會自動偵測 extension 解壓縮, 不需要自幹
+    df = pandas.read_csv(csv_file, skiprows=1, header=None, names=col_names)
     # print(df.head(3))
     # print(df.tail(3))
     sql_template = '''
@@ -81,10 +83,10 @@ def rebuild_dist():
     db_conn.close()
 
     # 確認可以重建的日期
-    dir = os.path.expanduser('~/.twnews/cache/tdcc')
+    csv_dir = common.get_cache_dir('tdcc')
     date_list = []
-    for filename in os.listdir(dir):
-        match = re.match(r'dist-(\d{8}).csv', filename)
+    for filename in os.listdir(csv_dir):
+        match = re.match(r'dist-(\d{8}).csv.xz', filename)
         if match is not None:
             date_list.append(match.group(1))
 
@@ -107,10 +109,8 @@ def backup_dist(refresh=False):
         dt_beg = csv.find('\n') + 1
         dt_end = csv.find(',', dt_beg)
         csv_date = csv[dt_beg:dt_end]
-        csv_dir = os.path.expanduser('~/.twnews/cache/tdcc')
-        if not os.path.isdir(csv_dir):
-            os.makedirs(csv_dir)
-        csv_file = '{}/dist-{}.csv'.format(csv_dir, csv_date)
+        csv_dir  = common.get_cache_dir('tdcc')
+        csv_file = '{}/dist-{}.csv.xz'.format(csv_dir, csv_date)
 
         if refresh:
             changed = True
@@ -124,7 +124,7 @@ def backup_dist(refresh=False):
 
         # 製作備份檔
         if changed:
-            with open(csv_file, 'wt') as csvf:
+            with lzma.open(csv_file, 'wt') as csvf:
                 csvf.write(csv)
                 logger.info('已更新股權分散表: %s', csv_date)
         else:
