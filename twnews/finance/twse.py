@@ -1,6 +1,7 @@
 from datetime import datetime
 import io
 import json
+import lzma
 import os.path
 import re
 import sqlite3
@@ -25,7 +26,7 @@ def get_cache_path(item, datestr, format):
     產生快取檔路徑
     """
     cache_dir = common.get_cache_dir('twse')
-    return '%s/%s-%s.%s' % (cache_dir, item, datestr, format)
+    return '%s/%s-%s.%s.xz' % (cache_dir, item, datestr, format)
 
 def has_cache(item, datestr, format):
     """
@@ -40,7 +41,7 @@ def load_cache(item, datestr, format):
     """
     content = None
     cache_path = get_cache_path(item, datestr, format)
-    with open(cache_path, 'r') as f_cache:
+    with lzma.open(cache_path, 'rt') as f_cache:
         if format == 'json':
             content = json.load(f_cache)
         else:
@@ -52,7 +53,7 @@ def save_cache(item, datestr, content, format):
     儲存快取檔
     """
     cache_path = get_cache_path(item, datestr, format)
-    with open(cache_path, 'w') as f_cache:
+    with lzma.open(cache_path, 'wt') as f_cache:
         if format == 'json':
             json.dump(content, f_cache)
         else:
@@ -379,7 +380,7 @@ def sync_dataset(dsitem, trading_date):
 
     if has_cache(dsitem, datestr, format):
         # 載入快取資料集
-        logger.info('載入 %s 的 %s', trading_date, dsitem)
+        logger.info('套用 %s 的 %s 快取', trading_date, dsitem)
         dataset = load_cache(dsitem, datestr, format)
     else:
         # 下載資料集
@@ -391,6 +392,7 @@ def sync_dataset(dsitem, trading_date):
             if repeat > 1:
                 time.sleep(REPEAT_INTERVAL)
             try:
+                logger.info('下載 %s 的 %s', trading_date, dsitem)
                 dataset = hookfunc(datestr)
                 logger.info('儲存 %s 的 %s', trading_date, dsitem)
                 save_cache(dsitem, datestr, dataset, format)
@@ -407,7 +409,7 @@ def sync_dataset(dsitem, trading_date):
         hookfunc(dbcon, trading_date, dataset)
         logger.info('匯入 %s 的 %s', trading_date, dsitem)
     except sqlite3.IntegrityError as ex:
-        logger.error('已經匯入過 %s 的 %s', trading_date, dsitem)
+        logger.warning('已經匯入過 %s 的 %s', trading_date, dsitem)
     except Exception as ex:
         # TODO: ex.args[0] 不確定是否可靠, 需要再確認
         logger.error('無法匯入 %s 的 %s (%s)', trading_date, dsitem, ex.args[0])
