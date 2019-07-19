@@ -5,7 +5,7 @@
 import io
 import re
 import copy
-import gzip
+import lzma
 import hashlib
 import os
 import os.path
@@ -17,24 +17,12 @@ from bs4 import BeautifulSoup
 
 import twnews.common
 
-def get_cache_dir():
-    """
-    取得快取目錄
-    """
-    logger = twnews.common.get_logger()
-    cache_dir = os.path.expanduser('~/.twnews/cache')
-    if not os.path.isdir(cache_dir):
-        logger.debug('建立快取目錄: %s', cache_dir)
-        os.makedirs(cache_dir)
-    logger.debug('使用快取目錄: %s', cache_dir)
-    return cache_dir
-
 def get_cache_filepath(channel, uri):
     """
     取得快取檔案路徑
     """
     cache_id = hashlib.md5(uri.encode('ascii')).hexdigest()
-    path = '{}/{}-{}.html.gz'.format(get_cache_dir(), channel, cache_id)
+    path = '{}/{}.html.xz'.format(twnews.common.get_cache_dir(channel), cache_id)
     return path
 
 def url_follow_redirection(url, proxy_first):
@@ -141,7 +129,7 @@ def soup_from_website(url, channel, refresh, proxy_first):
                 logger.debug('回應 200 OK')
                 soup = BeautifulSoup(resp.text, 'lxml')
                 rawlen = len(resp.text.encode('utf-8'))
-                with gzip.open(path, 'wt') as cache_file:
+                with lzma.open(path, 'wt') as cache_file:
                     logger.debug('寫入快取: %s', path)
                     cache_file.write(resp.text)
             else:
@@ -159,12 +147,11 @@ def soup_from_file(file_path):
     soup = None
     clen = 0
 
-    if file_path.endswith('.gz'):
-        # 注意 gzip 預設 mode 是 rb
-        with gzip.open(file_path, 'rt') as cache_file:
-            html = cache_file.read()
+    if file_path.endswith('.xz'):
+        with lzma.open(file_path, 'rt') as cache_file:
+             html = cache_file.read()
     else:
-        with open(file_path, 'r') as cache_file:
+        with open(file_path, 'rt') as cache_file:
             html = cache_file.read()
 
     if html is not None:

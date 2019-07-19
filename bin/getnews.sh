@@ -14,4 +14,4 @@ wget -U "$USER_AGENT" -O $SAMPLE_DIR/udn.html https://udn.com/news/story/7315/37
 # iconv -f cp950 -t utf8 $SAMPLE_DIR/judicial-cp950.html > $SAMPLE_DIR/judicial.html
 # rm -f $SAMPLE_DIR/judicial-cp950.html
 
-gzip -f $SAMPLE_DIR/*.html
+xz -f $SAMPLE_DIR/*.html
