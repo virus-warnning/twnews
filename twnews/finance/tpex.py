@@ -71,7 +71,17 @@ def download_margin(datestr):
     """
     下載信用交易資料集
     """
-    return None
+    session = common.get_session(False)
+    url = 'https://www.tpex.org.tw/web/stock/margin_trading/margin_balance/margin_bal_result.php?l=zh_tw&o=json&d=%s' % datestr
+    resp = session.get(url)
+    if resp.status_code == 200:
+        dataset = resp.json()
+        if dataset['iTotalRecords'] == 0:
+            raise SyncException('日期格式錯誤，或是 %s 的資料尚未產出' % datestr)
+    else:
+        raise SyncException('HTTP ERROR %d' % resp.status_code)
+
+    return dataset
 
 def download_block(datestr):
     """
@@ -109,12 +119,12 @@ def import_margin(dbcon, trading_date, dataset):
             buying_balance, selling_balance
         ) VALUES (?,?,?,?,?)
     '''
-    for detail in dataset['data']:
+    for detail in dataset['aaData']:
         # TODO
         security_id = detail[0]
         security_name = detail[1].strip()
         buying_balance = int(detail[6].replace(',', ''))
-        selling_balance = int(detail[12].replace(',', ''))
+        selling_balance = int(detail[14].replace(',', ''))
         dbcon.execute(sql, (
             trading_date,
             security_id,
