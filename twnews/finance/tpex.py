@@ -87,7 +87,16 @@ def download_block(datestr):
     """
     下載鉅額交易資料集
     """
-    return None
+    session = common.get_session(False)
+    url = 'https://www.tpex.org.tw/web/stock/block_trade/daily_qutoes/block_day_download.php?l=zh_tw&d=%s&s=0,asc,0&charset=UTF-8' % datestr
+    resp = session.get(url)
+    if resp.status_code == 200:
+        # 不做日期驗證，因為 csv 顯示的時間，是我們傳入參數的字串，驗也是白驗
+        dataset = resp.text
+    else:
+        raise SyncException('HTTP ERROR %d' % resp.status_code)
+
+    return dataset
 
 def download_institution(datestr):
     """
@@ -146,6 +155,10 @@ def import_block(dbcon, trading_date, dataset):
     """
     匯入鉅額交易資料集
     """
+    col_names = ['交易型態', '交割期別', '代號', '名稱', '成交價格(元)', '成交股數', '成交值(元)', '成交時間']
+    # Pandas 只能吃 file-like 參數，需要把 dataset 轉成 StringIO
+    df = pandas.read_csv(io.StringIO(dataset), engine='python', sep=',', skiprows=3, skipfooter=1, names=col_names)
+
     sql = '''
         INSERT INTO `block` (
             trading_date, security_id, security_name,
@@ -154,20 +167,20 @@ def import_block(dbcon, trading_date, dataset):
         ) VALUES (?,?,?,?,?,?,?,?)
     '''
     tick_rank = {}
-    for trade in dataset['data']:
-        # TODO
-        if trade[0] == '總計':
-            break
-        security_id = trade[0]
-        security_name = trade[1]
-        tick_type = trade[2]
-        close = float(trade[3].replace(',', ''))
-        volume = int(trade[4].replace(',', ''))
-        total = int(trade[5].replace(',', ''))
+
+    for _index, row in df.iterrows():
+        security_id = row['代號']
+        security_name = row['名稱']
+        tick_type = row['交易型態']
+        close = float(row['成交價格(元)'])
+        volume = int(row['成交股數'].replace(',', ''))
+        total = int(row['成交值(元)'].replace(',', ''))
+
         if security_id not in tick_rank:
             tick_rank[security_id] = 1
         else:
             tick_rank[security_id] += 1
+
         dbcon.execute(sql, (
             trading_date,
             security_id,
@@ -178,17 +191,6 @@ def import_block(dbcon, trading_date, dataset):
             volume,
             total
         ))
-        """
-        logger.debug('[%s %s] #%d %s 成交價: %s 股數: %s 金額: %s' % (
-            security_id,
-            security_name,
-            tick_rank[security_id],
-            tick_type,
-            close,
-            volume,
-            total
-        ))
-        """
 
 def import_institution(dbcon, trading_date, dataset):
     """
