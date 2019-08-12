@@ -397,6 +397,7 @@ def sync_dataset(dsitem, trading_date):
                 logger.info('儲存 %s 的 %s', trading_date, dsitem)
                 save_cache(dsitem, datestr, dataset, format)
             except Exception as ex:
+                # 2019-08-08: 這裡的重試效果不夠理想，3 次重試的結果都失敗，可能要改用別的重試機制
                 logger.error('無法取得 %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
 
     if dataset is None:
