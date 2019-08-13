@@ -21,7 +21,7 @@ class TestEttoday(unittest.TestCase):
         測試東森新聞雲樣本
         """
         pkgdir = twnews.common.get_package_dir()
-        nsoup = NewsSoup(pkgdir + '/samples/ettoday.html.gz')
+        nsoup = NewsSoup(pkgdir + '/samples/ettoday.html.xz')
         self.assertEqual('ettoday', nsoup.channel)
         self.assertIn('客運司機車禍致人於死　心情鬱悶陽台以狗鍊上吊', nsoup.title())
         self.assertEqual('2017-12-09 00:26:00', nsoup.date().strftime(self.dtf))

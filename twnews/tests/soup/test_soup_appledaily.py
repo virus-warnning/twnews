@@ -22,7 +22,7 @@ class TestAppleDaily(unittest.TestCase):
         測試蘋果日報樣本
         """
         pkgdir = twnews.common.get_package_dir()
-        nsoup = NewsSoup(pkgdir + '/samples/appledaily.html.gz')
+        nsoup = NewsSoup(pkgdir + '/samples/appledaily.html.xz')
         self.assertEqual('appledaily', nsoup.channel)
         self.assertIn('和男友口角鎖門吞藥　女墜樓不治', nsoup.title())
         self.assertEqual('2016-05-21 11:44:00', nsoup.date().strftime(self.dtf))

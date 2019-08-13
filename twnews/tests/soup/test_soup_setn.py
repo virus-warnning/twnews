@@ -23,7 +23,7 @@ class TestSetn(unittest.TestCase):
         測試三立新聞網樣本
         """
         pkgdir = twnews.common.get_package_dir()
-        nsoup = NewsSoup(pkgdir + '/samples/setn.html.gz')
+        nsoup = NewsSoup(pkgdir + '/samples/setn.html.xz')
         self.assertEqual('setn', nsoup.channel)
         self.assertIn('與母爭吵疑失足墜樓　男子送醫搶救不治', nsoup.title())
         self.assertEqual('2018-02-21 18:03:00', nsoup.date().strftime(self.dtf))

@@ -23,7 +23,7 @@ class TestCna(unittest.TestCase):
         測試中央社樣本
         """
         pkgdir = twnews.common.get_package_dir()
-        nsoup = NewsSoup(pkgdir + '/samples/cna.html.gz')
+        nsoup = NewsSoup(pkgdir + '/samples/cna.html.xz')
         self.assertEqual('cna', nsoup.channel)
         self.assertIn('平鎮輪胎行惡火  疏散7人1女命喪', nsoup.title())
         self.assertEqual('2016-03-19 10:48:00', nsoup.date().strftime(self.dtf))

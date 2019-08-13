@@ -23,7 +23,7 @@ class TestUdn(unittest.TestCase):
         測試聯合新聞網樣本
         """
         pkgdir = twnews.common.get_package_dir()
-        nsoup = NewsSoup(pkgdir + '/samples/udn.html.gz')
+        nsoup = NewsSoup(pkgdir + '/samples/udn.html.xz')
         self.assertEqual('udn', nsoup.channel)
         self.assertIn('血濺桃機 他把老婆丟下樓再跳樓', nsoup.title())
         self.assertEqual('2019-03-18 23:59:00', nsoup.date().strftime(self.dtf))

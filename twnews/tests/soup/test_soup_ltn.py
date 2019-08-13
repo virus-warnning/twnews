@@ -22,7 +22,7 @@ class TestLtn(unittest.TestCase):
         測試自由時報樣本
         """
         pkgdir = twnews.common.get_package_dir()
-        nsoup = NewsSoup(pkgdir + '/samples/ltn.html.gz')
+        nsoup = NewsSoup(pkgdir + '/samples/ltn.html.xz')
         self.assertEqual('ltn', nsoup.channel)
         self.assertIn('10年前父親掐死兒後自縊... 凶宅下月拍開價425萬', nsoup.title())
         self.assertEqual('2018-07-31 08:19:00', nsoup.date().strftime(self.dtf))
