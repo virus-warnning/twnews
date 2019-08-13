@@ -8,6 +8,7 @@
 
 import os
 import unittest
+import twnews.common
 from twnews.soup import *
 
 class TestCommon(unittest.TestCase):
@@ -25,8 +26,8 @@ class TestCommon(unittest.TestCase):
         """
 
         # 清除快取
-        cache_dir = get_cache_dir()
-        cache_path = '{}/appledaily-ed33e11740a7c95cb0852827b91cd37d.html.gz'.format(cache_dir)
+        cache_dir = twnews.common.get_cache_dir('appledaily')
+        cache_path = '{}/ed33e11740a7c95cb0852827b91cd37d.html.xz'.format(cache_dir)
         if os.path.isfile(cache_path):
             os.unlink(cache_path)
 
