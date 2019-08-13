@@ -2,12 +2,17 @@
 中時電子報分解測試
 """
 
+# pylint: disable=duplicate-code
+
 import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestChinatimes(unittest.TestCase):
+    """
+    中時電子報分解測試
+    """
 
     def setUp(self):
         self.url = 'https://www.chinatimes.com/realtimenews/20180916001767-260402'

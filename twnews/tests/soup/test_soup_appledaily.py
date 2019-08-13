@@ -2,12 +2,17 @@
 蘋果日報分解測試
 """
 
+# pylint: disable=duplicate-code
+
 import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestAppleDaily(unittest.TestCase):
+    """
+    蘋果日報分解測試
+    """
 
     def setUp(self):
         self.dtf = '%Y-%m-%d %H:%M:%S'

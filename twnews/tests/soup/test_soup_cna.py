@@ -2,12 +2,17 @@
 中央社分解測試
 """
 
+# pylint: disable=duplicate-code
+
 import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestCna(unittest.TestCase):
+    """
+    中央社分解測試
+    """
 
     def setUp(self):
         self.url = 'https://www.cna.com.tw/news/asoc/201810170077.aspx'

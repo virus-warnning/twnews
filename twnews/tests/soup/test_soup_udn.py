@@ -2,12 +2,17 @@
 聯合新聞網分解測試
 """
 
+# pylint: disable=duplicate-code
+
 import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestUdn(unittest.TestCase):
+    """
+    聯合新聞網分解測試
+    """
 
     def setUp(self):
         self.url = 'https://udn.com/news/story/7320/3407294'

@@ -39,7 +39,7 @@ def url_follow_redirection(url, proxy_first):
         try:
             resp = session.head(old_url)
             status = resp.status_code
-            if status == 301 or status == 302:
+            if status in (301, 302):
                 dest = resp.headers['Location']
                 if dest.startswith('//'):
                     new_url = 'https:' + dest
@@ -91,11 +91,12 @@ def url_force_ltn_mobile(url):
     """
     logger = twnews.common.get_logger()
     new_url = url
+    sub_chanels = r'^https://(3c|auto|ec|ent|food|istyle|market|playing|sports).ltn.com.tw/[^m].+'
     if url.startswith('https://news.ltn.com.tw'):
         new_url = 'https://m.ltn.com.tw' + url[len('https://news.ltn.com.tw'):]
         logger.debug('原始 URL: %s', url)
         logger.debug('變更 URL: %s', new_url)
-    elif re.match('^https://(3c|auto|ec|ent|food|istyle|market|playing|sports).ltn.com.tw/[^m].+', url):
+    elif re.match(sub_chanels, url):
         uri_pos = url.find('/', 10)
         new_url = url[:uri_pos] + '/m' + url[uri_pos:]
         logger.debug('原始 URL: %s', url)
@@ -155,7 +156,7 @@ def soup_from_file(file_path):
 
     if file_path.endswith('.xz'):
         with lzma.open(file_path, 'rt') as cache_file:
-             html = cache_file.read()
+            html = cache_file.read()
     else:
         with open(file_path, 'rt') as cache_file:
             html = cache_file.read()
@@ -203,10 +204,13 @@ class NewsSoup:
     新聞分解器
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, path, refresh=False, proxy_first=False):
         """
         建立新聞分解器
         """
+
         self.path = path
         self.refresh = refresh
         self.proxy_first = proxy_first
@@ -358,6 +362,8 @@ class NewsSoup:
         """
         取得新聞記者/社論作者
         """
+
+        # pylint: disable=too-many-branches
 
         soup = self.__get_soup()
         if soup is None:

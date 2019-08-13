@@ -2,12 +2,17 @@
 自由時報單元分解測試
 """
 
+# pylint: disable=duplicate-code
+
 import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestLtn(unittest.TestCase):
+    """
+    自由時報單元分解測試
+    """
 
     def setUp(self):
         self.dtf = '%Y-%m-%d %H:%M:%S'

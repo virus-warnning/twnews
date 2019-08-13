@@ -2,13 +2,17 @@
 三立新聞網分解測試
 """
 
-import time
+# pylint: disable=duplicate-code
+
 import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
 #@unittest.skip
 class TestSetn(unittest.TestCase):
+    """
+    三立新聞網分解測試
+    """
 
     def setUp(self):
         self.url = 'http://www.setn.com/News.aspx?NewsID=350370'

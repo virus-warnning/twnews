@@ -2,11 +2,16 @@
 東森新聞雲分解測試
 """
 
+# pylint: disable=duplicate-code
+
 import unittest
 import twnews.common
 from twnews.soup import NewsSoup
 
 class TestEttoday(unittest.TestCase):
+    """
+    東森新聞雲分解測試
+    """
 
     def setUp(self):
         self.dtf = '%Y-%m-%d %H:%M:%S'

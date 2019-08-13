@@ -54,7 +54,6 @@ class NewsSearchException(Exception):
     """
     新聞搜尋例外
     """
-    pass
 
 class NewsSearch:
     """
@@ -65,6 +64,9 @@ class NewsSearch:
         """
         配置新聞搜尋器
         """
+
+        # pylint: disable=too-many-arguments
+
         # 防止用中時搜尋
         if channel == 'chinatimes':
             msg = '頻道 {} 不支援搜尋功能'.format(channel)
@@ -122,6 +124,9 @@ class NewsSearch:
         """
         關鍵字搜尋
         """
+
+        # pylint: disable=fixme
+
         logger = twnews.common.get_logger()
         page = 1
         results = []
@@ -293,6 +298,8 @@ class NewsSearch:
         return page_range['lower']
 
     def __load_page(self, keyword, page):
+        # pylint: disable=fixme
+
         # 組查詢條件
         replacement = {
             'PAGE': page,

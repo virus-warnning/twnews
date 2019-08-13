@@ -4,12 +4,16 @@
 為了節省爬蟲開發時間，原則上 NewsSoup 盡量不丟例外，有問題以 logging 機制為主
 """
 
+# pylint: disable=wildcard-import,unused-wildcard-import
+
 import os
-import re
 import unittest
 from twnews.soup import *
 
 class TestCommon(unittest.TestCase):
+    """
+    不分頻道分解測試
+    """
 
     def setUp(self):
         self.url = 'https://tw.appledaily.com/headline/daily/20181201/38194705/'
@@ -42,6 +46,8 @@ class TestCommon(unittest.TestCase):
         '''
         測試 NewSoup(URL) 輸入不理想網址
         '''
+
+        # pylint: disable=broad-except, line-too-long
 
         # channel 不存在
         try:
@@ -81,6 +87,8 @@ class TestCommon(unittest.TestCase):
         '''
         測試 NewsSoup(FILE) 輸入不理想檔案
         '''
+
+        # pylint: disable=broad-except, line-too-long
 
         # channel 不存在
         try:
@@ -188,10 +196,10 @@ class TestCommon(unittest.TestCase):
 
         # 中時找不到異常案例，暫不測試
         bad_samples = [
-          # 中央社 高雄6日電 (無連結)
-          'https://udn.com/news/story/10958/3465283',
-          # 聯合新聞網 綜合報導 (無連結)
-          'https://udn.com/news/story/10958/3465161'
+            # 中央社 高雄6日電 (無連結)
+            'https://udn.com/news/story/10958/3465283',
+            # 聯合新聞網 綜合報導 (無連結)
+            'https://udn.com/news/story/10958/3465161'
         ]
 
         for url in bad_samples:

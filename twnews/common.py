@@ -22,12 +22,15 @@ __SESSION = {
 VERSION = '0.3.2'
 
 def found_socks5():
+    """
+    檢查是否有 SOCKS 5 Proxy
+    """
     found = False
     with socket.socket(socket.AF_INET) as sock:
         try:
             sock.connect(('localhost', 9050))
             found = True
-        except socket.error as ex:
+        except socket.error:
             pass
         finally:
             sock.close()

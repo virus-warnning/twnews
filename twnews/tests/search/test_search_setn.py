@@ -1,5 +1,5 @@
 """
-蘋果日報搜尋測試
+三立新聞網搜尋測試
 """
 
 import unittest
@@ -7,6 +7,9 @@ from twnews.search import NewsSearch
 
 #@unittest.skip
 class TestSetn(unittest.TestCase):
+    """
+    三立新聞網搜尋測試
+    """
 
     def setUp(self):
         self.keyword = '上吊'

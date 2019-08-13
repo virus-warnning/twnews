@@ -7,6 +7,9 @@ from twnews.search import NewsSearch
 
 #@unittest.skip
 class TestAppleDaily(unittest.TestCase):
+    """
+    蘋果日報搜尋測試
+    """
 
     def setUp(self):
         self.keyword = '上吊'
