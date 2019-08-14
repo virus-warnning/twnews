@@ -77,11 +77,6 @@ def test_in_virtualenv(pyver, wheel):
 
     return (comp.returncode == 0)
 
-def upload_to_pypi(test=False):
-    """ 上傳 wheel 到 PyPi """
-    # TODO
-    pass
-
 def wheel_check():
     """ 檢查 wheel 是否能正常運作在各個 Python 版本環境上 """
 
@@ -103,15 +98,44 @@ def wheel_check():
     for pyver in latest_python:
         test_in_virtualenv(pyver, wheel)
 
+def upload_to_pypi(test=False):
+    """ 上傳 wheel 到 PyPi """
+
+    # 檢查 ~/.pypirc 是否存在
+    if not os.path.isfile(os.path.expanduser('~/.pypirc')):
+        print('缺少 pypi 設定檔 ~/.pypirc')
+        print('參考: https://gist.github.com/ibrahim12/c6a296c1e8f409dbed2f')
+
+    # 重新產生 wheel 與上傳前確認
+    wheel = get_wheel()
+    prompt = '準備上傳的檔案是 %s, 確定上傳嗎 [y/n]? ' % wheel
+    print(prompt, end='', flush=True)
+    ans = sys.stdin.readline().strip()
+    if ans != 'y':
+        print('取消上傳')
+        return
+
+    # 上傳 wheel
+    cmd = ['twine', 'upload']
+    if test:
+        cmd.append('--repository')
+        cmd.append('testpypi')
+    cmd.append('--verbose')
+    cmd.append(wheel)
+    comp = subprocess.run(cmd)
+    if comp.returncode == 0:
+        print('上傳成功')
+    else:
+        print('上傳失敗')
+
 def main():
     # 確保不在 repo 目錄也能正常執行
     TWNEWS_HOME = os.path.realpath(os.path.dirname(__file__) + '/..')
     os.chdir(TWNEWS_HOME)
 
+    action = 'wheel'
     if len(sys.argv) > 1:
         action = sys.argv[1]
-    else:
-        action = 'wheel'
 
     if action == 'release':
         upload_to_pypi()
