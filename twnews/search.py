@@ -4,7 +4,6 @@
 
 import re
 import time
-import os.path
 import urllib.parse
 from string import Template
 from datetime import datetime
