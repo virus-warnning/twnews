@@ -1,33 +1,10 @@
 {
 	"info": {
-		"_postman_id": "bf667ff4-7df7-441f-b613-e8d71516639e",
+		"_postman_id": "3a031cb9-6446-487b-b5e7-d77b7b351058",
 		"name": "0xFE-TWMKT",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
-		{
-			"name": "[TWSE] 上市大股東股權異動",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://siis.twse.com.tw/publish/sii/106IRB110_01.HTM",
-					"protocol": "http",
-					"host": [
-						"siis",
-						"twse",
-						"com",
-						"tw"
-					],
-					"path": [
-						"publish",
-						"sii",
-						"106IRB110_01.HTM"
-					]
-				}
-			},
-			"response": []
-		},
 		{
 			"name": "[TWSE] 上櫃大股東股權異動",
 			"request": {
@@ -75,7 +52,7 @@
 			"response": []
 		},
 		{
-			"name": "[TWSE] ETF 溢價",
+			"name": "[TWSE] ETF 折溢價",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -103,7 +80,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://www.twse.com.tw/fund/T86?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}&selectType=ALL",
+					"raw": "http://www.twse.com.tw/fund/T86?response={{TWSE_EXFORMAT}}&date={{TWSE_EXDATE}}&selectType=ALL",
 					"protocol": "http",
 					"host": [
 						"www",
@@ -118,11 +95,11 @@
 					"query": [
 						{
 							"key": "response",
-							"value": "{{TWSE_EXPORT_FORMAT}}"
+							"value": "{{TWSE_EXFORMAT}}"
 						},
 						{
 							"key": "date",
-							"value": "{{TWSE_EXPORT_DATE}}"
+							"value": "{{TWSE_EXDATE}}"
 						},
 						{
 							"key": "selectType",
@@ -134,12 +111,35 @@
 			"response": []
 		},
 		{
+			"name": "[TWSE] 上市大股東股權異動",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://siis.twse.com.tw/publish/sii/106IRB110_01.HTM",
+					"protocol": "http",
+					"host": [
+						"siis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"publish",
+						"sii",
+						"106IRB110_01.HTM"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "[TWSE] 融資融券明細",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://www.twse.com.tw/exchangeReport/MI_MARGN?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}&selectType=ALL",
+					"raw": "http://www.twse.com.tw/exchangeReport/MI_MARGN?response={{TWSE_EXFORMAT}}&date={{TWSE_EXDATE}}&selectType=ALL",
 					"protocol": "http",
 					"host": [
 						"www",
@@ -154,11 +154,11 @@
 					"query": [
 						{
 							"key": "response",
-							"value": "{{TWSE_EXPORT_FORMAT}}"
+							"value": "{{TWSE_EXFORMAT}}"
 						},
 						{
 							"key": "date",
-							"value": "{{TWSE_EXPORT_DATE}}"
+							"value": "{{TWSE_EXDATE}}"
 						},
 						{
 							"key": "selectType",
@@ -175,7 +175,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://www.twse.com.tw/exchangeReport/TWT93U?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}",
+					"raw": "http://www.twse.com.tw/exchangeReport/TWT93U?response={{TWSE_EXFORMAT}}&date={{TWSE_EXDATE}}",
 					"protocol": "http",
 					"host": [
 						"www",
@@ -190,11 +190,39 @@
 					"query": [
 						{
 							"key": "response",
-							"value": "{{TWSE_EXPORT_FORMAT}}"
+							"value": "{{TWSE_EXFORMAT}}"
 						},
 						{
 							"key": "date",
-							"value": "{{TWSE_EXPORT_DATE}}"
+							"value": "{{TWSE_EXDATE}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] 可借券賣出餘額",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://www.twse.com.tw/SBL/TWT96U?response=csv",
+					"protocol": "http",
+					"host": [
+						"www",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"SBL",
+						"TWT96U"
+					],
+					"query": [
+						{
+							"key": "response",
+							"value": "csv"
 						}
 					]
 				}
@@ -207,7 +235,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://www.twse.com.tw/block/BFIAUU?response={{TWSE_EXPORT_FORMAT}}&date={{TWSE_EXPORT_DATE}}&selectType=S",
+					"raw": "http://www.twse.com.tw/block/BFIAUU?response={{TWSE_EXFORMAT}}&date={{TWSE_EXDATE}}&selectType=S",
 					"protocol": "http",
 					"host": [
 						"www",
@@ -222,11 +250,11 @@
 					"query": [
 						{
 							"key": "response",
-							"value": "{{TWSE_EXPORT_FORMAT}}"
+							"value": "{{TWSE_EXFORMAT}}"
 						},
 						{
 							"key": "date",
-							"value": "{{TWSE_EXPORT_DATE}}"
+							"value": "{{TWSE_EXDATE}}"
 						},
 						{
 							"key": "selectType",
@@ -539,6 +567,81 @@
 					"path": [
 						"smWeb",
 						"QryStockAjax.do"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TWSE] 會計師查核",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "TYPEK",
+							"value": "sii",
+							"type": "text"
+						},
+						{
+							"key": "year",
+							"value": "107",
+							"type": "text"
+						},
+						{
+							"key": "season",
+							"value": "04",
+							"type": "text"
+						},
+						{
+							"key": "isQuery",
+							"value": "Y",
+							"type": "text"
+						},
+						{
+							"key": "off",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "firstin",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "step",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "encodeURIComponent",
+							"value": "1",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://mops.twse.com.tw/mops/web/t163sb14",
+					"protocol": "https",
+					"host": [
+						"mops",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"mops",
+						"web",
+						"t163sb14"
 					]
 				}
 			},
