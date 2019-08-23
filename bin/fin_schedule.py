@@ -1,59 +1,73 @@
-import asyncio
-import math
 import os
 import schedule
 import signal
+import threading
 import time
 from datetime import datetime
 
-def job():
-    print('  job() run at %s' % datetime.now().strftime('%H:%M:%S'))
+import busm
+
+@busm.through_telegram
+def job(label):
+    wkd = datetime.now().isoweekday()
+    if wkd > 5:
+        return
+    timestr = datetime.now().strftime('%H:%M:%S.%f')
+    print('[%s] job(%s)' % (timestr, label))
 
 def daemon():
-    # kill process 時溫和結束
-    close_requested = False
-    def on_term(signum, frame):
+    # 觸發排程條件時，平行執行工作，避免超時導致下一個工作被忽略
+    def run_threaded(job_func, *args):
+        th = threading.Thread(target=job_func, args=args)
+        th.start()
+
+    def on_quit(signum, frame):
         nonlocal close_requested
         close_requested = True
-    signal.signal(signal.SIGTERM, on_term)
 
-    # 非同步值行排程工作
-    async def async_run_pending():
-        schedule.run_pending()
+    # 產生 pid file
+    pid_file = os.path.expanduser('~/.twnews/fin_schedule.pid')
+    pid_base = os.path.dirname(pid_file)
+    if not os.path.isdir(pid_base):
+        os.makedirs(pid_base)
+    with open(pid_file, 'w') as pid_stream:
+        pid_stream.write('%s' % os.getpid())
+
+    # kill process 時溫和結束
+    close_requested = False
+    for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(sig, on_quit)
+
+    # schedule.every().day.at('16:52').do(job, 'Test')
 
     # 證交所
-    schedule.every().day.at('00:30').do(job)
-    schedule.every().day.at('08:00').do(job)
-    schedule.every().day.at('08:47').do(job)
-    schedule.every().day.at('09:37').do(job)
-    schedule.every().day.at('12:44').do(job)
-    schedule.every().day.at('12:45').do(job)
+    schedule.every().day.at('00:30').do(job, '模擬證交所可借券')
+    schedule.every().day.at('08:00').do(job, '模擬證交所ETF淨值')
+    schedule.every().day.at('08:47').do(job, '模擬證交所三大法人')
+    schedule.every().day.at('09:37').do(job, '模擬證交所鉅額交易')
+    schedule.every().day.at('12:44').do(job, '模擬證交所信用交易')
+    schedule.every().day.at('12:45').do(job, '模擬證交所借券賣出')
 
     # 櫃買中心
-    schedule.every().day.at('08:52').do(job)
-    schedule.every().day.at('09:42').do(job)
-    schedule.every().day.at('12:49').do(job)
+    schedule.every().day.at('08:52').do(job, '模擬櫃買三大法人')
+    schedule.every().day.at('09:42').do(job, '模擬櫃買鉅額交易')
+    schedule.every().day.at('12:49').do(job, '模擬櫃買信用交易')
 
+    # 集保中心
+    schedule.every().day.at('23:00').do(job, '模擬集保股權分散')
+
+    # 偵測與執行排程
     while not close_requested:
-        print(datetime.now().strftime('[%H:%M:%S.%f] Wake up.'))
-        asyncio.run(async_run_pending())
+        schedule.run_pending()
 
         # 控制下次醒來的時，秒數小數部位趨近於 0
         t = time.time()
         delay = 1 - (t - int(t))
         time.sleep(delay)
 
-    # TODO: Remove pid file
-    print('daemon(): kill pid %d' % os.getpid())
-
-def main():
-    pid = os.fork()
-    if pid == 0:
-        daemon()
-    else:
-        print('PID of daemon is %d.' % pid)
-        with open('b.pid', 'w') as fpid:
-            fpid.write('%s' % pid)
+    # 移除 pid file
+    os.remove(pid_file)
 
 if __name__ == '__main__':
-    main()
+    if os.fork() == 0:
+        daemon()
