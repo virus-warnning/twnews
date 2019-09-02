@@ -280,7 +280,7 @@ def sync_dataset(dsitem, trading_date):
     dbcon.commit()
     dbcon.close()
 
-# @busm.through_telegram
+@busm.through_telegram
 def main():
     """
     python3 -m twnews.finance.tpex {action}

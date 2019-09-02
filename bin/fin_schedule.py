@@ -1,14 +1,20 @@
 import os
 import schedule
 import signal
+import sys
 import threading
 import time
 from datetime import datetime
 
-import busm
+sys.path.append(os.path.realpath('.'))
 
-@busm.through_telegram
+import busm
+import twnews.finance.tpex as tpex
+
+# @busm.through_telegram
 def job(label):
+    # tpex.sync_dataset('institution', '2019-09-02')
+    print('shit')
     wkd = datetime.now().isoweekday()
     if wkd > 5:
         return
@@ -49,8 +55,8 @@ def daemon():
     schedule.every().day.at('12:45').do(job, '模擬證交所借券賣出')
 
     # 櫃買中心
-    schedule.every().day.at('08:52').do(job, '模擬櫃買三大法人')
-    schedule.every().day.at('09:42').do(job, '模擬櫃買鉅額交易')
+    schedule.every().day.at('18:04').do(run_threaded, tpex.sync_dataset, 'institution', '2019-09-02')
+    schedule.every().day.at('09:58').do(job, '模擬櫃買鉅額交易')
     schedule.every().day.at('12:49').do(job, '模擬櫃買信用交易')
 
     # 集保中心
