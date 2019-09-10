@@ -55,24 +55,24 @@ def daemon():
     for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
         signal.signal(sig, on_quit)
 
-    dt = datetime.now() + timedelta(minutes=1)
-    sch_time = dt.strftime('%H:%M')
+    # dt = datetime.now() + timedelta(minutes=1)
+    # sch_time = dt.strftime('%H:%M')
 
     # 證交所 - OK!
-    # schedule.every().day.at(sch_time).do(run_threaded, 'twse:borrowed')
-    # schedule.every().day.at(sch_time).do(run_threaded, 'twse:etfnet')
-    # schedule.every().day.at(sch_time).do(run_threaded, 'twse:institution')
-    # schedule.every().day.at(sch_time).do(run_threaded, 'twse:block')
-    # schedule.every().day.at(sch_time).do(run_threaded, 'twse:margin')
-    # schedule.every().day.at(sch_time).do(run_threaded, 'twse:selled')
+    schedule.every().day.at('00:27').do(run_threaded, 'twse:borrowed')
+    schedule.every().day.at('07:57').do(run_threaded, 'twse:etfnet')
+    schedule.every().day.at('08:44').do(run_threaded, 'twse:institution')
+    schedule.every().day.at('09:33').do(run_threaded, 'twse:block')
+    schedule.every().day.at('12:41').do(run_threaded, 'twse:margin')
+    schedule.every().day.at('12:42').do(run_threaded, 'twse:selled')
 
     # 櫃買中心 - OK!
-    # schedule.every().day.at(sch_time).do(run_threaded, 'tpex:institution')
-    # schedule.every().day.at(sch_time).do(run_threaded, 'tpex:block')
-    # schedule.every().day.at(sch_time).do(run_threaded, 'tpex:margin')
+    schedule.every().day.at('08:49').do(run_threaded, 'tpex:institution')
+    schedule.every().day.at('09:48').do(run_threaded, 'tpex:block')
+    schedule.every().day.at('12:47').do(run_threaded, 'tpex:margin')
 
-    # 集保中心
-    schedule.every().day.at(sch_time).do(run_threaded, 'tdcc:')
+    # 集保中心 - OK!
+    schedule.every().day.at('23:01').do(run_threaded, 'tdcc:')
 
     # 偵測與執行排程
     while not close_requested:
@@ -87,5 +87,5 @@ def daemon():
     os.remove(pid_file)
 
 if __name__ == '__main__':
-    # if os.fork() == 0:
-    daemon()
+    if os.fork() == 0:
+        daemon()
