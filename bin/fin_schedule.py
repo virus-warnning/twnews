@@ -8,84 +8,130 @@ from datetime import datetime, timedelta
 
 sys.path.append(os.path.realpath('.'))
 
-import busm
 import twnews.finance.twse as twse
 import twnews.finance.tpex as tpex
 import twnews.finance.tdcc as tdcc
 
-def run_threaded(task):
-    # 觸發排程條件時，平行執行工作，避免超時導致下一個工作被忽略
-    print('Run task %s' % task)
-    trading_date = datetime.now().strftime('%Y-%m-%d')
-    (inst, action) = task.split(':')
+class JustDaemon:
 
-    if inst == 'twse':
-        func = twse.sync_dataset
-        args = (action, trading_date)
-    elif inst == 'tpex':
-        func = tpex.sync_dataset
-        args = (action, trading_date)
-    elif inst == 'tdcc':
-        func = tdcc.sync_dataset
-        args = ()
-    else:
-        func = None
-        args = ()
+    def __init__(self, init_task=None, loop_task=None, stdout='/dev/null', stderr='/dev/null', background=True):
+        if background and os.fork() > 0:
+            exit(0)
 
-    if func is not None:
+        self.init_task = init_task if init_task is not None else self.do_nothing
+        self.loop_task = loop_task if loop_task is not None else self.do_nothing
+        self.stdout = stdout
+        self.stderr = stderr
+        self.background = background
+        self.close_requested = False
+
+    def do_nothing(self):
+        pass
+
+    def on_quit(self, signum, frame):
+        self.close_requested = True
+
+    def listen_sys_signals(self):
+        ACCEPTED_SIGNALS = [
+            signal.SIGHUP,  # 1
+            signal.SIGINT,  # 2
+            signal.SIGQUIT, # 3
+            signal.SIGABRT, # 6
+            signal.SIGTERM  # 15
+        ]
+        for sig in ACCEPTED_SIGNALS:
+            signal.signal(sig, self.on_quit)
+
+    def stream_redirect(self):
+        if self.background:
+            outpath = os.path.expanduser(self.stdout)
+            sys.stdout = open(outpath, 'w')
+            errpath = os.path.expanduser(self.stderr)
+            sys.stderr = open(errpath, 'w')
+
+    def stream_flush(self):
+        if self.background:
+            sys.stdout.flush()
+            sys.stderr.flush()
+
+    def stream_close(self):
+        if self.background:
+            sys.stdout.close()
+            sys.stderr.close()
+
+    def pidfile_create(self):
+        # 產生 pid file
+        pid_file = os.path.expanduser('~/.twnews/fin_schedule.pid')
+        pid_base = os.path.dirname(pid_file)
+        if not os.path.isdir(pid_base):
+            os.makedirs(pid_base)
+        with open(pid_file, 'w') as pid_stream:
+            pid_stream.write('%s' % os.getpid())
+
+    def pidfile_remove(self):
+        # 移除 pid file
+        os.remove(pid_file)
+
+    def run(self):
+        self.listen_sys_signals()
+        self.stream_redirect()
+
+        attrs = {}
+        self.init_task(attrs)
+        while not self.close_requested:
+            self.loop_task(attrs)
+            self.stream_flush()
+
+            # Make the next waking near 0 second.
+            t = time.time()
+            delay = 1 - (t - int(t))
+            time.sleep(delay)
+
+        self.stream_close()
+
+class ScheduleDaemon(JustDaemon):
+
+    def __init__(self, schedule_table, stdout='/dev/null', stderr='/dev/null', background=True):
+        self.schedule_table = schedule_table
+        super().__init__(
+            init_task = self.init_task,
+            loop_task = self.loop_task,
+            stdout = stdout,
+            stderr = stderr,
+            background = background
+        )
+
+    def init_task(self, attrs):
+        for run_at in self.schedule_table:
+            func = self.schedule_table[run_at]['func']
+            args = self.schedule_table[run_at]['args']
+            schedule.every().day.at(run_at).do(self.run_parallel, func, args)
+
+    def loop_task(self, attrs):
+        schedule.run_pending()
+
+    def run_parallel(self, func, args):
         th = threading.Thread(target=func, args=args)
         th.start()
 
-def daemon():
-    # 產生 pid file
-    pid_file = os.path.expanduser('~/.twnews/fin_schedule.pid')
-    pid_base = os.path.dirname(pid_file)
-    if not os.path.isdir(pid_base):
-        os.makedirs(pid_base)
-    with open(pid_file, 'w') as pid_stream:
-        pid_stream.write('%s' % os.getpid())
-
-    # kill process 時安全結束
-    close_requested = False
-
-    def on_quit(signum, frame):
-        nonlocal close_requested
-        close_requested = True
-
-    for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
-        signal.signal(sig, on_quit)
-
-    # dt = datetime.now() + timedelta(minutes=1)
-    # sch_time = dt.strftime('%H:%M')
-
-    # 證交所 - OK!
-    schedule.every().day.at('00:27').do(run_threaded, 'twse:borrowed')
-    schedule.every().day.at('07:57').do(run_threaded, 'twse:etfnet')
-    schedule.every().day.at('08:44').do(run_threaded, 'twse:institution')
-    schedule.every().day.at('09:33').do(run_threaded, 'twse:block')
-    schedule.every().day.at('12:41').do(run_threaded, 'twse:margin')
-    schedule.every().day.at('12:42').do(run_threaded, 'twse:selled')
-
-    # 櫃買中心 - OK!
-    schedule.every().day.at('08:49').do(run_threaded, 'tpex:institution')
-    schedule.every().day.at('09:48').do(run_threaded, 'tpex:block')
-    schedule.every().day.at('12:47').do(run_threaded, 'tpex:margin')
-
-    # 集保中心 - OK!
-    schedule.every().day.at('23:01').do(run_threaded, 'tdcc:')
-
-    # 偵測與執行排程
-    while not close_requested:
-        schedule.run_pending()
-
-        # 控制下次醒來的時，秒數小數部位趨近於 0
-        t = time.time()
-        delay = 1 - (t - int(t))
-        time.sleep(delay)
-
-    # 移除 pid file
-    os.remove(pid_file)
+def main():
+    trading_date = datetime.now().strftime('%Y-%m-%d')
+    ScheduleDaemon(
+        schedule_table = {
+            '00:27': { 'func': twse.sync_dataset, 'args': ('borrowed', trading_date) },
+            '07:57': { 'func': twse.sync_dataset, 'args': ('etfnet', trading_date) },
+            '08:44': { 'func': twse.sync_dataset, 'args': ('institution', trading_date) },
+            '09:33': { 'func': twse.sync_dataset, 'args': ('block', trading_date) },
+            '12:41': { 'func': twse.sync_dataset, 'args': ('margin', trading_date) },
+            '12:42': { 'func': twse.sync_dataset, 'args': ('selled', trading_date) },
+            '08:49': { 'func': tpex.sync_dataset, 'args': ('institution', trading_date) },
+            '09:48': { 'func': tpex.sync_dataset, 'args': ('block', trading_date) },
+            '12:47': { 'func': tpex.sync_dataset, 'args': ('margin', trading_date) },
+            '23:01': { 'func': tdcc.sync_dataset, 'args': () },
+            '17:53': { 'func': tpex.sync_dataset, 'args': ('institution', trading_date) }
+        },
+        background = False
+    ).run()
 
 if __name__ == '__main__':
-    if os.fork() == 0:
-        daemon()
+    main()
