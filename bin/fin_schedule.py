@@ -13,6 +13,10 @@ import twnews.finance.tpex as tpex
 import twnews.finance.tdcc as tdcc
 
 class JustDaemon:
+    """
+    定型化 Daemon
+    TODO: 分割成獨立套件
+    """
 
     def __init__(self, init_task=None, loop_task=None, stdout='/dev/null', stderr='/dev/null', background=True):
         if background and os.fork() > 0:
@@ -90,6 +94,10 @@ class JustDaemon:
         self.stream_close()
 
 class ScheduleDaemon(JustDaemon):
+    """
+    排程型 Daemon
+    TODO: 分割成獨立套件
+    """
 
     def __init__(self, schedule_table, stdout='/dev/null', stderr='/dev/null', background=True):
         self.schedule_table = schedule_table
@@ -128,7 +136,7 @@ def main():
             '09:48': { 'func': tpex.sync_dataset, 'args': ('block', trading_date) },
             '12:47': { 'func': tpex.sync_dataset, 'args': ('margin', trading_date) },
             '23:01': { 'func': tdcc.sync_dataset, 'args': () },
-            '17:53': { 'func': tpex.sync_dataset, 'args': ('institution', trading_date) }
+            # '17:53': { 'func': tpex.sync_dataset, 'args': ('institution', trading_date) }
         },
         background = False
     ).run()
