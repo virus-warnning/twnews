@@ -138,7 +138,7 @@ def main():
             '23:01': { 'func': tdcc.sync_dataset, 'args': () },
             # '17:53': { 'func': tpex.sync_dataset, 'args': ('institution', trading_date) }
         },
-        background = False
+        # background = False
     ).run()
 
 if __name__ == '__main__':
