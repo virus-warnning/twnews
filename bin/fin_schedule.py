@@ -122,21 +122,26 @@ class ScheduleDaemon(JustDaemon):
         th = threading.Thread(target=func, args=args)
         th.start()
 
+def taipei_time(timestr):
+    hh_adjust = (time.altzone / -3600) - 8
+    hh = int(timestr[0:2]) + hh_adjust
+    mm = int(timestr[3:5])
+    return '%02d:%02d' % (hh, mm)
+
 def main():
-    trading_date = datetime.now().strftime('%Y-%m-%d')
     ScheduleDaemon(
         schedule_table = {
-            '00:27': { 'func': twse.sync_dataset, 'args': ('borrowed', trading_date) },
-            '07:57': { 'func': twse.sync_dataset, 'args': ('etfnet', trading_date) },
-            '08:44': { 'func': twse.sync_dataset, 'args': ('institution', trading_date) },
-            '09:33': { 'func': twse.sync_dataset, 'args': ('block', trading_date) },
-            '12:41': { 'func': twse.sync_dataset, 'args': ('margin', trading_date) },
-            '12:42': { 'func': twse.sync_dataset, 'args': ('selled', trading_date) },
-            '08:49': { 'func': tpex.sync_dataset, 'args': ('institution', trading_date) },
-            '09:48': { 'func': tpex.sync_dataset, 'args': ('block', trading_date) },
-            '12:47': { 'func': tpex.sync_dataset, 'args': ('margin', trading_date) },
-            '23:01': { 'func': tdcc.sync_dataset, 'args': () },
-            # '17:53': { 'func': tpex.sync_dataset, 'args': ('institution', trading_date) }
+            taipei_time('14:09'): { 'func': twse.sync_dataset, 'args': ('borrowed') },
+            taipei_time('15:57'): { 'func': twse.sync_dataset, 'args': ('etfnet') },
+            taipei_time('16:44'): { 'func': twse.sync_dataset, 'args': ('institution') },
+            taipei_time('17:33'): { 'func': twse.sync_dataset, 'args': ('block') },
+            taipei_time('20:41'): { 'func': twse.sync_dataset, 'args': ('margin') },
+            taipei_time('20:42'): { 'func': twse.sync_dataset, 'args': ('selled') },
+            taipei_time('16:49'): { 'func': tpex.sync_dataset, 'args': ('institution') },
+            taipei_time('17:48'): { 'func': tpex.sync_dataset, 'args': ('block') },
+            taipei_time('20:47'): { 'func': tpex.sync_dataset, 'args': ('margin') },
+            taipei_time('07:01'): { 'func': tdcc.sync_dataset, 'args': () },
+            # '17:53': { 'func': tpex.sync_dataset, 'args': ('institution') }
         },
         # background = False
     ).run()

@@ -222,13 +222,16 @@ def import_institution(dbcon, trading_date, dataset):
         )
         """
 
-def sync_dataset(dsitem, trading_date):
+def sync_dataset(dsitem, trading_date='latest'):
     """
     同步資料集共用流程
 
     * HTTP 日期格式: 108/05/29
     * DB, Cache 日期格式: 2019-05-29
     """
+    if trading_date == 'latest':
+        trading_date = datetime.today().strftime('%Y-%m-%d')
+
     logger = common.get_logger('finance')
     dtm = re.match(r'(\d{4})-(\d{2})-(\d{2})', trading_date)
     tokens = [
@@ -286,11 +289,10 @@ def main():
     python3 -m twnews.finance.tpex {action}
     python3 -m twnews.finance.tpex {action} {date}
     """
-    today = datetime.today().strftime('%Y-%m-%d')
     action = get_argument(1)
-    trading_date = get_argument(2, today)
+    trading_date = get_argument(2, 'latest')
 
-    if re.match(r'\d{4}-\d{2}-\d{2}', trading_date) is None:
+    if trading_date != 'latest' and re.match(r'^\d{4}-\d{2}-\d{2}$', trading_date) is None:
         print('日期格式錯誤')
         return
 
