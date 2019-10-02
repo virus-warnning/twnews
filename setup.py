@@ -25,10 +25,11 @@ setup(
     },
     install_requires=[
         'beautifulsoup4>=4.7.1',
-        'busm>=0.8.0',
+        'busm>=0.9.0',
         'lxml>=4.3.3',
         'requests>=2.21.0',
-        'pandas>=0.24.2'
+        'pandas>=0.24.2',
+        'PyYAML>=5.1.2'
     ],
     python_requires='>=3.5'
 )
