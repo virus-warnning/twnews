@@ -117,8 +117,10 @@ def backup_dist(refresh=False):
         elif not os.path.isfile(csv_file):
             changed = True
         else:
-            sz_local = os.path.getsize(csv_file)
             sz_remote = int(resp.headers['Content-Length'])
+            sz_local = 0 # TODO: 改良不暴力的方式取得 LZMA 原始大小
+            with lzma.open(csv_file) as f:
+                sz_local = len(f.read())
             if sz_local != sz_remote:
                 changed = True
 
@@ -139,6 +141,14 @@ def get_action():
         return sys.argv[1]
     return 'update'
 
+def sync_dataset():
+    """
+    暫時寫成這個形式方便排程用
+    """
+    changed = backup_dist()
+    if changed:
+        import_dist()
+
 @busm.through_telegram
 def main():
     """
@@ -151,9 +161,7 @@ def main():
     logger = common.get_logger('finance')
 
     if action == 'update':
-        changed = backup_dist()
-        if changed:
-            import_dist()
+        sync_dataset()
     elif action == 'rebuild':
         rebuild_dist()
     else:

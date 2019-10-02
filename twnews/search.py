@@ -4,7 +4,6 @@
 
 import re
 import time
-import os.path
 import urllib.parse
 from string import Template
 from datetime import datetime
@@ -406,9 +405,14 @@ class NewsSearch:
                 base_end = self.conf['url'].rfind('/')
                 self.url_prefix['base'] = self.conf['url'][0:base_end+1]
 
-        # 消除三立的 ../
         full_url = self.url_prefix['base'] + href
-        spos = full_url.find('/', 10)
-        reduced_url = full_url[0:spos] + os.path.realpath(full_url[spos:])
 
-        return reduced_url
+        # 消除三立的 ../
+        # 這段 code 已知在 windows 會出現 C:\ 在網址中間 (Issue #93)
+        # 原因是 os.path.realpath() 在 windows 上會出現 C:\
+        # 目前暫時先不處理 ../ 問題, 之後如果再發生, 需要改用替代方法
+        #spos = full_url.find('/', 10)
+        #reduced_url = full_url[0:spos] + os.path.realpath(full_url[spos:])
+        #return reduced_url
+
+        return full_url

@@ -369,10 +369,13 @@ def import_etfnet(dbcon, trading_date, dataset):
         logger.debug('%s, %s, %s, %s%%', etf['a'], etf['b'], etf['f'], etf['g'])
         """
 
-def sync_dataset(dsitem, trading_date):
+def sync_dataset(dsitem, trading_date='latest'):
     """
     同步資料集共用流程
     """
+    if trading_date == 'latest':
+        trading_date = datetime.today().strftime('%Y-%m-%d')
+
     logger = common.get_logger('finance')
     datestr = trading_date.replace('-', '')
     format = 'csv' if dsitem == 'borrowed' else 'json'
@@ -423,11 +426,10 @@ def main():
     python3 -m twnews.finance.twse {action}
     python3 -m twnews.finance.twse {action} {date}
     """
-    today = datetime.today().strftime('%Y-%m-%d')
     action = get_argument(1)
-    trading_date = get_argument(2, today)
+    trading_date = get_argument(2, 'latest')
 
-    if re.match(r'\d{4}-\d{2}-\d{2}', trading_date) is None:
+    if trading_date != 'latest' and re.match(r'^\d{4}-\d{2}-\d{2}$', trading_date) is None:
         print('日期格式錯誤')
         return
 

@@ -5,6 +5,7 @@
 # * rstcheck
 # * setuptools
 
+import configparser
 import os
 import re
 import subprocess
@@ -80,22 +81,35 @@ def test_in_virtualenv(pyver, wheel):
 def wheel_check():
     """ 檢查 wheel 是否能正常運作在各個 Python 版本環境上 """
 
+    print('檢查 logging.ini')
+    config = configparser.ConfigParser()
+    config.read('twnews/conf/logging.ini')
+    if config['handler_stdout']['level'] != 'CRITICAL':
+        print('handler_stdout 忘記切換成 CRITICAL level')
+        exit(1)
+
     print('檢查程式碼品質')
     ret = os.system('pylint -f colorized twnews')
     if ret != 0:
-        print('檢查沒通過，停止封裝\n')
+        print('檢查沒通過，停止封裝')
         exit(ret)
 
     print('檢查 README.rst')
     ret = os.system('rstcheck README.rst')
     if ret != 0:
-        print('檢查沒通過，停止封裝\n')
+        print('檢查沒通過，停止封裝')
         exit(ret)
 
+    print('偵測可用的測試環境')
     os.system('rm -rf sandbox/*')
     wheel = get_wheel()
     latest_python = get_latest_python()
+    if len(latest_python) == 0:
+        print('沒有任何可用的測試環境')
+        exit(1)
+
     for pyver in latest_python:
+        print('測試 Python %s' % pyver)
         test_in_virtualenv(pyver, wheel)
 
 def upload_to_pypi(test=False):
