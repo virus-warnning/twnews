@@ -8,6 +8,7 @@ import os.path
 import logging
 import logging.config
 import socket
+import yaml
 
 import requests
 
@@ -53,11 +54,15 @@ def get_logger(name='news'):
         if not os.path.isdir(logdir):
             os.makedirs(logdir)
 
-        logini = '{}/conf/logging.ini'.format(get_package_dir())
-        if os.path.isfile(logini):
-            logging.config.fileConfig(logini)
-
-        __LOGGER_LOADED = True
+        cfg_yaml = '{}/conf/logging.yaml'.format(get_package_dir())
+        with open(cfg_yaml, 'r') as cfg_file:
+            cfg_dict = yaml.load(open(cfg_yaml, 'r'), Loader=yaml.SafeLoader)
+            for hname in cfg_dict['handlers']:
+                handler = cfg_dict['handlers'][hname]
+                if 'filename' in handler and handler['filename'].startswith('~'):
+                    handler['filename'] = os.path.expanduser(handler['filename'])
+            logging.config.dictConfig(cfg_dict)
+            __LOGGER_LOADED = True
 
     logger = None
     if __LOGGER_LOADED:
