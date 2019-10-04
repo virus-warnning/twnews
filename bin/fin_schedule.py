@@ -124,7 +124,7 @@ class ScheduleDaemon(JustDaemon):
 
 def taipei_time(timestr):
     hh_adjust = (time.altzone / -3600) - 8
-    hh = int(timestr[0:2]) + hh_adjust
+    hh = (int(timestr[0:2]) + hh_adjust) % 24
     mm = int(timestr[3:5])
     return '%02d:%02d' % (hh, mm)
 
