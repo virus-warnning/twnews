@@ -383,7 +383,7 @@ def sync_dataset(dsitem, trading_date='latest'):
 
     if has_cache(dsitem, datestr, format):
         # 載入快取資料集
-        logger.info('套用 %s 的 %s 快取', trading_date, dsitem)
+        logger.debug('套用 TWSE %s 的 %s 快取', trading_date, dsitem)
         dataset = load_cache(dsitem, datestr, format)
     else:
         # 下載資料集
@@ -395,13 +395,13 @@ def sync_dataset(dsitem, trading_date='latest'):
             if repeat > 1:
                 time.sleep(REPEAT_INTERVAL)
             try:
-                logger.info('下載 %s 的 %s', trading_date, dsitem)
+                logger.info('下載 TWSE %s 的 %s', trading_date, dsitem)
                 dataset = hookfunc(datestr)
-                logger.info('儲存 %s 的 %s', trading_date, dsitem)
+                logger.debug('儲存 TWSE %s 的 %s', trading_date, dsitem)
                 save_cache(dsitem, datestr, dataset, format)
             except Exception as ex:
                 # 2019-08-08: 這裡的重試效果不夠理想，3 次重試的結果都失敗，可能要改用別的重試機制
-                logger.error('無法取得 %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
+                logger.error('無法取得 TWSE %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
 
     if dataset is None:
         return
@@ -411,16 +411,15 @@ def sync_dataset(dsitem, trading_date='latest'):
     hookfunc = hookfunc = getattr(this_mod, 'import_' + dsitem)
     try:
         hookfunc(dbcon, trading_date, dataset)
-        logger.info('匯入 %s 的 %s', trading_date, dsitem)
+        logger.info('匯入 TWSE %s 的 %s', trading_date, dsitem)
     except sqlite3.IntegrityError as ex:
-        logger.warning('已經匯入過 %s 的 %s', trading_date, dsitem)
+        logger.warning('已經匯入過 TWSE %s 的 %s', trading_date, dsitem)
     except Exception as ex:
         # TODO: ex.args[0] 不確定是否可靠, 需要再確認
-        logger.error('無法匯入 %s 的 %s (%s)', trading_date, dsitem, ex.args[0])
+        logger.error('無法匯入 TWSE %s 的 %s (%s)', trading_date, dsitem, ex.args[0])
     dbcon.commit()
     dbcon.close()
 
-# @busm.through_telegram
 def main():
     """
     python3 -m twnews.finance.twse {action}

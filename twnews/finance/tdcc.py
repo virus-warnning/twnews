@@ -4,6 +4,7 @@ import os
 import os.path
 import re
 import requests
+import sqlite3
 import subprocess
 import sys
 
@@ -32,7 +33,7 @@ def import_dist(csv_date='latest'):
     csv_file = '{}/dist-{}.csv.xz'.format(csv_dir, csv_date)
     iso_date = re.sub(r'(\d{4})(\d{2})(\d{2})', r'\1-\2-\3', csv_date)
     if not os.path.isfile(csv_file):
-        logger.error('沒有 %s 的股權分散表檔案: %s', iso_date, csv_file)
+        logger.error('沒有 TDCC %s 的股權分散表檔案: %s', iso_date, csv_file)
         return
 
     db_conn = db.get_connection()
@@ -54,18 +55,28 @@ def import_dist(csv_date='latest'):
         numof_holders, numof_stocks, percentof_stocks
     ) VALUES (?,?,?,?,?);
     '''
+    affected = -1
     for index, row in df.iterrows():
         sql = sql_template % row['level']
-        db_conn.execute(sql, (
-            iso_date,
-            row['security_id'],
-            row['numof_holders'],
-            row['numof_stocks'],
-            row['percentof_stocks']
-        ))
-        if index > 0 and index % 5000 == 0:
-            msg = '已儲存 %s 的 %d 筆股權分散資料' % (iso_date, index)
-            logger.info(msg)
+        try:
+            db_conn.execute(sql, (
+                iso_date,
+                row['security_id'],
+                row['numof_holders'],
+                row['numof_stocks'],
+                row['percentof_stocks']
+            ))
+            if index > 0 and index % 5000 == 0:
+                logger.debug('已儲存 TDCC %s 的股權分散資料 %d 筆', iso_date, index)
+            affected = index
+        except sqlite3.IntegrityError:
+            affected = 0
+            break
+
+    if affected > 0:
+        logger.info('已匯入 TDCC %s 的股權分散資料 %d 筆', iso_date, affected);
+    else:
+        logger.warning('已匯入過 TDCC %s 的股權分散資料', iso_date)
     db_conn.commit()
     db_conn.close()
 
@@ -128,11 +139,11 @@ def backup_dist(refresh=False):
         if changed:
             with lzma.open(csv_file, 'wt') as csvf:
                 csvf.write(csv)
-                logger.info('已更新股權分散表: %s', csv_date)
+                logger.info('已更新 TDCC %s 的股權分散表', csv_date)
         else:
-            logger.info('已存在股權分散表: %s, 不需更新', csv_date)
+            logger.info('已存在 TDCC %s 的股權分散表, 不需更新', csv_date)
     else:
-        logger.error('無法更新股權分散表')
+        logger.error('無法更新 TDCC %s 股權分散表', csv_date)
 
     return changed
 
@@ -149,7 +160,10 @@ def sync_dataset():
     if changed:
         import_dist()
 
-@busm.through_telegram
+    # 測試時，即使快取存在也重新匯入一次
+    # backup_dist()
+    # import_dist()
+
 def main():
     """
     下載最新的股權分散表，轉檔到資料庫:

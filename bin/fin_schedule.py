@@ -1,3 +1,4 @@
+import logging
 import os
 import schedule
 import signal
@@ -8,6 +9,7 @@ from datetime import datetime, timedelta
 
 sys.path.append(os.path.realpath('.'))
 
+import twnews.common as cm
 import twnews.finance.twse as twse
 import twnews.finance.tpex as tpex
 import twnews.finance.tdcc as tdcc
@@ -122,7 +124,11 @@ class ScheduleDaemon(JustDaemon):
         th = threading.Thread(target=func, args=args)
         th.start()
 
-def taipei_time(timestr):
+def im_fine():
+    logger = cm.get_logger('finance')
+    logger.info('I\'m fine. (%s)', __file__)
+
+def tpe_at(timestr):
     hh_adjust = (time.altzone / -3600) - 8
     hh = (int(timestr[0:2]) + hh_adjust) % 24
     mm = int(timestr[3:5])
@@ -131,17 +137,20 @@ def taipei_time(timestr):
 def main():
     ScheduleDaemon(
         schedule_table = {
-            taipei_time('14:09'): { 'func': twse.sync_dataset, 'args': ('borrowed') },
-            taipei_time('15:57'): { 'func': twse.sync_dataset, 'args': ('etfnet') },
-            taipei_time('16:44'): { 'func': twse.sync_dataset, 'args': ('institution') },
-            taipei_time('17:33'): { 'func': twse.sync_dataset, 'args': ('block') },
-            taipei_time('20:41'): { 'func': twse.sync_dataset, 'args': ('margin') },
-            taipei_time('20:42'): { 'func': twse.sync_dataset, 'args': ('selled') },
-            taipei_time('16:49'): { 'func': tpex.sync_dataset, 'args': ('institution') },
-            taipei_time('17:48'): { 'func': tpex.sync_dataset, 'args': ('block') },
-            taipei_time('20:47'): { 'func': tpex.sync_dataset, 'args': ('margin') },
-            taipei_time('07:01'): { 'func': tdcc.sync_dataset, 'args': () },
-            # '17:53': { 'func': tpex.sync_dataset, 'args': ('institution') }
+            tpe_at('09:30'): { 'func': im_fine, 'args': () },
+            tpe_at('14:00'): { 'func': im_fine, 'args': () },
+            tpe_at('14:09'): { 'func': twse.sync_dataset, 'args': ('borrowed') },
+            tpe_at('15:57'): { 'func': twse.sync_dataset, 'args': ('etfnet') },
+            tpe_at('16:44'): { 'func': twse.sync_dataset, 'args': ('institution') },
+            tpe_at('17:33'): { 'func': twse.sync_dataset, 'args': ('block') },
+            tpe_at('20:41'): { 'func': twse.sync_dataset, 'args': ('margin') },
+            tpe_at('20:42'): { 'func': twse.sync_dataset, 'args': ('selled') },
+            tpe_at('16:49'): { 'func': tpex.sync_dataset, 'args': ('institution') },
+            tpe_at('17:48'): { 'func': tpex.sync_dataset, 'args': ('block') },
+            tpe_at('20:47'): { 'func': tpex.sync_dataset, 'args': ('margin') },
+            tpe_at('07:01'): { 'func': tdcc.sync_dataset, 'args': () },
+            # tpe_at('15:26'): { 'func': im_fine, 'args': () },
+            # tpe_at('17:53'): { 'func': tpex.sync_dataset, 'args': ('institution') }
         },
         # background = False
     ).run()
