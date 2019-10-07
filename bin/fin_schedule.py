@@ -135,22 +135,23 @@ def tpe_at(timestr):
     return '%02d:%02d' % (hh, mm)
 
 def main():
+    # 注意!! args 要用 list 不可以用 tuple，否則傳遞一個字串時，會把每個字元當成一個參數傳遞
     ScheduleDaemon(
         schedule_table = {
-            tpe_at('09:30'): { 'func': im_fine, 'args': () },
-            tpe_at('14:00'): { 'func': im_fine, 'args': () },
-            tpe_at('14:09'): { 'func': twse.sync_dataset, 'args': ('borrowed') },
-            tpe_at('15:57'): { 'func': twse.sync_dataset, 'args': ('etfnet') },
-            tpe_at('16:44'): { 'func': twse.sync_dataset, 'args': ('institution') },
-            tpe_at('17:33'): { 'func': twse.sync_dataset, 'args': ('block') },
-            tpe_at('20:41'): { 'func': twse.sync_dataset, 'args': ('margin') },
-            tpe_at('20:42'): { 'func': twse.sync_dataset, 'args': ('selled') },
-            tpe_at('16:49'): { 'func': tpex.sync_dataset, 'args': ('institution') },
-            tpe_at('17:48'): { 'func': tpex.sync_dataset, 'args': ('block') },
-            tpe_at('20:47'): { 'func': tpex.sync_dataset, 'args': ('margin') },
-            tpe_at('07:01'): { 'func': tdcc.sync_dataset, 'args': () },
+            tpe_at('09:30'): { 'func': im_fine, 'args': [] },
+            tpe_at('14:00'): { 'func': im_fine, 'args': [] },
+            tpe_at('14:09'): { 'func': twse.sync_dataset, 'args': ['borrowed'] },
+            tpe_at('15:57'): { 'func': twse.sync_dataset, 'args': ['etfnet'] },
+            tpe_at('16:44'): { 'func': twse.sync_dataset, 'args': ['institution'] },
+            tpe_at('17:33'): { 'func': twse.sync_dataset, 'args': ['block'] },
+            tpe_at('20:41'): { 'func': twse.sync_dataset, 'args': ['margin'] },
+            tpe_at('20:42'): { 'func': twse.sync_dataset, 'args': ['selled'] },
+            tpe_at('16:49'): { 'func': tpex.sync_dataset, 'args': ['institution'] },
+            tpe_at('17:48'): { 'func': tpex.sync_dataset, 'args': ['block'] },
+            tpe_at('20:47'): { 'func': tpex.sync_dataset, 'args': ['margin'] },
+            tpe_at('07:01'): { 'func': tdcc.sync_dataset, 'args': [] },
             # tpe_at('15:26'): { 'func': im_fine, 'args': () },
-            # tpe_at('17:53'): { 'func': tpex.sync_dataset, 'args': ('institution') }
+            # tpe_at('17:52'): { 'func': tpex.sync_dataset, 'args': ('institution') }
         },
         # background = False
     ).run()
