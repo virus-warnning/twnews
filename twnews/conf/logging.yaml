@@ -29,12 +29,12 @@ handlers:
     level: INFO
     formatter: simple
     class: busm.BusmHandler
+    subject: finance crawler
 loggers:
   news:
     level: DEBUG
     handlers:
       - news_log
-      - telegram
       - stdout
     propagate: true
   finance:
