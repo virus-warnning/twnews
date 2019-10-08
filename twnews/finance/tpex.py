@@ -126,9 +126,26 @@ def download_selled(datestr):
     url = 'https://www.tpex.org.tw/web/stock/margin_trading/margin_sbl/margin_sbl_download.php?l=zh-tw&d=%s&s=0,asc,0&charset=utf-8' % datestr
     resp = session.get(url)
     if resp.status_code == 200:
-        dataset = resp.text
-        # TODO: 移除 header 與 footer 的雜訊
-        # TODO: 欄位名稱與 comma 之間的空格移除
+        obuf = io.StringIO()
+        ibuf = io.StringIO(resp.text)
+
+        # 過濾 header, footer & 欄位名稱消除空白字元
+        enabled = False
+        line = ibuf.readline()
+        while len(line) > 0:
+            if not enabled:
+                enabled = line.startswith('股票代號')
+                if enabled:
+                    line = line.replace(' ', '')
+            else:
+                enabled = line.startswith('"')
+            if enabled:
+                obuf.write(line)
+            line = ibuf.readline()
+
+        dataset = obuf.getvalue()
+        ibuf.close()
+        obuf.close()
     else:
         raise SyncException('HTTP ERROR %d' % resp.status_code)
 
@@ -242,17 +259,15 @@ def import_selled(dbcon, trading_date, dataset):
     """
     匯入借券賣出
     """
-    df = pandas.read_csv(io.StringIO(dataset), engine='python', sep=',', skiprows=2, skipfooter=13)
-    #print(df.head(3))
-    #print(df.tail(3))
+    sql = '''
+        UPDATE `short_sell` SET `selled`=?
+        WHERE `trading_date`=? AND `security_id`=?
+    '''
+    df = pandas.read_csv(io.StringIO(dataset), sep=',')
     for index, row in df.iterrows():
-        print(row['股票代號'])
-        print(row[' 融券前日餘額'])
-        print(row)
-        print(row[' 借券賣出當日餘額'])
-        # break
-
-    # TODO: 匯入 SQLite
+        security_id = row['股票代號']
+        balance = int(row['借券賣出當日餘額'].replace(',', ''))
+        dbcon.execute(sql, (balance, trading_date, security_id))
 
 def sync_dataset(dsitem, trading_date='latest'):
     """
@@ -272,7 +287,7 @@ def sync_dataset(dsitem, trading_date='latest'):
         dtm.group(3)
     ]
     datestr = '/'.join(tokens)
-    format = 'json'
+    format = 'csv' if dsitem in ['block', 'selled'] else 'json'
     this_mod = sys.modules[__name__]
 
     if has_cache(dsitem, trading_date, format):
