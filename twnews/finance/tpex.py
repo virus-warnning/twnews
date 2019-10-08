@@ -260,14 +260,15 @@ def import_selled(dbcon, trading_date, dataset):
     匯入借券賣出
     """
     sql = '''
-        UPDATE `short_sell` SET `selled`=?
+        UPDATE `short_sell` SET `security_name`=?,`selled`=?
         WHERE `trading_date`=? AND `security_id`=?
     '''
     df = pandas.read_csv(io.StringIO(dataset), sep=',')
     for index, row in df.iterrows():
         security_id = row['股票代號']
+        security_name = row['股票名稱'].strip()
         balance = int(row['借券賣出當日餘額'].replace(',', ''))
-        dbcon.execute(sql, (balance, trading_date, security_id))
+        dbcon.execute(sql, (security_name, balance, trading_date, security_id))
 
 def sync_dataset(dsitem, trading_date='latest'):
     """
