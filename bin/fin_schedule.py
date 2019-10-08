@@ -149,6 +149,7 @@ def main():
             tpe_at('16:49'): { 'func': tpex.sync_dataset, 'args': ['institution'] },
             tpe_at('17:48'): { 'func': tpex.sync_dataset, 'args': ['block'] },
             tpe_at('21:47'): { 'func': tpex.sync_dataset, 'args': ['margin'] },
+            tpe_at('21:48'): { 'func': tpex.sync_dataset, 'args': ['selled'] },
             tpe_at('07:01'): { 'func': tdcc.sync_dataset, 'args': [] },
             # tpe_at('15:26'): { 'func': im_fine, 'args': () },
             # tpe_at('17:52'): { 'func': tpex.sync_dataset, 'args': ('institution') }
