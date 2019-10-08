@@ -118,6 +118,22 @@ def download_institution(datestr):
 
     return dataset
 
+def download_selled(datestr):
+    """
+    下載已借券賣出
+    """
+    session = common.get_session(False)
+    url = 'https://www.tpex.org.tw/web/stock/margin_trading/margin_sbl/margin_sbl_download.php?l=zh-tw&d=%s&s=0,asc,0&charset=utf-8' % datestr
+    resp = session.get(url)
+    if resp.status_code == 200:
+        dataset = resp.text
+        # TODO: 移除 header 與 footer 的雜訊
+        # TODO: 欄位名稱與 comma 之間的空格移除
+    else:
+        raise SyncException('HTTP ERROR %d' % resp.status_code)
+
+    return dataset
+
 def import_margin(dbcon, trading_date, dataset):
     """
     匯入信用交易資料集
@@ -222,6 +238,22 @@ def import_institution(dbcon, trading_date, dataset):
         )
         """
 
+def import_selled(dbcon, trading_date, dataset):
+    """
+    匯入借券賣出
+    """
+    df = pandas.read_csv(io.StringIO(dataset), engine='python', sep=',', skiprows=2, skipfooter=13)
+    #print(df.head(3))
+    #print(df.tail(3))
+    for index, row in df.iterrows():
+        print(row['股票代號'])
+        print(row[' 融券前日餘額'])
+        print(row)
+        print(row[' 借券賣出當日餘額'])
+        # break
+
+    # TODO: 匯入 SQLite
+
 def sync_dataset(dsitem, trading_date='latest'):
     """
     同步資料集共用流程
@@ -295,7 +327,7 @@ def main():
         print('日期格式錯誤')
         return
 
-    if action in ['block', 'margin', 'institution']:
+    if action in ['block', 'margin', 'institution', 'selled']:
         sync_dataset(action, trading_date)
     else:
         print('參數錯誤')

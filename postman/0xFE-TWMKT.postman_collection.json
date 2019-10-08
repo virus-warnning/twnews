@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "3a031cb9-6446-487b-b5e7-d77b7b351058",
-		"name": "0xFE-TWMKT",
+		"_postman_id": "96e57888-4ea0-406b-9f9b-774e3cf3896f",
+		"name": "0xFE-TWMKT GitHub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -435,6 +435,49 @@
 						{
 							"key": "charset",
 							"value": "UTF-8"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[TPEX] 借券賣出 CSV",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.tpex.org.tw/web/stock/margin_trading/margin_sbl/margin_sbl_download.php?l=zh-tw&d={{TPEX_EXPORT_DATE}}&s=0,asc,0&charset=utf-8",
+					"protocol": "https",
+					"host": [
+						"www",
+						"tpex",
+						"org",
+						"tw"
+					],
+					"path": [
+						"web",
+						"stock",
+						"margin_trading",
+						"margin_sbl",
+						"margin_sbl_download.php"
+					],
+					"query": [
+						{
+							"key": "l",
+							"value": "zh-tw"
+						},
+						{
+							"key": "d",
+							"value": "{{TPEX_EXPORT_DATE}}"
+						},
+						{
+							"key": "s",
+							"value": "0,asc,0"
+						},
+						{
+							"key": "charset",
+							"value": "utf-8"
 						}
 					]
 				}
