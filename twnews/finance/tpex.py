@@ -10,16 +10,14 @@ import time
 
 import busm
 import pandas
+from requests.exceptions import ConnectionError
 
 import twnews.common as common
 import twnews.finance.db as db
+from twnews.finance.exceptions import SyncException, NetworkException, InvalidDataException
 
 REPEAT_LIMIT = 3
 REPEAT_INTERVAL = 5
-
-class SyncException(Exception):
-    def __init__(self, reason):
-        self.reason = reason
 
 def get_cache_path(item, datestr, format):
     """
@@ -73,13 +71,16 @@ def download_margin(datestr):
     """
     session = common.get_session(False)
     url = 'https://www.tpex.org.tw/web/stock/margin_trading/margin_balance/margin_bal_result.php?l=zh_tw&o=json&d=%s' % datestr
-    resp = session.get(url)
-    if resp.status_code == 200:
-        dataset = resp.json()
-        if dataset['iTotalRecords'] == 0:
-            raise SyncException('日期格式錯誤，或是 %s 的資料尚未產出' % datestr)
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
+    try:
+        resp = session.get(url)
+        if resp.status_code == 200:
+            dataset = resp.json()
+            if dataset['iTotalRecords'] == 0:
+                raise InvalidDataException('日期格式錯誤，或是 %s 的資料尚未產出' % datestr)
+        else:
+            raise NetworkException('HTTP ERROR %d' % resp.status_code)
+    except ConnectionError as ex:
+        print(ex)
 
     return dataset
 
@@ -309,6 +310,9 @@ def sync_dataset(dsitem, trading_date='latest'):
                 dataset = hookfunc(datestr)
                 logger.debug('儲存 TPEX %s 的 %s', trading_date, dsitem)
                 save_cache(dsitem, trading_date, dataset, format)
+            except InvalidDataException as ex:
+                logger.error('無法取得 TPEX %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
+                repeat = REPEAT_LIMIT
             except Exception as ex:
                 logger.error('無法取得 TPEX %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
 
