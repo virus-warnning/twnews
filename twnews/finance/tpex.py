@@ -10,14 +10,15 @@ import time
 
 import busm
 import pandas
-from requests.exceptions import ConnectionError
+from requests.exceptions import RequestException
 
 import twnews.common as common
 import twnews.finance.db as db
-from twnews.finance.exceptions import SyncException, NetworkException, InvalidDataException
+from twnews.finance.exceptions import NetworkException, InvalidDataException
 
 REPEAT_LIMIT = 3
 REPEAT_INTERVAL = 5
+URL_BASE = 'https://www.tpex.org.tw/web/stock/'
 
 def get_cache_path(item, datestr, format):
     """
@@ -65,68 +66,95 @@ def get_argument(index, default=''):
         return default
     return sys.argv[index]
 
+def fucking_get(hook, url, params):
+    """
+    共用 HTTP GET 處理邏輯
+    """
+    session = common.get_session(False)
+    try:
+        resp = session.get(url, params=params)
+        if resp.status_code == 200:
+            return hook(resp)
+        else:
+            msg = 'Got HTTP error, status code: %d' % resp.status_code
+            raise NetworkException(msg)
+    except RequestException as ex:
+        msg = 'Cannot get response, exception type: %s' % type(ex).__name__
+        raise NetworkException(msg)
+
+    return dataset
+
 def download_margin(datestr):
     """
     下載信用交易資料集
     """
-    session = common.get_session(False)
-    url = 'https://www.tpex.org.tw/web/stock/margin_trading/margin_balance/margin_bal_result.php?l=zh_tw&o=json&d=%s' % datestr
-    try:
-        resp = session.get(url)
-        if resp.status_code == 200:
-            dataset = resp.json()
-            if dataset['iTotalRecords'] == 0:
-                raise InvalidDataException('日期格式錯誤，或是 %s 的資料尚未產出' % datestr)
-        else:
-            raise NetworkException('HTTP ERROR %d' % resp.status_code)
-    except ConnectionError as ex:
-        print(ex)
-
-    return dataset
+    url = URL_BASE + 'margin_trading/margin_balance/margin_bal_result.php'
+    params = {
+        'd': datestr,
+        'l': 'zh_tw',
+        'o': 'json'
+    }
+    def hook(resp):
+        dataset = resp.json()
+        if dataset['iTotalRecords'] == 0:
+            raise InvalidDataException('日期格式錯誤，或是 %s 的資料尚未產出' % datestr)
+        return dataset
+    return fucking_get(hook, url, params)
 
 def download_block(datestr):
     """
     下載鉅額交易資料集
     """
-    session = common.get_session(False)
-    url = 'https://www.tpex.org.tw/web/stock/block_trade/daily_qutoes/block_day_download.php?l=zh_tw&d=%s&s=0,asc,0&charset=UTF-8' % datestr
-    resp = session.get(url)
-    if resp.status_code == 200:
-        # 不做日期驗證，因為 csv 顯示的時間，是我們傳入參數的字串，驗也是白驗
+    url = URL_BASE + 'block_trade/daily_qutoes/block_day_download.php'
+    params = {
+        'd': datestr,
+        'l': 'zh_tw',
+        's': '0,asc,0',
+        'charset': 'UTF-8'
+    }
+    def hook(resp):
+        # TODO: 需要檢查資料完整性，任意日期都有資料
         dataset = resp.text
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+        return dataset
+    return fucking_get(hook, url, params)
 
 def download_institution(datestr):
     """
     下載三大法人資料集
     """
-    session = common.get_session(False)
-    url = 'https://www.tpex.org.tw/web/stock/3insti/daily_trade/3itrade_hedge_result.php?l=zh_tw&o=json&se=EW&t=D&d=%s&s=0,asc' % datestr
-    resp = session.get(url)
-    if resp.status_code == 200:
+    url = URL_BASE + '3insti/daily_trade/3itrade_hedge_result.php'
+    params = {
+        'd': datestr,
+        'l': 'zh_tw',
+        'o': 'json',
+        's': '0,asc',
+        't': 'D',
+        'se': 'EW'
+    }
+    def hook(resp):
         dataset = resp.json()
         # 取標題內日期，轉換成與輸入參數相同的格式
         title = dataset['reportTitle']
         date_in_title = re.sub('[年月]', '/', title[:title.find(' ') - 1])
         # 參數日期與標題日期相同才視為有效資料
         if datestr != date_in_title:
-            raise SyncException('日期格式錯誤，或是 %s 的資料尚未產出' % datestr)
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+            raise InvalidDataException('日期格式錯誤，或是 %s 的資料尚未產出' % datestr)
+        return dataset
+    return fucking_get(hook, url, params)
 
 def download_selled(datestr):
     """
     下載已借券賣出
     """
-    session = common.get_session(False)
-    url = 'https://www.tpex.org.tw/web/stock/margin_trading/margin_sbl/margin_sbl_download.php?l=zh-tw&d=%s&s=0,asc,0&charset=utf-8' % datestr
-    resp = session.get(url)
-    if resp.status_code == 200:
+    url = URL_BASE + 'margin_trading/margin_sbl/margin_sbl_download.php'
+    params = {
+        'd': datestr,
+        'l': 'zh-tw',
+        's': '0,asc,0',
+        'charset': 'utf-8'
+    }
+    def hook(resp):
+        # TODO: 非交易日還是有資料，不過只有 header 和 footer
         obuf = io.StringIO()
         ibuf = io.StringIO(resp.text)
 
@@ -147,10 +175,8 @@ def download_selled(datestr):
         dataset = obuf.getvalue()
         ibuf.close()
         obuf.close()
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+        return dataset
+    return fucking_get(hook, url, params)
 
 def import_margin(dbcon, trading_date, dataset):
     """
