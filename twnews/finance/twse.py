@@ -10,16 +10,14 @@ import time
 
 import busm
 import pandas
+from requests.exceptions import RequestException
 
 import twnews.common as common
 import twnews.finance.db as db
+from twnews.finance.exceptions import NetworkException, InvalidDataException
 
 REPEAT_LIMIT = 3
 REPEAT_INTERVAL = 5
-
-class SyncException(Exception):
-    def __init__(self, reason):
-        self.reason = reason
 
 def get_cache_path(item, datestr, format):
     """
@@ -67,72 +65,96 @@ def get_argument(index, default=''):
         return default
     return sys.argv[index]
 
+def fucking_get(hook, url, params):
+    """
+    共用 HTTP GET 處理邏輯
+    """
+    session = common.get_session(False)
+    try:
+        resp = session.get(url, params=params)
+        if resp.status_code == 200:
+            return hook(resp)
+        else:
+            msg = 'Got HTTP error, status code: %d' % resp.status_code
+            raise NetworkException(msg)
+    except RequestException as ex:
+        msg = 'Cannot get response, exception type: %s' % type(ex).__name__
+        raise NetworkException(msg)
+
+    return dataset
+
 def download_margin(datestr):
     """
     下載信用交易資料集
     """
-    session = common.get_session(False)
-    url = 'http://www.twse.com.tw/exchangeReport/MI_MARGN?response=json&date=%s&selectType=ALL' % datestr
-    resp = session.get(url)
-    if resp.status_code == 200:
+    url = 'http://www.twse.com.tw/exchangeReport/MI_MARGN'
+    params = {
+        'date': datestr,
+        'response': 'json',
+        'selectType': 'ALL'
+    }
+    def hook(resp):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
             if len(dataset['data']) == 0:
-                raise SyncException('可能尚未結算或是非交易日')
+                raise InvalidDataException('可能尚未結算或是非交易日')
         else:
-            raise SyncException(status)
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+            raise NetworkException(status)
+        return dataset
+    return fucking_get(hook, url, params)
 
 def download_block(datestr):
     """
     下載鉅額交易資料集
     """
-    session = common.get_session(False)
-    url = 'http://www.twse.com.tw/block/BFIAUU?response=json&date=%s&selectType=S' % datestr
+    url = 'http://www.twse.com.tw/block/BFIAUU'
+    params = {
+        'date': datestr,
+        'response': 'json',
+        'selectType': 'S'
+    }
     resp = session.get(url)
-    if resp.status_code == 200:
+    def hook(resp):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
             if len(dataset['data']) == 0:
-                raise SyncException('可能尚未結算或是非交易日')
+                raise InvalidDataException('可能尚未結算或是非交易日')
         else:
-            raise SyncException(status)
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+            raise NetworkException(status)
+        return dataset
+    return fucking_get(hook, url, params)
 
 def download_institution(datestr):
     """
     下載三大法人資料集
     """
-    session = common.get_session(False)
-    url = 'http://www.twse.com.tw/fund/T86?response=json&date=%s&selectType=ALL' % datestr
-    resp = session.get(url)
-    if resp.status_code == 200:
+    url = 'http://www.twse.com.tw/fund/T86'
+    params = {
+        'date': datestr,
+        'response': 'json',
+        'selectType': 'ALL'
+    }
+    def hook(resp):
+        # TODO: 需要驗證資料完整性
         dataset = resp.json()
         status = dataset['stat']
         if status != 'OK':
-            raise SyncException(status)
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+            raise NetworkException(status)
+        return dataset
+    return fucking_get(hook, url, params)
 
 def download_borrowed(datestr):
     """
     下載可借券賣出資料集 (只有當天資料)
     TODO: 待確認資料切換時間
     """
-    session = common.get_session(False)
-    url = 'http://www.twse.com.tw/SBL/TWT96U?response=csv'
-    resp = session.get(url)
-    if resp.status_code == 200:
+    url = 'http://www.twse.com.tw/SBL/TWT96U'
+    params = {
+        'response': 'csv'
+    }
+    def hook(resp):
         dataset = resp.text
         line1 = dataset[:dataset.find('\r\n')]
         match = re.search(r'(\d{3})年(\d{2})月(\d{2})日', line1)
@@ -142,50 +164,45 @@ def download_borrowed(datestr):
             dd = match.group(3)
             dsdate = '%04d%s%s' % (yy, mm, dd)
             if dsdate != datestr:
-                raise SyncException('資料日期 %s 與指定日期不同' % dsdate)
+                raise InvalidDataException('資料日期 %s 與指定日期不同' % dsdate)
         else:
-            raise SyncException('無法取得 CSV 內的日期字串')
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+            raise NetworkException('無法取得 CSV 內的日期字串')
+        return dataset
+    return fucking_get(hook, url, params)
 
 def download_selled(datestr):
     """
     下載已借券賣出
     """
-    session = common.get_session(False)
-    url = 'http://www.twse.com.tw/exchangeReport/TWT93U?response=json&date=%s' % datestr
-    resp = session.get(url)
-    if resp.status_code == 200:
+    url = 'http://www.twse.com.tw/exchangeReport/TWT93U'
+    params = {
+        'date': datestr,
+        'response': 'json'
+    }
+    def hook(resp):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
             if len(dataset['data']) == 0:
-                raise SyncException('可能尚未結算或非交易日')
+                raise InvalidDataException('可能尚未結算或非交易日')
         else:
-            raise SyncException(status)
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+            raise NetworkException(status)
+        return dataset
+    return fucking_get(hook, url, params)
 
 def download_etfnet(datestr):
     """
     下載 ETF 淨值折溢價率
     """
     url = 'https://mis.twse.com.tw/stock/data/all_etf.txt'
-    session = common.get_session(False)
-    resp = session.get(url)
-    if resp.status_code == 200:
+    params = {}
+    def hook(resp):
         dataset = resp.json()
         dsdate = dataset['a1'][1]['msgArray'][0]['i']
         if datestr != dsdate:
-            raise SyncException('資料日期 %s 與指定日期不同' % dsdate)
-    else:
-        raise SyncException('HTTP ERROR %d' % resp.status_code)
-
-    return dataset
+            raise InvalidDataException('資料日期 %s 與指定日期不同' % dsdate)
+        return dataset
+    return fucking_get(hook, url, params)
 
 def import_margin(dbcon, trading_date, dataset):
     """
@@ -399,8 +416,10 @@ def sync_dataset(dsitem, trading_date='latest'):
                 dataset = hookfunc(datestr)
                 logger.debug('儲存 TWSE %s 的 %s', trading_date, dsitem)
                 save_cache(dsitem, datestr, dataset, format)
+            except InvalidDataException as ex:
+                logger.error('無法取得 TWSE %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
+                repeat = REPEAT_LIMIT
             except Exception as ex:
-                # 2019-08-08: 這裡的重試效果不夠理想，3 次重試的結果都失敗，可能要改用別的重試機制
                 logger.error('無法取得 TWSE %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
 
     if dataset is None:
