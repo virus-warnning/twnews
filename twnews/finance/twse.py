@@ -4,15 +4,12 @@
 
 from datetime import datetime
 import io
-import os.path
 import re
 import sqlite3
 import sys
 import time
 
-import busm
 import pandas
-from requests.exceptions import RequestException
 
 import twnews.common as common
 from twnews.finance import get_argument, fucking_get, get_connection, REPEAT_LIMIT, REPEAT_INTERVAL
@@ -33,7 +30,7 @@ def download_margin(datestr):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
-            if len(dataset['data']) == 0:
+            if dataset['data']:
                 raise InvalidDataException('可能尚未結算或是非交易日')
         else:
             raise NetworkException(status)
@@ -50,12 +47,11 @@ def download_block(datestr):
         'response': 'json',
         'selectType': 'S'
     }
-    resp = session.get(url)
     def hook(resp):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
-            if len(dataset['data']) == 0:
+            if dataset['data']:
                 raise InvalidDataException('可能尚未結算或是非交易日')
         else:
             raise NetworkException(status)
@@ -95,10 +91,12 @@ def download_borrowed(datestr):
         line1 = dataset[:dataset.find('\r\n')]
         match = re.search(r'(\d{3})年(\d{2})月(\d{2})日', line1)
         if match is not None:
-            yy = int(match.group(1)) + 1911
-            mm = match.group(2)
-            dd = match.group(3)
-            dsdate = '%04d%s%s' % (yy, mm, dd)
+            dtup = (
+                int(match.group(1)) + 1911,
+                match.group(2),
+                match.group(3)
+            )
+            dsdate = '%04d%s%s' % dtup
             if dsdate != datestr:
                 raise InvalidDataException('資料日期 %s 與指定日期不同' % dsdate)
         else:
@@ -119,7 +117,7 @@ def download_selled(datestr):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
-            if len(dataset['data']) == 0:
+            if dataset['data']:
                 raise InvalidDataException('可能尚未結算或非交易日')
         else:
             raise NetworkException(status)
@@ -162,15 +160,6 @@ def import_margin(dbcon, trading_date, dataset):
             buying_balance,
             selling_balance
         ))
-        """
-        logger = common.get_logger('finance')
-        logger.debug('[%s %s] 融資餘額: %s, 融券餘額: %s' % (
-            security_id,
-            security_name,
-            buying_balance,
-            selling_balance
-        ))
-        """
 
 def import_block(dbcon, trading_date, dataset):
     """
@@ -207,17 +196,6 @@ def import_block(dbcon, trading_date, dataset):
             volume,
             total
         ))
-        """
-        logger.debug('[%s %s] #%d %s 成交價: %s 股數: %s 金額: %s' % (
-            security_id,
-            security_name,
-            tick_rank[security_id],
-            tick_type,
-            close,
-            volume,
-            total
-        ))
-        """
 
 def import_institution(dbcon, trading_date, dataset):
     """
@@ -239,12 +217,6 @@ def import_institution(dbcon, trading_date, dataset):
             trading_date, security_id, security_name,
             foreign_trend, stic_trend, dealer_trend
         ))
-        """
-        logger.debug('[%s %s] 外資: %s 投信: %s 自營商: %s',
-            security_id, security_name,
-            foreign_trend, stic_trend, dealer_trend
-        )
-        """
 
 def import_borrowed(dbcon, trading_date, dataset):
     """
@@ -257,9 +229,9 @@ def import_borrowed(dbcon, trading_date, dataset):
     '''
     col_names = ['sec1', 'vol1', 'sec2', 'vol2', 'shit']
     # Pandas 只能吃 file-like 參數，需要把 dataset 轉成 StringIO
-    df = pandas.read_csv(io.StringIO(dataset), sep=',', skiprows=3, header=None, names=col_names)
+    dfrm = pandas.read_csv(io.StringIO(dataset), sep=',', skiprows=3, header=None, names=col_names)
     cnt = 0
-    for index, row in df.iterrows():
+    for _, row in dfrm.iterrows():
         # 匯入左側資料
         security_id = row['sec1'].strip('="')
         borrowed = int(row['vol1'].replace(',', ''))
@@ -290,11 +262,6 @@ def import_selled(dbcon, trading_date, dataset):
                 security_name, balance,
                 trading_date, security_id
             ))
-            """
-            logger.debug('[%s %s] 已借券賣出餘額: %s',
-                security_id, security_name, balance
-            )
-            """
 
 def import_etfnet(dbcon, trading_date, dataset):
     """
@@ -318,9 +285,6 @@ def import_etfnet(dbcon, trading_date, dataset):
     for k in sorted(etf_dict.keys()):
         etf = etf_dict[k]
         dbcon.execute(sql, (trading_date, etf['a'], etf['b'], etf['e'], etf['f'], etf['g']))
-        """
-        logger.debug('%s, %s, %s, %s%%', etf['a'], etf['b'], etf['f'], etf['g'])
-        """
 
 def sync_dataset(dsitem, trading_date='latest'):
     """
@@ -331,10 +295,10 @@ def sync_dataset(dsitem, trading_date='latest'):
 
     logger = common.get_logger('finance')
     datestr = trading_date.replace('-', '')
-    format = 'csv' if dsitem == 'borrowed' else 'json'
+    data_format = 'csv' if dsitem == 'borrowed' else 'json'
     this_mod = sys.modules[__name__]
 
-    daily_cache = DailyCache('twse', dsitem, format)
+    daily_cache = DailyCache('twse', dsitem, data_format)
     if daily_cache.has(datestr):
         # 載入快取資料集
         logger.debug('套用 TWSE %s 的 %s 快取', trading_date, dsitem)
@@ -354,15 +318,22 @@ def sync_dataset(dsitem, trading_date='latest'):
                 logger.debug('儲存 TWSE %s 的 %s', trading_date, dsitem)
                 daily_cache.save(datestr, dataset)
             except InvalidDataException as ex:
-                logger.error('無法取得 TWSE %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
+                logger.error(
+                    '無法取得 TWSE %s 的 %s (重試: %d, %s)',
+                    trading_date, dsitem, repeat, ex.reason
+                )
                 repeat = REPEAT_LIMIT
-            except Exception as ex:
-                logger.error('無法取得 TWSE %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
+            except NetworkException as ex:
+                logger.error(
+                    '無法取得 TWSE %s 的 %s (重試: %d, %s)',
+                    trading_date, dsitem, repeat, ex.reason
+                )
 
     if dataset is None:
         return
 
     # 匯入資料庫
+    # pylint: disable=bare-except
     dbcon = get_connection()
     hookfunc = getattr(this_mod, 'import_' + dsitem)
     try:
@@ -370,9 +341,9 @@ def sync_dataset(dsitem, trading_date='latest'):
         logger.info('匯入 TWSE %s 的 %s', trading_date, dsitem)
     except sqlite3.IntegrityError as ex:
         logger.warning('已經匯入過 TWSE %s 的 %s', trading_date, dsitem)
-    except Exception as ex:
+    except:
         # TODO: ex.args[0] 不確定是否可靠, 需要再確認
-        logger.error('無法匯入 TWSE %s 的 %s (%s)', trading_date, dsitem, ex.args[0])
+        logger.error('無法匯入 TWSE %s 的 %s', trading_date, dsitem)
     dbcon.commit()
     dbcon.close()
 

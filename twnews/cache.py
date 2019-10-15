@@ -11,13 +11,13 @@ class DailyCache:
     處理每日一檔的快取
     """
 
-    def __init__(self, category, item, format):
+    def __init__(self, category, item, data_format):
         """
         建立每日快取
         """
         self.category = category
         self.item = item
-        self.format = format
+        self.data_format = data_format
 
     def get_path(self, datestr):
         """
@@ -26,7 +26,7 @@ class DailyCache:
         cache_dir = os.path.expanduser('~/.twnews/cache/' + self.category)
         if not os.path.isdir(cache_dir):
             os.makedirs(cache_dir)
-        return '%s/%s-%s.%s.xz' % (cache_dir, self.item, datestr, self.format)
+        return '%s/%s-%s.%s.xz' % (cache_dir, self.item, datestr, self.data_format)
 
     def has(self, datestr):
         """
@@ -42,7 +42,7 @@ class DailyCache:
         content = None
         cache_path = self.get_path(datestr)
         with lzma.open(cache_path, 'rt') as f_cache:
-            if self.format == 'json':
+            if self.data_format == 'json':
                 content = json.load(f_cache)
             else:
                 content = f_cache.read()
@@ -54,7 +54,7 @@ class DailyCache:
         """
         cache_path = self.get_path(datestr)
         with lzma.open(cache_path, 'wt') as f_cache:
-            if self.format == 'json':
+            if self.data_format == 'json':
                 json.dump(content, f_cache)
             else:
                 f_cache.write(content)

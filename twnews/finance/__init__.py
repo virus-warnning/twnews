@@ -1,3 +1,7 @@
+"""
+財經資料蒐集工具共用模組
+"""
+
 import os
 import sqlite3
 import sys
@@ -105,7 +109,7 @@ def get_connection(rebuild=False):
             db_conn.execute(ddl)
 
         # 產生各級股權分散表, 有 1~17 級
-        for level in range(1,18):
+        for level in range(1, 18):
             ddl = DDL_DIST.format(level)
             db_conn.execute(ddl)
 
@@ -128,11 +132,10 @@ def fucking_get(hook, url, params):
     session = common.get_session(False)
     try:
         resp = session.get(url, params=params)
-        if resp.status_code == 200:
-            return hook(resp)
-        else:
+        if resp.status_code != 200:
             msg = 'Got HTTP error, status code: %d' % resp.status_code
             raise NetworkException(msg)
+        dataset = hook(resp)
     except RequestException as ex:
         msg = 'Cannot get response, exception type: %s' % type(ex).__name__
         raise NetworkException(msg)

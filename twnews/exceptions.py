@@ -7,6 +7,7 @@ class SyncException(Exception):
     同步資料時觸發的例外
     """
     def __init__(self, reason):
+        super().__init__()
         self.reason = reason
 
 class NetworkException(SyncException):

@@ -1,18 +1,19 @@
-import logging
+"""
+集保中心資料蒐集模組
+"""
+
 import lzma
 import os
-import os.path
 import re
-import requests
 import sqlite3
-import subprocess
 import sys
 
-import busm
+
 import pandas
+import requests
 
 import twnews.common as common
-import twnews.finance.db as db
+from twnews.finance import get_connection
 
 def import_dist(csv_date='latest'):
     """
@@ -36,7 +37,7 @@ def import_dist(csv_date='latest'):
         logger.error('沒有 TDCC %s 的股權分散表檔案: %s', iso_date, csv_file)
         return
 
-    db_conn = db.get_connection()
+    db_conn = get_connection()
     col_names = [
         'trading_date',
         'security_id',
@@ -46,7 +47,7 @@ def import_dist(csv_date='latest'):
         'percentof_stocks'
     ]
     # Pandas 會自動偵測 extension 解壓縮, 不需要自幹
-    df = pandas.read_csv(csv_file, skiprows=1, header=None, names=col_names)
+    dfrm = pandas.read_csv(csv_file, skiprows=1, header=None, names=col_names)
     # print(df.head(3))
     # print(df.tail(3))
     sql_template = '''
@@ -56,7 +57,7 @@ def import_dist(csv_date='latest'):
     ) VALUES (?,?,?,?,?);
     '''
     affected = -1
-    for index, row in df.iterrows():
+    for index, row in dfrm.iterrows():
         sql = sql_template % row['level']
         try:
             db_conn.execute(sql, (
@@ -74,7 +75,7 @@ def import_dist(csv_date='latest'):
             break
 
     if affected > 0:
-        logger.info('已匯入 TDCC %s 的股權分散資料 %d 筆', iso_date, affected);
+        logger.info('已匯入 TDCC %s 的股權分散資料 %d 筆', iso_date, affected)
     else:
         logger.warning('已匯入過 TDCC %s 的股權分散資料', iso_date)
     db_conn.commit()
@@ -85,7 +86,7 @@ def rebuild_dist():
     重建股權分散表資料庫
     """
     # 清除現有資料
-    db_conn = db.get_connection()
+    db_conn = get_connection()
     for level in range(1, 18):
         sql = 'DELETE FROM level%02d;' % level
         db_conn.execute(sql)
@@ -120,7 +121,7 @@ def backup_dist(refresh=False):
         dt_beg = csv.find('\n') + 1
         dt_end = csv.find(',', dt_beg)
         csv_date = csv[dt_beg:dt_end]
-        csv_dir  = common.get_cache_dir('tdcc')
+        csv_dir = common.get_cache_dir('tdcc')
         csv_file = '{}/dist-{}.csv.xz'.format(csv_dir, csv_date)
 
         if refresh:
@@ -130,8 +131,8 @@ def backup_dist(refresh=False):
         else:
             sz_remote = int(resp.headers['Content-Length'])
             sz_local = 0 # TODO: 改良不暴力的方式取得 LZMA 原始大小
-            with lzma.open(csv_file) as f:
-                sz_local = len(f.read())
+            with lzma.open(csv_file) as lzf:
+                sz_local = len(lzf.read())
             if sz_local != sz_remote:
                 changed = True
 
@@ -148,6 +149,9 @@ def backup_dist(refresh=False):
     return changed
 
 def get_action():
+    """
+    get_action
+    """
     if len(sys.argv) > 1:
         return sys.argv[1]
     return 'update'
