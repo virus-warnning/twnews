@@ -3,10 +3,10 @@ disable_existing_loggers: true
 formatters:
   standard:
     datefmt: '%Y-%m-%d %H:%M:%S'
-    format: '[%(asctime)s] %(name)-7s | %(levelname)-7s | %(message)s'
+    format: '[%(asctime)s] %(levelname)-7s | %(message)s'
   simple:
     datefmt: '%H:%M:%S'
-    format: '[%(asctime)s] %(levelname)-7s | %(message)s'
+    format: '[%(asctime)s] %(name)-7s | %(levelname)-7s | %(message)s'
 handlers:
   common_log:
     level: DEBUG

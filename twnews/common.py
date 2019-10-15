@@ -75,7 +75,7 @@ def get_session(proxy_first):
     取得 requests session 如果已經存在就使用現有的
     """
     global __SESSION
-    logger = get_logger()
+    logger = get_logger('common')
 
     if proxy_first and found_socks5():
         logger.debug('透過 proxy 連線')
