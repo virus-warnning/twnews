@@ -1,8 +1,5 @@
 from datetime import datetime
 import io
-import json
-import lzma
-import os.path
 import re
 import sqlite3
 import sys
@@ -13,76 +10,11 @@ import pandas
 from requests.exceptions import RequestException
 
 import twnews.common as common
-import twnews.finance.db as db
-from twnews.finance.exceptions import NetworkException, InvalidDataException
+from twnews.finance import get_argument, fucking_get, get_connection, REPEAT_LIMIT, REPEAT_INTERVAL
+from twnews.cache import DailyCache
+from twnews.exceptions import NetworkException, InvalidDataException
 
-REPEAT_LIMIT = 3
-REPEAT_INTERVAL = 5
 URL_BASE = 'https://www.tpex.org.tw/web/stock/'
-
-def get_cache_path(item, datestr, format):
-    """
-    產生快取檔路徑
-    """
-    cache_dir = common.get_cache_dir('tpex')
-    return '%s/%s-%s.%s.xz' % (cache_dir, item, datestr, format)
-
-def has_cache(item, datestr, format):
-    """
-    檢查快取檔是否存在
-    """
-    cache_path = get_cache_path(item, datestr, format)
-    return os.path.isfile(cache_path)
-
-def load_cache(item, datestr, format):
-    """
-    載入快取檔
-    """
-    content = None
-    cache_path = get_cache_path(item, datestr, format)
-    with lzma.open(cache_path, 'rt') as f_cache:
-        if format == 'json':
-            content = json.load(f_cache)
-        else:
-            content = f_cache.read()
-    return content
-
-def save_cache(item, datestr, content, format):
-    """
-    儲存快取檔
-    """
-    cache_path = get_cache_path(item, datestr, format)
-    with lzma.open(cache_path, 'wt') as f_cache:
-        if format == 'json':
-            json.dump(content, f_cache)
-        else:
-            f_cache.write(content)
-
-def get_argument(index, default=''):
-    """
-    取得 shell 參數, 或使用預設值
-    """
-    if len(sys.argv) <= index:
-        return default
-    return sys.argv[index]
-
-def fucking_get(hook, url, params):
-    """
-    共用 HTTP GET 處理邏輯
-    """
-    session = common.get_session(False)
-    try:
-        resp = session.get(url, params=params)
-        if resp.status_code == 200:
-            return hook(resp)
-        else:
-            msg = 'Got HTTP error, status code: %d' % resp.status_code
-            raise NetworkException(msg)
-    except RequestException as ex:
-        msg = 'Cannot get response, exception type: %s' % type(ex).__name__
-        raise NetworkException(msg)
-
-    return dataset
 
 def download_margin(datestr):
     """
@@ -318,10 +250,11 @@ def sync_dataset(dsitem, trading_date='latest'):
     format = 'csv' if dsitem in ['block', 'selled'] else 'json'
     this_mod = sys.modules[__name__]
 
-    if has_cache(dsitem, trading_date, format):
+    daily_cache = DailyCache('tpex', dsitem, format)
+    if daily_cache.has(trading_date):
         # 載入快取資料集
         logger.info('套用 TPEX %s 的 %s 快取', trading_date, dsitem)
-        dataset = load_cache(dsitem, trading_date, format)
+        dataset = daily_cache.load(trading_date)
     else:
         # 下載資料集
         dataset = None
@@ -335,7 +268,7 @@ def sync_dataset(dsitem, trading_date='latest'):
                 logger.info('下載 TPEX %s 的 %s', trading_date, dsitem)
                 dataset = hookfunc(datestr)
                 logger.debug('儲存 TPEX %s 的 %s', trading_date, dsitem)
-                save_cache(dsitem, trading_date, dataset, format)
+                daily_cache.save(trading_date, dataset)
             except InvalidDataException as ex:
                 logger.error('無法取得 TPEX %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
                 repeat = REPEAT_LIMIT
@@ -348,8 +281,8 @@ def sync_dataset(dsitem, trading_date='latest'):
     # return
 
     # 匯入資料庫
-    dbcon = db.get_connection()
-    hookfunc = hookfunc = getattr(this_mod, 'import_' + dsitem)
+    dbcon = get_connection()
+    hookfunc = getattr(this_mod, 'import_' + dsitem)
     try:
         hookfunc(dbcon, trading_date, dataset)
         logger.info('匯入 TPEX %s 的 %s', trading_date, dsitem)

@@ -1,6 +1,11 @@
 import os
-import os.path
 import sqlite3
+import sys
+
+from requests.exceptions import RequestException
+
+import twnews.common as common
+from twnews.exceptions import NetworkException
 
 DDL_LIST = [
     # 三大法人
@@ -77,6 +82,9 @@ CREATE TABLE IF NOT EXISTS level{:02d} (
 );
 '''
 
+REPEAT_LIMIT = 3
+REPEAT_INTERVAL = 5
+
 def get_connection(rebuild=False):
     """
     自動產生財經資料庫與取得連線
@@ -104,3 +112,29 @@ def get_connection(rebuild=False):
         db_conn.commit()
 
     return db_conn
+
+def get_argument(index, default=''):
+    """
+    取得 shell 參數, 或使用預設值
+    """
+    if len(sys.argv) <= index:
+        return default
+    return sys.argv[index]
+
+def fucking_get(hook, url, params):
+    """
+    共用 HTTP GET 處理邏輯
+    """
+    session = common.get_session(False)
+    try:
+        resp = session.get(url, params=params)
+        if resp.status_code == 200:
+            return hook(resp)
+        else:
+            msg = 'Got HTTP error, status code: %d' % resp.status_code
+            raise NetworkException(msg)
+    except RequestException as ex:
+        msg = 'Cannot get response, exception type: %s' % type(ex).__name__
+        raise NetworkException(msg)
+
+    return dataset

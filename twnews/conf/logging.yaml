@@ -8,11 +8,12 @@ formatters:
     datefmt: '%H:%M:%S'
     format: '[%(asctime)s] %(levelname)-7s | %(message)s'
 handlers:
-  stdout:
+  common_log:
     level: DEBUG
-    formatter: simple
-    class: logging.StreamHandler
-    stream: ext://sys.stdout
+    formatter: standard
+    class: logging.handlers.TimedRotatingFileHandler
+    filename: '~/.twnews/log/common.log'
+    when: 'D'
   news_log:
     level: DEBUG
     formatter: standard
@@ -25,22 +26,30 @@ handlers:
     class: logging.handlers.TimedRotatingFileHandler
     filename: '~/.twnews/log/finance.log'
     when: 'D'
+  stdout:
+    level: DEBUG
+    formatter: simple
+    class: logging.StreamHandler
+    stream: ext://sys.stdout
   telegram:
     level: INFO
     formatter: simple
     class: busm.BusmHandler
     subject: finance crawler
 loggers:
+  common:
+    level: DEBUG
+    handlers:
+      - common_log
+      - stdout
   news:
     level: DEBUG
     handlers:
       - news_log
       - stdout
-    propagate: true
   finance:
     level: DEBUG
     handlers:
       - finance_log
       - telegram
       - stdout
-    propagate: true
