@@ -1,10 +1,20 @@
+"""
+快取處理模組
+"""
+
 import os
 import lzma
 import json
 
 class DailyCache:
+    """
+    處理每日一檔的快取
+    """
 
     def __init__(self, category, item, format):
+        """
+        建立每日快取
+        """
         self.category = category
         self.item = item
         self.format = format

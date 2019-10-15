@@ -1,3 +1,7 @@
+"""
+證交所資料蒐集模組
+"""
+
 from datetime import datetime
 import io
 import os.path

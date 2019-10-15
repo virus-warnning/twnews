@@ -56,7 +56,7 @@ def get_logger(name='news'):
 
         cfg_yaml = '{}/conf/logging.yaml'.format(get_package_dir())
         with open(cfg_yaml, 'r') as cfg_file:
-            cfg_dict = yaml.load(open(cfg_yaml, 'r'), Loader=yaml.SafeLoader)
+            cfg_dict = yaml.load(cfg_file, Loader=yaml.SafeLoader)
             for hname in cfg_dict['handlers']:
                 handler = cfg_dict['handlers'][hname]
                 if 'filename' in handler and handler['filename'].startswith('~'):

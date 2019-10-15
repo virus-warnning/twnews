@@ -81,12 +81,14 @@ def test_in_virtualenv(pyver, wheel):
 def wheel_check():
     """ 檢查 wheel 是否能正常運作在各個 Python 版本環境上 """
 
+    """
     print('檢查 logging.ini')
     config = configparser.ConfigParser()
     config.read('twnews/conf/logging.ini')
     if config['handler_stdout']['level'] != 'CRITICAL':
         print('handler_stdout 忘記切換成 CRITICAL level')
         exit(1)
+    """
 
     print('檢查程式碼品質')
     ret = os.system('pylint -f colorized twnews')

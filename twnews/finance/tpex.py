@@ -1,3 +1,7 @@
+"""
+櫃買中心資料蒐集模組
+"""
+
 from datetime import datetime
 import io
 import re
@@ -5,14 +9,12 @@ import sqlite3
 import sys
 import time
 
-import busm
 import pandas
-from requests.exceptions import RequestException
 
 import twnews.common as common
 from twnews.finance import get_argument, fucking_get, get_connection, REPEAT_LIMIT, REPEAT_INTERVAL
 from twnews.cache import DailyCache
-from twnews.exceptions import NetworkException, InvalidDataException
+from twnews.exceptions import InvalidDataException, NetworkException
 
 URL_BASE = 'https://www.tpex.org.tw/web/stock/'
 
@@ -93,7 +95,7 @@ def download_selled(datestr):
         # 過濾 header, footer & 欄位名稱消除空白字元
         enabled = False
         line = ibuf.readline()
-        while len(line) > 0:
+        while line:
             if not enabled:
                 enabled = line.startswith('股票代號')
                 if enabled:
@@ -133,15 +135,6 @@ def import_margin(dbcon, trading_date, dataset):
             buying_balance,
             selling_balance
         ))
-        """
-        logger = common.get_logger('finance')
-        logger.debug('[%s %s] 融資餘額: %s, 融券餘額: %s' % (
-            security_id,
-            security_name,
-            buying_balance,
-            selling_balance
-        ))
-        """
 
 def import_block(dbcon, trading_date, dataset):
     """
@@ -149,7 +142,11 @@ def import_block(dbcon, trading_date, dataset):
     """
     col_names = ['交易型態', '交割期別', '代號', '名稱', '成交價格(元)', '成交股數', '成交值(元)', '成交時間']
     # Pandas 只能吃 file-like 參數，需要把 dataset 轉成 StringIO
-    df = pandas.read_csv(io.StringIO(dataset), engine='python', sep=',', skiprows=3, skipfooter=1, names=col_names)
+    dfrm = pandas.read_csv(
+        io.StringIO(dataset),
+        engine='python', sep=',',
+        skiprows=3, skipfooter=1, names=col_names
+    )
 
     sql = '''
         INSERT INTO `block` (
@@ -160,7 +157,7 @@ def import_block(dbcon, trading_date, dataset):
     '''
     tick_rank = {}
 
-    for _index, row in df.iterrows():
+    for _index, row in dfrm.iterrows():
         security_id = row['代號']
         security_name = row['名稱']
         tick_type = row['交易型態']
@@ -207,12 +204,6 @@ def import_institution(dbcon, trading_date, dataset):
             trading_date, security_id, security_name,
             foreign_trend, stic_trend, dealer_trend
         ))
-        """
-        logger.debug('[%s %s] 外資: %s 投信: %s 自營商: %s',
-            security_id, security_name,
-            foreign_trend, stic_trend, dealer_trend
-        )
-        """
 
 def import_selled(dbcon, trading_date, dataset):
     """
@@ -222,8 +213,8 @@ def import_selled(dbcon, trading_date, dataset):
         UPDATE `short_sell` SET `security_name`=?,`selled`=?
         WHERE `trading_date`=? AND `security_id`=?
     '''
-    df = pandas.read_csv(io.StringIO(dataset), sep=',')
-    for index, row in df.iterrows():
+    dfrm = pandas.read_csv(io.StringIO(dataset), sep=',')
+    for _, row in dfrm.iterrows():
         security_id = row['股票代號']
         security_name = row['股票名稱'].strip()
         balance = int(row['借券賣出當日餘額'].replace(',', ''))
@@ -247,10 +238,10 @@ def sync_dataset(dsitem, trading_date='latest'):
         dtm.group(3)
     ]
     datestr = '/'.join(tokens)
-    format = 'csv' if dsitem in ['block', 'selled'] else 'json'
+    data_format = 'csv' if dsitem in ['block', 'selled'] else 'json'
     this_mod = sys.modules[__name__]
 
-    daily_cache = DailyCache('tpex', dsitem, format)
+    daily_cache = DailyCache('tpex', dsitem, data_format)
     if daily_cache.has(trading_date):
         # 載入快取資料集
         logger.info('套用 TPEX %s 的 %s 快取', trading_date, dsitem)
@@ -270,10 +261,16 @@ def sync_dataset(dsitem, trading_date='latest'):
                 logger.debug('儲存 TPEX %s 的 %s', trading_date, dsitem)
                 daily_cache.save(trading_date, dataset)
             except InvalidDataException as ex:
-                logger.error('無法取得 TPEX %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
+                logger.error(
+                    '無法取得 TPEX %s 的 %s (重試: %d, %s)',
+                    trading_date, dsitem, repeat, ex.reason
+                )
                 repeat = REPEAT_LIMIT
-            except Exception as ex:
-                logger.error('無法取得 TPEX %s 的 %s (重試: %d, %s)', trading_date, dsitem, repeat, ex.reason)
+            except NetworkException as ex:
+                logger.error(
+                    '無法取得 TPEX %s 的 %s (重試: %d, %s)',
+                    trading_date, dsitem, repeat, ex.reason
+                )
 
     if dataset is None:
         return
@@ -281,6 +278,7 @@ def sync_dataset(dsitem, trading_date='latest'):
     # return
 
     # 匯入資料庫
+    # pylint: disable=bare-except
     dbcon = get_connection()
     hookfunc = getattr(this_mod, 'import_' + dsitem)
     try:
@@ -288,9 +286,8 @@ def sync_dataset(dsitem, trading_date='latest'):
         logger.info('匯入 TPEX %s 的 %s', trading_date, dsitem)
     except sqlite3.IntegrityError as ex:
         logger.warning('已經匯入過 TPEX %s 的 %s', trading_date, dsitem)
-    except Exception as ex:
-        # TODO: ex.args[0] 不確定是否可靠, 需要再確認
-        logger.error('無法匯入 TPEX %s 的 %s (%s)', trading_date, dsitem, ex.args[0])
+    except:
+        logger.error('無法匯入 TPEX %s 的 %s', trading_date, dsitem)
     dbcon.commit()
     dbcon.close()
 
