@@ -1,3 +1,5 @@
+# pylint: disable=all
+
 import io
 import json
 import os

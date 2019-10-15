@@ -2,18 +2,15 @@
 集保中心資料蒐集模組
 """
 
-import lzma
 import os
 import re
 import sqlite3
-import sys
-
 
 import pandas
-import requests
 
 import twnews.common as common
-from twnews.finance import get_connection
+from twnews.finance import get_argument, fucking_get, get_connection
+from twnews.cache import DateCache
 
 def import_dist(csv_date='latest'):
     """
@@ -111,50 +108,30 @@ def backup_dist(refresh=False):
     """
     備份最新的股權分散表
     """
-    changed = False
-    logger = common.get_logger('finance')
-    url = 'https://smart.tdcc.com.tw/opendata/getOD.ashx?id=1-5'
-    resp = requests.get(url)
-    if resp.status_code == 200:
+    url = 'https://smart.tdcc.com.tw/opendata/getOD.ashx'
+    params = {
+        'id': '1-5'
+    }
+    def hook(resp):
+        logger = common.get_logger('finance')
         # 確認統計日期
         csv = resp.text
         dt_beg = csv.find('\n') + 1
         dt_end = csv.find(',', dt_beg)
         csv_date = csv[dt_beg:dt_end]
-        csv_dir = common.get_cache_dir('tdcc')
-        csv_file = '{}/dist-{}.csv.xz'.format(csv_dir, csv_date)
-
-        if refresh:
-            changed = True
-        elif not os.path.isfile(csv_file):
-            changed = True
-        else:
-            sz_remote = int(resp.headers['Content-Length'])
-            sz_local = 0 # TODO: 改良不暴力的方式取得 LZMA 原始大小
-            with lzma.open(csv_file) as lzf:
-                sz_local = len(lzf.read())
-            if sz_local != sz_remote:
-                changed = True
+        date_cache = DateCache('tdcc', 'dist', 'csv')
+        changed = refresh or not date_cache.has(csv_date)
 
         # 製作備份檔
         if changed:
-            with lzma.open(csv_file, 'wt') as csvf:
-                csvf.write(csv)
-                logger.info('已更新 TDCC %s 的股權分散表', csv_date)
+            date_cache.save(csv_date, csv)
+            logger.info('已更新 TDCC %s 的股權分散表', csv_date)
         else:
             logger.info('已存在 TDCC %s 的股權分散表, 不需更新', csv_date)
-    else:
-        logger.error('無法更新 TDCC %s 股權分散表', csv_date)
 
-    return changed
+        return changed
 
-def get_action():
-    """
-    get_action
-    """
-    if len(sys.argv) > 1:
-        return sys.argv[1]
-    return 'update'
+    return fucking_get(hook, url, params)
 
 def sync_dataset():
     """
@@ -175,7 +152,7 @@ def main():
     使用既有的 CSV 檔案重建股權分散表資料庫:
       python3 -m twnews.finance.tdcc rebuild
     """
-    action = get_action()
+    action = get_argument(0, 'update')
     logger = common.get_logger('finance')
 
     if action == 'update':

@@ -13,7 +13,7 @@ import pandas
 
 import twnews.common as common
 from twnews.finance import get_argument, fucking_get, get_connection, REPEAT_LIMIT, REPEAT_INTERVAL
-from twnews.cache import DailyCache
+from twnews.cache import DateCache
 from twnews.exceptions import InvalidDataException, NetworkException
 
 URL_BASE = 'https://www.tpex.org.tw/web/stock/'
@@ -241,7 +241,7 @@ def sync_dataset(dsitem, trading_date='latest'):
     data_format = 'csv' if dsitem in ['block', 'selled'] else 'json'
     this_mod = sys.modules[__name__]
 
-    daily_cache = DailyCache('tpex', dsitem, data_format)
+    daily_cache = DateCache('tpex', dsitem, data_format)
     if daily_cache.has(trading_date):
         # 載入快取資料集
         logger.info('套用 TPEX %s 的 %s 快取', trading_date, dsitem)

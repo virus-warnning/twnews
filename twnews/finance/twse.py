@@ -13,7 +13,7 @@ import pandas
 
 import twnews.common as common
 from twnews.finance import get_argument, fucking_get, get_connection, REPEAT_LIMIT, REPEAT_INTERVAL
-from twnews.cache import DailyCache
+from twnews.cache import DateCache
 from twnews.exceptions import NetworkException, InvalidDataException
 
 def download_margin(datestr):
@@ -298,7 +298,7 @@ def sync_dataset(dsitem, trading_date='latest'):
     data_format = 'csv' if dsitem == 'borrowed' else 'json'
     this_mod = sys.modules[__name__]
 
-    daily_cache = DailyCache('twse', dsitem, data_format)
+    daily_cache = DateCache('twse', dsitem, data_format)
     if daily_cache.has(datestr):
         # 載入快取資料集
         logger.debug('套用 TWSE %s 的 %s 快取', trading_date, dsitem)

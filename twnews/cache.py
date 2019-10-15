@@ -6,14 +6,14 @@ import os
 import lzma
 import json
 
-class DailyCache:
+class DateCache:
     """
-    處理每日一檔的快取
+    處理日期命名快取
     """
 
     def __init__(self, category, item, data_format):
         """
-        建立每日快取
+        建立日期命名快取
         """
         self.category = category
         self.item = item
