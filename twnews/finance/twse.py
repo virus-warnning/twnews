@@ -255,7 +255,7 @@ def import_selled(dbcon, trading_date, dataset):
     for detail in dataset['data']:
         security_id = detail[0]
         security_name = detail[1].strip()
-        balance = int(detail[12].replace(',', '')) // 1000
+        balance = int(detail[12].replace(',', ''))
         if security_id != '':
             # TODO: 如果 WHERE 條件不成立，沒更新到資料，應該要產生 Exception 觸發錯誤回報
             dbcon.execute(sql, (
