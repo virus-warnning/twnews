@@ -94,7 +94,7 @@ class JustDaemon:
             delay = 1 - (t - int(t))
             time.sleep(delay)
 
-        self.pidfile_remove():
+        self.pidfile_remove()
         self.stream_close()
 
 class ScheduleDaemon(JustDaemon):
