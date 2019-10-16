@@ -30,7 +30,7 @@ def download_margin(datestr):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
-            if dataset['data']:
+            if not dataset['data']:
                 raise InvalidDataException('可能尚未結算或是非交易日')
         else:
             raise NetworkException(status)
@@ -51,7 +51,7 @@ def download_block(datestr):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
-            if dataset['data']:
+            if not dataset['data']:
                 raise InvalidDataException('可能尚未結算或是非交易日')
         else:
             raise NetworkException(status)
@@ -117,7 +117,7 @@ def download_selled(datestr):
         dataset = resp.json()
         status = dataset['stat']
         if status == 'OK':
-            if dataset['data']:
+            if not dataset['data']:
                 raise InvalidDataException('可能尚未結算或非交易日')
         else:
             raise NetworkException(status)
