@@ -81,6 +81,7 @@ class JustDaemon:
     def run(self):
         self.listen_sys_signals()
         self.stream_redirect()
+        self.pidfile_create()
 
         attrs = {}
         self.init_task(attrs)
@@ -93,6 +94,7 @@ class JustDaemon:
             delay = 1 - (t - int(t))
             time.sleep(delay)
 
+        self.pidfile_remove():
         self.stream_close()
 
 class ScheduleDaemon(JustDaemon):
