@@ -67,16 +67,16 @@ class JustDaemon:
 
     def pidfile_create(self):
         # 產生 pid file
-        pid_file = os.path.expanduser('~/.twnews/fin_schedule.pid')
-        pid_base = os.path.dirname(pid_file)
+        self.pid_file = os.path.expanduser('~/.twnews/fin_schedule.pid')
+        pid_base = os.path.dirname(self.pid_file)
         if not os.path.isdir(pid_base):
             os.makedirs(pid_base)
-        with open(pid_file, 'w') as pid_stream:
+        with open(self.pid_file, 'w') as pid_stream:
             pid_stream.write('%s' % os.getpid())
 
     def pidfile_remove(self):
         # 移除 pid file
-        os.remove(pid_file)
+        os.remove(self.pid_file)
 
     def run(self):
         self.listen_sys_signals()
@@ -117,7 +117,18 @@ class ScheduleDaemon(JustDaemon):
         for run_at in self.schedule_table:
             func = self.schedule_table[run_at]['func']
             args = self.schedule_table[run_at]['args']
-            schedule.every().day.at(run_at).do(self.run_parallel, func, args)
+            weekend = True
+            if 'weekend' in self.schedule_table[run_at]:
+                weekend = self.schedule_table[run_at]['weekend']
+
+            if weekend:
+                schedule.every().day.at(run_at).do(self.run_parallel, func, args)
+            else:
+                schedule.every().monday.at(run_at).do(self.run_parallel, func, args)
+                schedule.every().tuesday.at(run_at).do(self.run_parallel, func, args)
+                schedule.every().wednesday.at(run_at).do(self.run_parallel, func, args)
+                schedule.every().thursday.at(run_at).do(self.run_parallel, func, args)
+                schedule.every().friday.at(run_at).do(self.run_parallel, func, args)
 
     def loop_task(self, attrs):
         schedule.run_pending()
@@ -140,23 +151,25 @@ def main():
     # 注意!! args 要用 list 不可以用 tuple，否則傳遞一個字串時，會把每個字元當成一個參數傳遞
     ScheduleDaemon(
         schedule_table = {
+            # 每日健康回報
             tpe_at('09:30'): { 'func': im_fine, 'args': [] },
             tpe_at('14:00'): { 'func': im_fine, 'args': [] },
-            tpe_at('14:09'): { 'func': twse.sync_dataset, 'args': ['borrowed'] },
-            tpe_at('15:57'): { 'func': twse.sync_dataset, 'args': ['etfnet'] },
-            tpe_at('16:44'): { 'func': twse.sync_dataset, 'args': ['institution'] },
-            tpe_at('17:33'): { 'func': twse.sync_dataset, 'args': ['block'] },
-            tpe_at('21:41'): { 'func': twse.sync_dataset, 'args': ['margin'] },
-            tpe_at('21:42'): { 'func': twse.sync_dataset, 'args': ['selled'] },
-            tpe_at('16:49'): { 'func': tpex.sync_dataset, 'args': ['institution'] },
-            tpe_at('17:48'): { 'func': tpex.sync_dataset, 'args': ['block'] },
-            tpe_at('21:47'): { 'func': tpex.sync_dataset, 'args': ['margin'] },
-            tpe_at('21:48'): { 'func': tpex.sync_dataset, 'args': ['selled'] },
+            # 證交所
+            tpe_at('14:09'): { 'func': twse.sync_dataset, 'args': ['borrowed'], 'weekend': False },
+            tpe_at('15:57'): { 'func': twse.sync_dataset, 'args': ['etfnet'], 'weekend': False },
+            tpe_at('16:44'): { 'func': twse.sync_dataset, 'args': ['institution'], 'weekend': False },
+            tpe_at('17:33'): { 'func': twse.sync_dataset, 'args': ['block'], 'weekend': False },
+            tpe_at('21:41'): { 'func': twse.sync_dataset, 'args': ['margin'], 'weekend': False },
+            tpe_at('21:42'): { 'func': twse.sync_dataset, 'args': ['selled'], 'weekend': False },
+            # 櫃買中心
+            tpe_at('16:49'): { 'func': tpex.sync_dataset, 'args': ['institution'], 'weekend': False },
+            tpe_at('17:48'): { 'func': tpex.sync_dataset, 'args': ['block'], 'weekend': False },
+            tpe_at('21:47'): { 'func': tpex.sync_dataset, 'args': ['margin'], 'weekend': False },
+            tpe_at('21:48'): { 'func': tpex.sync_dataset, 'args': ['selled'], 'weekend': False },
+            # 集保中心
             tpe_at('07:01'): { 'func': tdcc.sync_dataset, 'args': [] },
-            # tpe_at('15:26'): { 'func': im_fine, 'args': () },
-            # tpe_at('17:52'): { 'func': tpex.sync_dataset, 'args': ('institution') }
         },
-        # background = False
+        background = False
     ).run()
 
 if __name__ == '__main__':
