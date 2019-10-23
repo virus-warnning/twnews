@@ -169,7 +169,7 @@ def main():
             # 集保中心
             tpe_at('07:01'): { 'func': tdcc.sync_dataset, 'args': [] },
         },
-        background = False
+        # background = False
     ).run()
 
 if __name__ == '__main__':
