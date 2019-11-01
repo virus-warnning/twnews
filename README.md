@@ -10,7 +10,24 @@
 
 如果你是來找發財工具，另一個乏人問津的專案[群益證券聽牌機](https://github.com/virus-warnning/skcom)也歡迎來關注一下。 
 
-### 這個怎麼用？
+### 怎麼用？
+
+**系統需求**
+
+* OS: 不限
+* Python: 3.5 ~ 3.7
+
+**安裝**
+
+```sh
+# Windows (只有 Python 3.x 的環境)
+pip install twnews
+
+# macOS, Linux (Python 2.x 與 3.x 並存的環境)
+pip3 install twnews
+```
+
+**體驗**
 
 為了方便有緣人使用，開發了一些 console 工具讓人可以不用寫程式就立即體驗
 
