@@ -4,7 +4,7 @@ import twnews.common as common
 # Load reStructedText description.
 # Online Editor   - http://rst.ninjs.org/
 # Quick Reference - http://docutils.sourceforge.net/docs/user/rst/quickref.html
-readme = open('README.rst', 'r')
+readme = open('README.md', 'r')
 longdesc = readme.read()
 readme.close()
 
@@ -16,6 +16,7 @@ setup(
     version=common.VERSION,
     description='To tear down news web pages in Taiwan.',
     long_description=longdesc,
+    long_description_content_type='text/markdown',
     packages=find_packages(),
     url='https://github.com/virus-warnning/twnews',
     license='MIT',
