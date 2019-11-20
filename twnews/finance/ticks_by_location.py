@@ -18,7 +18,7 @@ def handle_captcha(captcha_stream):
     """
     root = tk.Tk()
     root.title('請輸入驗證碼')
-    root.geometry('400x200')
+    root.geometry('250x300')
 
     bm = ImageTk.PhotoImage(Image.open(captcha_stream))
     lbl_captcha = tk.Label(root, image=bm)
@@ -28,9 +28,10 @@ def handle_captcha(captcha_stream):
         root,
         background='#ffffff',
         font=('Arial', 12),
-        border=1,
-        width=50,
-        height=1.5
+        bd=1,
+        relief='ridge',
+        width=200,
+        height=30
     )
     txt_captcha.config(wrap='none')
     txt_captcha.pack()

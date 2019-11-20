@@ -83,5 +83,60 @@ def main():
     intersections = set(map(get_name, top_bid)) & set(map(get_name, top_ask))
     print('造市分點:', ', '.join(intersections))
 
+def heatmap():
+    fpath = os.path.realpath(sys.argv[1])
+    if not os.path.isfile(fpath):
+        exit(1)
+
+    # 統計買賣狀況
+    stat = {}
+    dfrm = pandas.read_csv(fpath, skiprows=2)
+    for index, row in dfrm.iterrows():
+        loc, bid, ask = (row['券商'][0:4], int(row['買進股數']), int(row['賣出股數']))
+        if loc in stat:
+            stat[loc]['bid'] += bid
+            stat[loc]['ask'] += ask
+        else:
+            stat[loc] = { 'bid': bid, 'ask': ask }
+        if isinstance(row['券商.1'], str):
+            loc, bid, ask = (row['券商.1'][0:4], int(row['買進股數.1']), int(row['賣出股數.1']))
+            if loc in stat:
+                stat[loc]['bid'] += bid
+                stat[loc]['ask'] += ask
+            else:
+                stat[loc] = { 'bid': bid, 'ask': ask }
+
+    # 轉換 geojson 格式
+    fc = None
+    path = os.path.realpath(os.path.dirname(__file__) + '/../res/security_firms.geojson')
+    with open(path, 'r') as ffc:
+        fc = json.load(ffc)
+        fcnt = len(fc['features'])
+        filtered_features = []
+        for i in range(fcnt):
+            feature = fc['features'][i]
+            loc = feature['properties']['id']
+            if loc in stat:
+                feature['properties']['bid'] = stat[loc]['bid']
+                feature['properties']['ask'] = stat[loc]['ask']
+                filtered_features.append(feature)
+        fc['features'] = filtered_features
+
+    if fc is None:
+        exit(1)
+
+    # 生成熱區圖網頁
+    path = os.path.realpath(os.path.dirname(__file__) + '/../res/heatmap-template.html')
+    with open(path, 'r') as tplf:
+        fcstr = json.dumps(fc)
+        template = tplf.read()
+        template = template.replace('__FEATURE_COLLECTION__', fcstr, 1)
+        template = template.replace('__SECURITY_ID__', '9955', 1)
+        template = template.replace('__SECURITY_NAME__', '佳龍', 1)
+        html = template.replace('__DATE__', '2019-11-12', 1)
+        with open('heatmap.html', 'w') as out:
+            out.write(html)
+
 if __name__ == '__main__':
-    main()
+    # main()
+    heatmap()
