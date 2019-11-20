@@ -68,6 +68,6 @@ pixabay）在那之後，屋主連續租給其他幾位房客，但卻頻頻發�
 
 ## 深入了解
 
-* 新聞 console 工具
-* 新聞 API
-* 股市交易資訊爬蟲
+* [新聞 Console 工具](https://github.com/virus-warnning/twnews/wiki/01.%E6%96%B0%E8%81%9E-Console-%E5%B7%A5%E5%85%B7)
+* [新聞 API](https://github.com/virus-warnning/twnews/wiki/02.%E6%96%B0%E8%81%9E-API)
+* [股市情報蒐集工具](https://github.com/virus-warnning/twnews/wiki/03.%E8%82%A1%E5%B8%82%E6%83%85%E5%A0%B1%E8%92%90%E9%9B%86%E5%B7%A5%E5%85%B7)
