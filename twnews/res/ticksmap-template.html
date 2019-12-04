@@ -17,9 +17,30 @@
     line-height: 30px;
 }
 
-#bidmap, #askmap {
+#bidlabel, #asklabel {
     position: absolute;
     top: 30px;
+    height: 30px;
+    color: #fff;
+    text-align: center;
+    line-height: 30px;
+}
+
+#bidlabel {
+    left: 0;
+    right: 50%;
+    background: #700;
+}
+
+#asklabel {
+    left: 50%;
+    right: 0;
+    background: #070;
+}
+
+#bidmap, #askmap {
+    position: absolute;
+    top: 60px;
     bottom: 0;
 }
 
@@ -38,6 +59,8 @@
 </head>
 <body>
 <div id="banner">__SECURITY_ID__ __SECURITY_NAME__ (__DATE__)</div>
+<div id="bidlabel">買進熱點</div>
+<div id="asklabel">賣出熱點</div>
 <div id="bidmap"></div>
 <div id="askmap"></div>
 <script>

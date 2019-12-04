@@ -22,7 +22,7 @@ setup(
     license='MIT',
     author='Raymond Wu',
     package_data={
-        'twnews': ['conf/*', 'samples/*', 'tests/soup/*', 'tests/search/*']
+        'twnews': ['conf/*', 'res/*', 'samples/*', 'tests/soup/*', 'tests/search/*']
     },
     install_requires=[
         'beautifulsoup4>=4.7.1',
@@ -30,7 +30,8 @@ setup(
         'lxml>=4.3.3',
         'requests>=2.21.0',
         'pandas>=0.24.2',
-        'PyYAML>=5.1.2'
+        'PyYAML>=5.1.2',
+        'wxPython>=4.0.4'
     ],
     python_requires='>=3.5'
 )
