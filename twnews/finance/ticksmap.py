@@ -269,7 +269,7 @@ def main():
         #   * Windows Brave
         #   * Chrome for MacOS
         chrome_bin = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
-        chrome_bin = r'C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\brave.exe' # ok!
+        # chrome_bin = r'C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\brave.exe' # ok!
 
         # 相關參數參考 https://peter.sh/experiments/chromium-command-line-switches/
         cmd = [
@@ -285,12 +285,11 @@ def main():
 
         # 用預設軟體開啟圖檔
         #         MacOS: open
-        # Windows + cmd: start
         #  Windows + PS: start-process -file
-        print(os.path.realpath(screenshot))
-        cmd = [ 'powershell', 'start-process', '-file', os.path.realpath(screenshot) ]
-        # cmd = [ 'cmd', 'start', os.path.realpath(screenshot) ]
-        print(cmd)
+        # print(os.path.realpath(screenshot))
+        # cmd = [ 'powershell', 'start-process', '-file', os.path.realpath(screenshot) ]
+        cmd = [ 'open', os.path.realpath(screenshot) ]
+        # print(cmd)
         subprocess.run(cmd)
 
 if __name__ == '__main__':
