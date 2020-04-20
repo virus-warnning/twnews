@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resource version="2.9.0.5">
+  <object name="main_frame" class="wxFrame">
+    <title>輸入驗證碼</title>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <minsize>230,160</minsize>
+      <object class="spacer">
+        <size>200,15</size>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_CENTER</flag>
+        <object name="captcha_image" class="wxStaticBitmap">
+          <size>200,60</size>
+        </object>
+      </object>
+      <object class="spacer">
+        <size>200,15</size>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_CENTER</flag>
+        <object name="captcha_code" class="wxTextCtrl">
+          <size>200,25</size>
+        </object>
+      </object>
+      <object class="spacer">
+        <size>200,15</size>
+      </object>
+      <object class="sizeritem">
+        <flag>wxALIGN_CENTER</flag>
+        <object class="wxStaticText">
+          <size>200,30</size>
+        	<style>wxALIGN_RIGHT</style>
+        	<label>完成後按 Enter 送出</label>
+        </object>
+      </object>
+    </object>
+  </object>
+</resource>

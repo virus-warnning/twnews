@@ -1,81 +1,12 @@
 {
 	"info": {
 		"_postman_id": "96e57888-4ea0-406b-9f9b-774e3cf3896f",
-		"name": "0xFE-TWMKT GitHub",
+		"name": "0xFE-TWMKT",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "[TWSE] 上櫃大股東股權異動",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://siis.twse.com.tw/publish/otc/107IRB110_12.HTM",
-					"protocol": "http",
-					"host": [
-						"siis",
-						"twse",
-						"com",
-						"tw"
-					],
-					"path": [
-						"publish",
-						"otc",
-						"107IRB110_12.HTM"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "[TWSE] 興櫃大股東股權異動",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://siis.twse.com.tw/publish/rotc/106IRB110_01.HTM",
-					"protocol": "http",
-					"host": [
-						"siis",
-						"twse",
-						"com",
-						"tw"
-					],
-					"path": [
-						"publish",
-						"rotc",
-						"106IRB110_01.HTM"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "[TWSE] ETF 折溢價",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://mis.twse.com.tw/stock/data/all_etf.txt",
-					"protocol": "https",
-					"host": [
-						"mis",
-						"twse",
-						"com",
-						"tw"
-					],
-					"path": [
-						"stock",
-						"data",
-						"all_etf.txt"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "[TWSE] 三大法人明細",
+			"name": "[證交] 00 三大法人",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -111,30 +42,7 @@
 			"response": []
 		},
 		{
-			"name": "[TWSE] 上市大股東股權異動",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://siis.twse.com.tw/publish/sii/106IRB110_01.HTM",
-					"protocol": "http",
-					"host": [
-						"siis",
-						"twse",
-						"com",
-						"tw"
-					],
-					"path": [
-						"publish",
-						"sii",
-						"106IRB110_01.HTM"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "[TWSE] 融資融券明細",
+			"name": "[證交] 01 融資融券",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -170,67 +78,7 @@
 			"response": []
 		},
 		{
-			"name": "[TWSE] 借券賣出餘額",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://www.twse.com.tw/exchangeReport/TWT93U?response={{TWSE_EXFORMAT}}&date={{TWSE_EXDATE}}",
-					"protocol": "http",
-					"host": [
-						"www",
-						"twse",
-						"com",
-						"tw"
-					],
-					"path": [
-						"exchangeReport",
-						"TWT93U"
-					],
-					"query": [
-						{
-							"key": "response",
-							"value": "{{TWSE_EXFORMAT}}"
-						},
-						{
-							"key": "date",
-							"value": "{{TWSE_EXDATE}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "[TWSE] 可借券賣出餘額",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://www.twse.com.tw/SBL/TWT96U?response=csv",
-					"protocol": "http",
-					"host": [
-						"www",
-						"twse",
-						"com",
-						"tw"
-					],
-					"path": [
-						"SBL",
-						"TWT96U"
-					],
-					"query": [
-						{
-							"key": "response",
-							"value": "csv"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "[TWSE] 鉅額交易",
+			"name": "[證交] 02 鉅額交易",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -266,7 +114,90 @@
 			"response": []
 		},
 		{
-			"name": "[TPEX] 三大法人明細 JSON",
+			"name": "[證交] 03 融券借券",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://www.twse.com.tw/exchangeReport/TWT93U?response={{TWSE_EXFORMAT}}&date={{TWSE_EXDATE}}",
+					"protocol": "http",
+					"host": [
+						"www",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"exchangeReport",
+						"TWT93U"
+					],
+					"query": [
+						{
+							"key": "response",
+							"value": "{{TWSE_EXFORMAT}}"
+						},
+						{
+							"key": "date",
+							"value": "{{TWSE_EXDATE}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[證交] 04 可借券賣出",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://www.twse.com.tw/SBL/TWT96U?response=csv",
+					"protocol": "http",
+					"host": [
+						"www",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"SBL",
+						"TWT96U"
+					],
+					"query": [
+						{
+							"key": "response",
+							"value": "csv"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[證交] 05 ETF 折溢價",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://mis.twse.com.tw/stock/data/all_etf.txt",
+					"protocol": "https",
+					"host": [
+						"mis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"stock",
+						"data",
+						"all_etf.txt"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[櫃買] 00 三大法人明細",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -317,7 +248,7 @@
 			"response": []
 		},
 		{
-			"name": "[TPEX] 融資融券明細 JSON",
+			"name": "[櫃買] 01 融資融券明細",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -356,7 +287,7 @@
 			"response": []
 		},
 		{
-			"name": "[TPEX] 鉅額交易明細 CSV",
+			"name": "[櫃買] 02 鉅額交易明細",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -399,7 +330,7 @@
 			"response": []
 		},
 		{
-			"name": "[TPEX] 當沖明細 CSV",
+			"name": "[櫃買] 03 當沖明細",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -442,7 +373,7 @@
 			"response": []
 		},
 		{
-			"name": "[TPEX] 借券賣出 CSV",
+			"name": "[櫃買] 04 融券借券",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -485,7 +416,7 @@
 			"response": []
 		},
 		{
-			"name": "[TDCC] 股權分散表最新週報 CSV",
+			"name": "[集保] 01 股權分散表最新週報",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -513,7 +444,7 @@
 			"response": []
 		},
 		{
-			"name": "[TDCC] 股權分散表\b結算日期 JSON",
+			"name": "[集保] 02 股權分散表\b結算日期",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -557,7 +488,7 @@
 			"response": []
 		},
 		{
-			"name": "[TDCC] 股權分散表個股 HTML",
+			"name": "[集保] 03 股權分散表個股",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -616,7 +547,29 @@
 			"response": []
 		},
 		{
-			"name": "[TWSE] 會計師查核",
+			"name": "[分點] 00 券商地址 - TODO",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[分點] 01 股務代理 - TODO",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[財報] 00 會計師查核",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -685,6 +638,119 @@
 						"mops",
 						"web",
 						"t163sb14"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[財報] 01 資產負債 - TODO",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[財報] 02 損益 - TODO",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[財報] 03 現金流量 - TODO",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[財報] 04 股東權益 - TODO",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[大股東] 00 上市大股東股權異動",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://siis.twse.com.tw/publish/sii/106IRB110_01.HTM",
+					"protocol": "https",
+					"host": [
+						"siis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"publish",
+						"sii",
+						"106IRB110_01.HTM"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[大股東] 01 上櫃大股東股權異動",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://siis.twse.com.tw/publish/otc/107IRB110_12.HTM",
+					"protocol": "https",
+					"host": [
+						"siis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"publish",
+						"otc",
+						"107IRB110_12.HTM"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[大股東] 02 興櫃大股東股權異動",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://siis.twse.com.tw/publish/rotc/106IRB110_01.HTM",
+					"protocol": "https",
+					"host": [
+						"siis",
+						"twse",
+						"com",
+						"tw"
+					],
+					"path": [
+						"publish",
+						"rotc",
+						"106IRB110_01.HTM"
 					]
 				}
 			},
