@@ -152,7 +152,7 @@ def main():
     使用既有的 CSV 檔案重建股權分散表資料庫:
       python3 -m twnews.finance.tdcc rebuild
     """
-    action = get_argument(0, 'update')
+    action = get_argument(1, 'update')
     logger = common.get_logger('finance')
 
     if action == 'update':
