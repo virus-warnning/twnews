@@ -11,6 +11,10 @@ import socket
 import yaml
 
 import requests
+import requests.packages.urllib3.util.connection as urllib3_conn
+
+# 強制 requests 使用 IPv4
+urllib3_conn.allowed_gai_family = lambda: socket.AF_INET
 
 # pylint: disable=global-statement
 __LOGGER_LOADED = False
