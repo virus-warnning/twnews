@@ -30,8 +30,7 @@ setup(
         'lxml>=4.3.3',
         'requests>=2.21.0',
         'pandas>=0.24.2',
-        'PyYAML>=5.1.2',
-        'wxPython>=4.0.4'
+        'PyYAML>=5.1.2'
     ],
     python_requires='>=3.5'
 )

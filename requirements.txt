@@ -1,0 +1,8 @@
+beautifulsoup4>=4.7.1
+busm>=0.9.0
+lxml>=4.3.3
+requests>=2.21.0
+pandas>=0.24.2
+PyYAML>=5.1.2
+# 只有 ticksmap 需要用到 wxWidget 
+# wxPython>=4.0.4
